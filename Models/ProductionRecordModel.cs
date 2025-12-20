@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SimpleMES.Models
 {
-    public class ProductionRecord
+    public class ProductionRecordModel
     {
         public long RecordId { get; set; }
         public int DeviceId { get; set; }

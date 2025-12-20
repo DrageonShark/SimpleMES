@@ -1,0 +1,112 @@
+﻿using SimpleMES.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SimpleMES.Services.DAL
+{
+    /// <summary>
+    /// 基于 IDbService 的仓储实现，负责写入 SQL Server。
+    /// </summary>
+    public class DataRepository : IDataRepository
+    {
+        private readonly IDbService _db;
+        public DataRepository(IDbService db)
+        {
+            _db = db ?? throw new ArgumentNullException(nameof(db));
+        }
+        public async Task<int> UpsertProductAsync(ProductModel product)
+        {
+            if (product == null)
+            {
+                throw new ArgumentNullException(nameof(product));
+            }
+
+            const string sql = @"IF EXISTS (SELECT 1 FROM T_Products WHERE ProductCode = @ProductCode) 
+                       UPDATE T_Products 
+                       SET ProductName = @ProductName, 
+                       SetTemperature = @SetTemperature,
+                       SetPressure = @SetPressure, 
+                       Description = @Description 
+                       WHERE ProductCode = @ProductCode 
+                       ELSE 
+                       INSERT INTO T_Products(ProductCode, ProductName, SetTemperature, SetPressure, Description) 
+                       VALUES (@ProductCode, @ProductName, @SetTemperature, @SetPressure, @Description);";
+            return await _db.ExecuteAsync(sql, product);
+        }
+
+        public async Task<int> InsertOrderModelAsync(OrderModel order)
+        {
+            if (order == null)
+            {
+                throw new ArgumentNullException(nameof(order));
+            }
+            const string sql = @"INSERT INTO T_ProductionOrders 
+                               (OrderNo, ProductCode, PlanQty, CompletedQty, OrderStatus, StartTime, EndTime, CreateTime)
+                               VALUES (@OrderNo, @ProductCode, @PlanQty, @CompletedQty, @OrderStatus, @StartTime, @EndTime, @CreateTime);";
+            return await _db.ExecuteAsync(sql, order);
+        }
+
+        public async Task<int> UpdateOrderAsync(OrderModel order)
+        {
+            if (order == null)
+            {
+                throw new ArgumentNullException(nameof(order));
+            }
+            const string sql = @"UPDATE T_ProductionOrders
+                               SET ProductCode = @ProductCode,
+                               PlanQty = @PlanQty,
+                               CompletedQty = @CompletedQty,
+                               OrderStatus = @OrderStatus,
+                               StartTime = @StartTime,
+                               EndTime = @EndTime
+                               WHERE OrderNo = @OrderNo;";
+            return await _db.ExecuteAsync(sql, order);
+        }
+
+        public async Task<int> UpdateDeviceStatusAsync(int deviceId, string status, DateTime? lastUpDateTime = null)
+        {
+            const string sql = @"UPDATE T_Devices
+                               SET Status = @Status,
+                               LastUpdateTime = ISNULL(@LastUpdateTime, LastUpdateTime)
+                               WHERE DeviceId = @DeviceId;";
+            return await _db.ExecuteAsync(sql, new { DeviceId = deviceId, Status = status, LastUpdateTime = lastUpDateTime });
+        }
+
+        public async Task<int> InsertProductionRecordAsync(ProductionRecordModel productionRecord)
+        {
+            if (productionRecord == null)
+            {
+                throw new ArgumentNullException(nameof(productionRecord));
+            }
+            const string sql = @"INSERT INTO T_ProductionRecords 
+                               (DeviceId, Temperature, Pressure, Speed, RecordTime)
+                               VALUES (@DeviceId, @Temperature, @Pressure, @Speed, @RecordTime);";
+            return await _db.ExecuteAsync(sql, productionRecord);
+        }
+
+        public async Task<IEnumerable<ProductionRecordModel>> GetRecentRecordsAsync(int deviceId)
+        {
+            const string sql = @"SELECT * FROM T_ProductionRecords 
+                               WHERE DeviceId = @DeviceId 
+                               AND RecordTime > DATEADD(hour, -1, GETDATE())
+                               ORDER BY RecordTime";
+            return await _db.QueryAsync<ProductionRecordModel>(sql);
+        }
+
+        public async Task<int> InsertAlarmRecordAsync(AlarmRecordModel alarmRecord)
+        {
+            if (alarmRecord == null)
+            {
+                throw new ArgumentNullException(nameof(alarmRecord));
+            }
+            const string sql = @"INSERT INTO T_AlarmRecord 
+                               (DeviceId, AlarmMessage, AlarmTime, IsAck)
+                               VALUES (@DeviceId, @AlarmMessage, @AlarmTime, @IsAck);";
+            return await _db.ExecuteAsync(sql, alarmRecord);
+        }
+    }
+}
