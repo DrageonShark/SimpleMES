@@ -1,4 +1,3 @@
-```sql
 --创建数据库 (如果不存在)
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'SimpleMES_DB')
 BEGIN
@@ -19,16 +18,16 @@ BEGIN
 		IpAddress nvarchar(20) NULL, --设备IP (Modbus TCP)
 		Port int DEFAULT 502 NULL, --端口
 		SerialPort nvarchar(50) NULL, --串口名
-        SlaveId tinyint NOT NULL DEFAULT 1, --从站ID
+        SlaveId tinyint NULL DEFAULT 1, --从站ID
 		Status nvarchar(20) DEFAULT 'Stopped', --状态: Running/Stopped/Fault
 		LastUpdateTime datetime DEFAULT GETDATE() --最后通信时间
 		);
 		
 		--插入模拟数据(3台设备)
-		INSERT INTO T_Devices (DeviceName, IpAddress, Statu) VALUES
+		INSERT INTO T_Devices (DeviceName, IpAddress, Status) VALUES
 		('注塑机-A01', '127.0.0.1', 'Stopped'),
 		('冲压机-B02', '127.0.0.1', 'Stopped');
-		INSERT INTO T_Devices (DeviceName, SerialPort, Statu) VALUES
+		INSERT INTO T_Devices (DeviceName, SerialPort, Status) VALUES
 		('包装机-C03', 'COM1', 'Stopped');
 END;
 GO
@@ -107,7 +106,4 @@ END
 GO
 
 
-
-
-```
 

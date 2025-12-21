@@ -25,6 +25,10 @@ namespace SimpleMES.Services.DAL
         /// </summary>
         Task<int> UpdateOrderAsync(OrderModel order);
         /// <summary>
+        /// 获取所有设备
+        /// </summary>
+        Task<IEnumerable<DeviceModel>> GetAllDevicesAsync();
+        /// <summary>
         /// 更新设备状态
         /// </summary>
         Task<int> UpdateDeviceStatusAsync(int deviceId, string status, DateTime? lastUpDateTime = null);

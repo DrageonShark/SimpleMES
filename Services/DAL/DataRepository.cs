@@ -67,6 +67,12 @@ namespace SimpleMES.Services.DAL
             return await _db.ExecuteAsync(sql, order);
         }
 
+        public async Task<IEnumerable<DeviceModel>> GetAllDevicesAsync()
+        {
+            const string sql = @"SELECT * FROM T_Devices";
+            return await _db.QueryAsync<DeviceModel>(sql);
+        }
+
         public async Task<int> UpdateDeviceStatusAsync(int deviceId, string status, DateTime? lastUpDateTime = null)
         {
             const string sql = @"UPDATE T_Devices
