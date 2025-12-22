@@ -1,13 +1,14 @@
-﻿using System;
+﻿using NModbus;
+using SimpleMES.Models;
+using SimpleMES.Services.DAL;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using NModbus;
-using SimpleMES.Models;
-using SimpleMES.Services.DAL;
 
 namespace SimpleMES.Core
 {
@@ -24,6 +25,7 @@ namespace SimpleMES.Core
         {
             _repository = repository;
             _monitoredDevices = new List<DeviceModel>();
+            _ = LoadDevicesAsync();
         }
         // 初始化加载设备列表
         public async Task LoadDevicesAsync()
@@ -48,39 +50,78 @@ namespace SimpleMES.Core
 
         private async Task PollingLoop(CancellationToken token)
         {
+            var factory = new ModbusFactory();
+
             while (!token.IsCancellationRequested)
             {
                 foreach (var device in _monitoredDevices)
                 {
                     try
                     {
-                        // 创建 Modbus 工厂
-                        var factory = new ModbusFactory();
-                        IModbusMaster master;
-                        //1.判断设备通讯类型
+                        // 模拟数据容器
+                        ushort[] data = null;
+
+                        // === TCP 设备处理 ===
                         if (!string.IsNullOrWhiteSpace(device.IpAddress))
                         {
-                            using TcpClient client = new TcpClient();
-                            //2.连接设备 (设置超时 2秒)
-                            var connectTask = client.ConnectAsync(device.IpAddress, device.Port ?? 502, token).AsTask();
-                            if (await Task.WhenAny(connectTask, Task.Delay(2000, token)) != connectTask)
+                            using (TcpClient client = new TcpClient())
                             {
-                                throw new TimeoutException("连接超时");
+                                // 1. 连接
+                                var connectTask = client.ConnectAsync(device.IpAddress, device.Port ?? 502);
+                                // 等待连接，超时时间 2秒
+                                if (await Task.WhenAny(connectTask, Task.Delay(2000, token)) != connectTask)
+                                {
+                                    throw new TimeoutException("连接超时");
+                                }
+
+                                // 2. 读取
+                                var master = factory.CreateMaster(client);
+                                master.Transport.ReadTimeout = 2000;
+                                master.Transport.WriteTimeout = 2000;
+
+                                // 注意：这里要把硬编码的 '1' 改成 device.SlaveId
+                                data = await master.ReadHoldingRegistersAsync(device.SlaveId, 0, 3);
                             }
-                            //3.创建 Master
-                            master = factory.CreateMaster(client);
-                            master.Transport.ReadTimeout = 1000;
-                            //4.读取数据 (假设：寄存器0=温度*10，寄存器1=压力*10，寄存器2=转速)
-                            //ReadHoldingRegisters(从站ID, 起始地址, 长度)
-                            ushort[] data = await master.ReadHoldingRegistersAsync(1, 0, 3);
-                            //5.解析数据
+                        }
+                        // === 串口 (RTU) 设备处理 ===
+                        else if (!string.IsNullOrWhiteSpace(device.SerialPort))
+                        {
+                            // 使用 using 确保每次读取完都关闭串口，释放 COM 口资源
+                            // 虽然效率不如长连接，但最稳定，不会报 "Port Already Open"
+                            using (SerialPort serialPort = new SerialPort(device.SerialPort))
+                            {
+                                serialPort.BaudRate = 9600;
+                                serialPort.DataBits = 8;
+                                serialPort.Parity = Parity.None;
+                                serialPort.StopBits = StopBits.One;
+
+                                serialPort.Open(); // 打开串口
+
+                                var adapter = new SerialPortAdapter(serialPort);
+                                using (var master = factory.CreateRtuMaster(adapter))
+                                {
+                                    master.Transport.ReadTimeout = 2000;
+                                    master.Transport.WriteTimeout = 2000;
+
+                                    // 注意：改为 device.SlaveId
+                                    data = await master.ReadHoldingRegistersAsync(device.SlaveId, 0, 3);
+                                }
+                            }
+                            // 离开 using 块，serialPort 自动 Close()
+                        }
+
+                        // === 数据处理与入库 (通用逻辑) ===
+                        if (data != null)
+                        {
                             decimal temp = data[0] / 10.0m;
                             decimal press = data[1] / 10.0m;
                             int speed = data[2];
-                            //6.更新内存状态(用于界面显示)
+
+                            // 内存更新
                             device.Status = "Running";
                             device.LastUpdateTime = DateTime.Now;
-                            //7.存入数据库 (调用刚才写的 Repository）
+
+                            // 数据库写入
                             var record = new ProductionRecordModel
                             {
                                 DeviceId = device.DeviceId,
@@ -89,44 +130,27 @@ namespace SimpleMES.Core
                                 Speed = speed,
                                 RecordTime = DateTime.Now
                             };
-                            // 异步写入，不等待结果，防止阻塞下一个设备的读取
+
                             _ = _repository.InsertProductionRecordAsync(record);
                             _ = _repository.UpdateDeviceStatusAsync(device.DeviceId, "Running", DateTime.Now);
-                            Console.WriteLine($"[{device.DeviceName}] 温度:{temp} 压力:{press}");
-                        }
-                        else if(!string.IsNullOrWhiteSpace(device.SerialPort))
-                        {
-                            SerialPort serialPort = new SerialPort(device.SerialPort)
-                            {
-                                BaudRate = 9600,
-                                DataBits = 8,
-                                Parity = Parity.None,
-                                StopBits = StopBits.One
-                            };
-                            serialPort.Open();
-                            var adapter = new SerialPortAdapter(serialPort);
-                            master = factory.CreateRtuMaster(adapter);
-                            master.Transport.ReadTimeout = 2000;
-                            master.Transport.WriteTimeout = 2000;
-                        }
-                        else
-                        {
-                            
+
+                            Debug.WriteLine($"SUCCESS >>> [{device.DeviceName}] 温度:{temp} 压力:{press}");
                         }
                     }
                     catch (Exception ex)
                     {
-                        // 记录异常，更新设备状态为 Fault
                         device.Status = "Fault";
                         await _repository.UpdateDeviceStatusAsync(device.DeviceId, "Fault", DateTime.Now);
-                        Console.WriteLine($"[{device.DeviceName}] 通信失败: {ex.Message}");
+                        // 打印详细错误方便调试
+                        Console.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
                     }
                 }
-                // 休息 5 秒再进行下一轮轮询
-                await Task.Delay(5000, token);
+
+                // 暂停 5 秒
+                try { await Task.Delay(5000, token); } catch { break; }
             }
         }
 
-       
+
     }
 }

@@ -24,9 +24,9 @@ BEGIN
 		);
 		
 		--插入模拟数据(3台设备)
-		INSERT INTO T_Devices (DeviceName, IpAddress, Status) VALUES
-		('注塑机-A01', '127.0.0.1', 'Stopped'),
-		('冲压机-B02', '127.0.0.1', 'Stopped');
+		INSERT INTO T_Devices (DeviceName, IpAddress, Status, Port) VALUES
+		('注塑机-A01', '127.0.0.1', 'Stopped', 501),
+		('冲压机-B02', '127.0.0.1', 'Stopped', 502);
 		INSERT INTO T_Devices (DeviceName, SerialPort, Status) VALUES
 		('包装机-C03', 'COM1', 'Stopped');
 END;

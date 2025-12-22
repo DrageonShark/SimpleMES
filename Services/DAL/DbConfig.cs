@@ -8,6 +8,6 @@ namespace SimpleMES.Services.DAL
 {
     public class DbConfig
     {
-        public static readonly string ConnectionString = "Server=localhost;database=MesDb;uid=sa;pwd=123456";
+        public static readonly string ConnectionString = "server=localhost;database=SimpleMES_DB;uid=sa;pwd=123456";
     }
 }

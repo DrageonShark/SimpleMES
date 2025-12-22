@@ -53,7 +53,7 @@ namespace SimpleMES.Core
         /// <returns>实际读取到的字节数。</returns>
         public int Read(byte[] buffer, int offset, int count)
         {
-            return _serialPort.IsOpen
+            return !_serialPort.IsOpen
                     ? throw new InvalidOperationException("串口未连接")
                     : _serialPort.Read(buffer, offset, count)
                 ;
@@ -69,7 +69,7 @@ namespace SimpleMES.Core
         /// <param name="count">要写入的字节数。</param>
         public void Write(byte[] buffer, int offset, int count)
         {
-            if (_serialPort.IsOpen)
+            if (!_serialPort.IsOpen)
                 throw new InvalidOperationException("串口未连接");
             _serialPort.Write(buffer, offset, count);
         }
