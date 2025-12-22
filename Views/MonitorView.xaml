@@ -1,0 +1,82 @@
+﻿<UserControl x:Class="SimpleMES.Views.MonitorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    mc:Ignorable="d" 
+    d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <ScrollViewer Margin="0 40 0 0">
+            <ItemsControl ItemsSource="{Binding ListDeviceDto}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="220" Height="280" Background="White" CornerRadius="8" Margin="0 0 20 20" Padding="15">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#DDDDDD" BlurRadius="10" ShadowDepth="2" Direction="270" Opacity="15"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0 0 0 15">
+                                    <Border Width="40" Height="40" CornerRadius="20" Background="#E3F2FD">
+                                        <TextBlock Text="⚙️" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"/>
+                                    </Border>
+                                    <StackPanel Margin="10 0 0 0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DeviceName}" FontWeight="Bold" FontSize="16" Foreground="#333"/>
+                                        <TextBlock Text="{Binding IpAddress}" FontSize="12" Foreground="#888"/>
+                                        <TextBlock Text="{Binding IpAddress}" FontSize="12" Foreground="#888"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Separator Background="#F0F0F0" Margin="0 0 0 15"/>
+                                <DockPanel Margin="0 5">
+                                    <TextBlock Text="运行状态" Foreground="#666"/>
+                                    <TextBlock Text="{Binding Status}" FontWeight="Bold" HorizontalAlignment="Right">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="Green"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Fault">
+                                                        <Setter Property="Foreground" Value="Red"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Stopped">
+                                                        <Setter Property="Foreground" Value="Gray"></Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DockPanel>
+                                <DockPanel Margin="0 5">
+                                    <TextBlock Text="实时温度" Foreground="#666"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding Temperature}" FontWeight="Bold" Foreground="#1976D2" FontSize="16"/>
+                                        <TextBlock Text=" ℃" Foreground="#1976D2" VerticalAlignment="Bottom"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <DockPanel Margin="0 5">
+                                    <TextBlock Text="实时压力" Foreground="#666"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding Pressure}" FontWeight="Bold" Foreground="#FFA000" FontSize="16"/>
+                                        <TextBlock Text=" Bar" Foreground="#FFA000" VerticalAlignment="Bottom"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <DockPanel Margin="0 5">
+                                    <TextBlock Text="实时转速" Foreground="#666"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding Speed}" FontWeight="Bold" Foreground="DarkRed" FontSize="16"/>
+                                        <TextBlock Text="Rpm" Foreground="DarkRed" VerticalAlignment="Bottom"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <TextBlock Text="{Binding LastUpdateTime, StringFormat='更新于: HH:mm:ss'}" FontSize="10" Foreground="#AAA" Margin="0,20,0,0" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+
+</UserControl>

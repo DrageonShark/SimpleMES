@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SimpleMES.Models.Dto;
 
 namespace SimpleMES.Core
 {
@@ -17,6 +18,7 @@ namespace SimpleMES.Core
         private readonly IDataRepository _repository;
         private bool _isRunning = false;
         private CancellationTokenSource _cts;
+        public event Action<List<DeviceDto>> OnDeviceStatusChanged;
 
         // 模拟配置：假设我们有两个 Modbus TCP 设备
         private List<DeviceModel> _monitoredDevices;
@@ -54,6 +56,7 @@ namespace SimpleMES.Core
 
             while (!token.IsCancellationRequested)
             {
+                List<DeviceDto> devices = new List<DeviceDto>();
                 foreach (var device in _monitoredDevices)
                 {
                     try
@@ -120,6 +123,18 @@ namespace SimpleMES.Core
                             // 内存更新
                             device.Status = "Running";
                             device.LastUpdateTime = DateTime.Now;
+                            devices.Add(new DeviceDto
+                            {
+                                DeviceId = device.DeviceId,
+                                DeviceName = device.DeviceName,
+                                IpAddress = device.IpAddress,
+                                LastUpdateTime = device.LastUpdateTime,
+                                Pressure = press,
+                                SerialPort = device.SerialPort,
+                                Status = device.Status,
+                                Temperature = temp,
+                                Speed = speed
+                            });
 
                             // 数据库写入
                             var record = new ProductionRecordModel
@@ -145,7 +160,7 @@ namespace SimpleMES.Core
                         Console.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
                     }
                 }
-
+                OnDeviceStatusChanged?.Invoke(devices);
                 // 暂停 5 秒
                 try { await Task.Delay(5000, token); } catch { break; }
             }
