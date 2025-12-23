@@ -22,15 +22,20 @@ namespace SimpleMES.ViewModels
         [ObservableProperty] private string _newProductCode;
         [ObservableProperty] private int _newPlanQty = 100;
 
+        //核心业务数据
+        //下拉框用的产品列表
+        public ObservableCollection<ProductModel> Products { get; } = new ObservableCollection<ProductModel>();
+        [ObservableProperty] private ProductModel _productOrder;
         public OrderViewModel()
         {
             _repository = new DataRepository(new SqlDbService());
+            _ = LoadOrders();
         }
 
         public OrderViewModel(IDbService dbService)
         {
             _repository = new DataRepository(dbService);
-            LoadOrders();
+            _ = LoadOrders();
         }
 
         [RelayCommand]
@@ -39,6 +44,7 @@ namespace SimpleMES.ViewModels
             try
             {
                 var list = await _repository.GetAllOrdersAsync().ConfigureAwait(false);
+                var products = await _repository.GetAllProductsAsync().ConfigureAwait(false);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Orders.Clear();
@@ -46,7 +52,13 @@ namespace SimpleMES.ViewModels
                     {
                         Orders.Add(order);
                     }
+                    Products.Clear();
+                    foreach (var product in products.ToList())
+                    {
+                        Products.Add(product);
+                    }
                 });
+                
             }
             catch (Exception ex)
             {
@@ -81,7 +93,6 @@ namespace SimpleMES.ViewModels
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     NewOrderNo = "";
-                    NewProductCode = "";
                     MessageBox.Show("订单创建成功！");
                 });
             }
@@ -90,5 +101,6 @@ namespace SimpleMES.ViewModels
                 MessageBox.Show($"创建失败: {ex.Message}");
             }
         }
+       
     }
 }

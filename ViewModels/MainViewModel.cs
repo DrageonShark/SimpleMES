@@ -5,19 +5,19 @@ namespace SimpleMES.ViewModels
 {
     public partial class MainViewModel:ViewModelBase
     {
-        [ObservableProperty] private object _currentView;
+        [ObservableProperty] private ViewModelBase _currentView;
 
         // 定义页面对象（缓存起来，不需要每次点击都 new）
-        // 暂时先用 object 占位，等创建了真正的 View 再替换
-        private object MonitorView { get; }
-        private object OrderView { get; }
-        private object ReportView { get; } = new object();
+        private MonitorViewModel MonitorView { get; }
+        private OrderViewModel OrderView { get; }
+        private ReportViewModel ReportView { get; }
 
-        public MainViewModel(MonitorViewModel monitor, OrderViewModel orderView)
+        public MainViewModel(MonitorViewModel monitor, OrderViewModel orderView, ReportViewModel reportView)
         {
             MonitorView = monitor;
             OrderView = orderView;
-            CurrentView = MonitorView;
+            ReportView = reportView;
+            ShowMonitor();
         }
         // 定义按钮命令：切换到监控页
         [RelayCommand]

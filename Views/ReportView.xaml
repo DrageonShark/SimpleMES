@@ -4,9 +4,49 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SimpleMES.Views"
+             xmlns:wpf="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="500" d:DesignWidth="900" Background="White">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="📈 生产数据分析看板" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            <Button Content="刷新数据" Command="{Binding RefreshChartsCommand}" HorizontalAlignment="Right" Width="100" Height="30"/>
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.5*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,10,0" BorderBrush="#EEE" BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect Color="#EEE" BlurRadius="10" ShadowDepth="2" Direction="270" Opacity="0.5"/>
+                </Border.Effect>
+                <Grid Margin="15">
+                    <TextBlock Text="设备 A01 温度/压力/转速趋势" FontWeight="Bold" Foreground="#555" VerticalAlignment="Top"/>
+                    <wpf:CartesianChart Series="{Binding LineSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"  TooltipTextPaint="{Binding ChinesTextPaint}"  Margin="0,30,0,0"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Background="White" CornerRadius="8" Margin="10,0,0,0" BorderBrush="#EEE" BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect Color="#EEE" BlurRadius="10" ShadowDepth="2" Direction="270" Opacity="0.5"/>
+                </Border.Effect>
+                <Grid Margin="15">
+                    <TextBlock Text="全厂设备状态分布" FontWeight="Bold" Foreground="#555" VerticalAlignment="Top"/>
+                    <wpf:PieChart Series="{Binding PieSeries}" 
+                                  LegendTextPaint="{Binding ChinesTextPaint}"
+                                  TooltipTextPaint="{Binding ChinesTextPaint}"
+                                  LegendPosition="Bottom" 
+                                  Margin="0,30,0,0"/>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

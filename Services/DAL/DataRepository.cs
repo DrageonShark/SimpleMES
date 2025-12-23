@@ -101,13 +101,12 @@ namespace SimpleMES.Services.DAL
             return await _db.ExecuteAsync(sql, productionRecord);
         }
 
-        public async Task<IEnumerable<ProductionRecordModel>> GetRecentRecordsAsync(int deviceId)
+        public async Task<ProductionRecordModel?> GetRecentRecordsAsync(int deviceId)
         {
-            const string sql = @"SELECT * FROM T_ProductionRecords 
-                               WHERE DeviceId = @DeviceId 
-                               AND RecordTime > DATEADD(hour, -1, GETDATE())
-                               ORDER BY RecordTime";
-            return await _db.QueryAsync<ProductionRecordModel>(sql);
+            const string sql = @"SELECT  * FROM T_ProductionRecords 
+                                 WHERE DeviceId = @DeviceId 
+                                 ORDER BY RecordTime DESC";
+            return (await _db.QueryFirstOrDefault<ProductionRecordModel>(sql, new { DeviceId = deviceId }));
         }
 
         public async Task<int> InsertAlarmRecordAsync(AlarmRecordModel alarmRecord)
@@ -120,6 +119,12 @@ namespace SimpleMES.Services.DAL
                                (DeviceId, AlarmMessage, AlarmTime, IsAck)
                                VALUES (@DeviceId, @AlarmMessage, @AlarmTime, @IsAck);";
             return await _db.ExecuteAsync(sql, alarmRecord);
+        }
+
+        public async Task<IEnumerable<ProductModel>> GetAllProductsAsync()
+        {
+            const string sql = @"SELECT * FROM T_Products";
+            return await _db.QueryAsync<ProductModel>(sql);
         }
     }
 }

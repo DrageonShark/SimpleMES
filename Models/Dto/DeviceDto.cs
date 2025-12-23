@@ -18,7 +18,5 @@ namespace SimpleMES.Models.Dto
         [ObservableProperty] private int _speed;
         [ObservableProperty] private string _status;
         [ObservableProperty] private DateTime _lastUpdateTime;
-
-        
     }
 }

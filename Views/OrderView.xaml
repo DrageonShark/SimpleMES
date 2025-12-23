@@ -14,13 +14,16 @@
         <Border Grid.Column="0" Background="#F9FAFB" CornerRadius="8" Padding="20" Margin="0,0,20,0">
             <StackPanel>
                 <TextBlock Text="➕ 新建生产工单" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="#333"/>
-
+                
                 <TextBlock Text="订单编号" Margin="0,10,0,5" Foreground="#666"/>
                 <TextBox Text="{Binding NewOrderNo}" Height="35" VerticalContentAlignment="Center" Padding="5"/>
 
-                <TextBlock Text="产品型号" Margin="0,15,0,5" Foreground="#666"/>
-                <TextBox Text="{Binding NewProductCode}" Height="35" VerticalContentAlignment="Center" Padding="5"/>
-
+                <TextBlock Text="产品名" Margin="0,15,0,5" Foreground="#666"/>
+                <ComboBox ItemsSource="{Binding Products}"
+                          DisplayMemberPath="ProductName"
+                          SelectedValuePath="ProductCode"
+                          SelectedValue="{Binding NewProductCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Height="35" Padding="5" VerticalAlignment="Center"/>
                 <TextBlock Text="计划数量" Margin="0,15,0,5" Foreground="#666"/>
                 <TextBox Text="{Binding NewPlanQty}" Height="35" VerticalContentAlignment="Center" Padding="5"/>
 
@@ -67,11 +70,11 @@
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="工单号" Binding="{Binding OrderNo}" Width="150"/>
-                    <DataGridTextColumn Header="产品" Binding="{Binding ProductCode}" Width="120"/>
-                    <DataGridTextColumn Header="计划数" Binding="{Binding PlanQty}" Width="80"/>
-                    <DataGridTextColumn Header="已完成" Binding="{Binding CompletedQty}" Width="80"/>
-                    <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="100"/>
+                    <DataGridTextColumn Header="工单号" Binding="{Binding OrderNo}" Width="120"/>
+                    <DataGridTextColumn Header="产品" Binding="{Binding ProductCode}" Width="100"/>
+                    <DataGridTextColumn Header="计划数" Binding="{Binding PlanQty}" Width="70"/>
+                    <DataGridTextColumn Header="已完成" Binding="{Binding CompletedQty}" Width="70"/>
+                    <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="70"/>
                     <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime, StringFormat='yyyy-MM-dd HH:mm'}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>

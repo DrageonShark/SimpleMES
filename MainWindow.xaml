@@ -16,19 +16,25 @@
         <DataTemplate DataType="{x:Type vm:OrderViewModel}">
             <views:OrderView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ReportViewModel}">
+            <views:ReportView />
+        </DataTemplate>
     </Window.Resources>
     <Grid Background="#F0F2F5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition x:Name="LeftColumn" Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Border Grid.Column="0" Background="#2C3E50">
-            <StackPanel Margin="10">
-                <TextBlock Text="Simple MES" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,20,0,40" HorizontalAlignment="Center"/>
-                <Button Content="📊 设备监控" Command="{Binding ShowMonitorCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
-                <Button Content="📝 生产订单" Command="{Binding ShowOrderCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
-                <Button Content="📈 数据报表" Command="{Binding ShowReportCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
-            </StackPanel>
+            <Grid>
+                <Button x:Name="ToggleMenuButton" Content="⏴" Width="24" Height="24" Margin="5" HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent" Foreground="White" BorderBrush="White" Click="ToggleMenu"/>
+                <StackPanel Margin="10,40,10,10">
+                    <TextBlock Text="Simple MES" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,20,0,40" HorizontalAlignment="Center"/>
+                    <Button Content="📊 设备监控" Command="{Binding ShowMonitorCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
+                    <Button Content="📝 生产订单" Command="{Binding ShowOrderCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
+                    <Button Content="📈 数据报表" Command="{Binding ShowReportCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
+                </StackPanel>
+            </Grid>
         </Border>
         <Border Grid.Column="1" Background="White" Margin="10" CornerRadius="10">
             <Grid>

@@ -41,10 +41,14 @@ namespace SimpleMES.Services.DAL
         /// <summary>
         /// 获取最近1小时的记录 (用于画图表)
         /// </summary>
-        Task<IEnumerable<ProductionRecordModel>> GetRecentRecordsAsync(int deviceId);
+        Task<ProductionRecordModel?> GetRecentRecordsAsync(int deviceId);
         /// <summary>
         ///  更新报警信息
         /// </summary>
         Task<int> InsertAlarmRecordAsync(AlarmRecordModel alarmRecord);
+        /// <summary>
+        /// 获取所有产品信息
+        /// </summary>
+        Task<IEnumerable<ProductModel>> GetAllProductsAsync();
     }
 }

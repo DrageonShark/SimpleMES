@@ -117,8 +117,8 @@ namespace SimpleMES.Core
                         if (data != null)
                         {
                             decimal temp = data[0] / 10.0m;
-                            decimal press = data[1] / 10.0m;
-                            int speed = data[2];
+                            decimal press = data[1] / 12.0m;
+                            int speed = data[2] / 15;
 
                             // 内存更新
                             device.Status = "Running";
