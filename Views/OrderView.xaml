@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="SimpleMES.Views.OrderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="900" Background="White">
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="#F9FAFB" CornerRadius="8" Padding="20" Margin="0,0,20,0">
+            <StackPanel>
+                <TextBlock Text="➕ 新建生产工单" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="#333"/>
+
+                <TextBlock Text="订单编号" Margin="0,10,0,5" Foreground="#666"/>
+                <TextBox Text="{Binding NewOrderNo}" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+
+                <TextBlock Text="产品型号" Margin="0,15,0,5" Foreground="#666"/>
+                <TextBox Text="{Binding NewProductCode}" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+
+                <TextBlock Text="计划数量" Margin="0,15,0,5" Foreground="#666"/>
+                <TextBox Text="{Binding NewPlanQty}" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+
+                <Button Content="立即下达" Command="{Binding CreateOrderCommand}" 
+                        Height="40" Margin="0,30,0,0" 
+                        Background="#1976D2" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="📋 订单列表" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+            <Button Content="刷新数据" Command="{Binding LoadOrdersCommand}" HorizontalAlignment="Right" Margin="0,0,0,10" Width="80"/>
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" AutoGenerateColumns="False" 
+                      CanUserAddRows="False" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      RowHeaderWidth="0" Background="White" BorderThickness="1" BorderBrush="#EEE">
+
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#F5F5F5"/>
+                        <Setter Property="Padding" Value="10"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Foreground" Value="#555"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Padding" Value="0,8"/>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="工单号" Binding="{Binding OrderNo}" Width="150"/>
+                    <DataGridTextColumn Header="产品" Binding="{Binding ProductCode}" Width="120"/>
+                    <DataGridTextColumn Header="计划数" Binding="{Binding PlanQty}" Width="80"/>
+                    <DataGridTextColumn Header="已完成" Binding="{Binding CompletedQty}" Width="80"/>
+                    <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="100"/>
+                    <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime, StringFormat='yyyy-MM-dd HH:mm'}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</UserControl>

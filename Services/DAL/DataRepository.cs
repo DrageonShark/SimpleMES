@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace SimpleMES.Services.DAL
 {
@@ -38,7 +39,7 @@ namespace SimpleMES.Services.DAL
             return await _db.ExecuteAsync(sql, product);
         }
 
-        public async Task<int> InsertOrderModelAsync(OrderModel order)
+        public async Task<int> CreateOrderAsync(OrderModel order)
         {
             if (order == null)
             {
@@ -48,6 +49,12 @@ namespace SimpleMES.Services.DAL
                                (OrderNo, ProductCode, PlanQty, CompletedQty, OrderStatus, StartTime, EndTime, CreateTime)
                                VALUES (@OrderNo, @ProductCode, @PlanQty, @CompletedQty, @OrderStatus, @StartTime, @EndTime, @CreateTime);";
             return await _db.ExecuteAsync(sql, order);
+        }
+
+        public async Task<IEnumerable<OrderModel>> GetAllOrdersAsync()
+        {
+            const string sql = @"SELECT * FROM T_ProductionOrders ORDER BY CreateTime DESC";
+            return await _db.QueryAsync<OrderModel>(sql);
         }
 
         public async Task<int> UpdateOrderAsync(OrderModel order)

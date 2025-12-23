@@ -13,6 +13,9 @@
         <DataTemplate DataType="{x:Type vm:MonitorViewModel}">
             <views:MonitorView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:OrderViewModel}">
+            <views:OrderView/>
+        </DataTemplate>
     </Window.Resources>
     <Grid Background="#F0F2F5">
         <Grid.ColumnDefinitions>

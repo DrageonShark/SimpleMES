@@ -1,12 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SimpleMES.Core;
-using SimpleMES.Services.DAL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleMES.ViewModels
 {
@@ -16,13 +9,14 @@ namespace SimpleMES.ViewModels
 
         // 定义页面对象（缓存起来，不需要每次点击都 new）
         // 暂时先用 object 占位，等创建了真正的 View 再替换
-        public object MonitorView { get; }
-        public object OrderView { get; } = new object();
-        public object ReportView { get; } = new object();
+        private object MonitorView { get; }
+        private object OrderView { get; }
+        private object ReportView { get; } = new object();
 
-        public MainViewModel(MonitorViewModel monitor)
+        public MainViewModel(MonitorViewModel monitor, OrderViewModel orderView)
         {
             MonitorView = monitor;
+            OrderView = orderView;
             CurrentView = MonitorView;
         }
         // 定义按钮命令：切换到监控页

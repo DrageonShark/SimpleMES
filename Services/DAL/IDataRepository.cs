@@ -19,7 +19,9 @@ namespace SimpleMES.Services.DAL
         /// <summary>
         /// 新增生产工单
         /// </summary>
-        Task<int> InsertOrderModelAsync(OrderModel order);
+        Task<int> CreateOrderAsync(OrderModel order);
+
+        Task<IEnumerable<OrderModel>> GetAllOrdersAsync();
         /// <summary>
         /// 更新生产工单
         /// </summary>
