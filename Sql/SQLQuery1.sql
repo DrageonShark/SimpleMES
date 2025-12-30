@@ -105,5 +105,20 @@ BEGIN
 END
 GO
 
-
-
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID( N'dbo.T_User') AND type in(N'U'))
+BEGIN
+CREATE TABLE T_User(
+                       UserId int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                       UserName nvarchar(60) NOT NULL,
+                       Role int NOT NULL DEFAULT 3, --角色1:admin，2:leader，3:employee 
+                       Account nvarchar(50) NOT NULL UNIQUE,
+                       PasswordHash nvarchar(255) NOT NULL, --密码哈希值
+                       Salt nvarchar(128) NULL, --密码盐值
+                       Email nvarchar(100) NULL UNIQUE, --邮箱
+                       IsActive bit DEFAULT 1 --是否启用
+);
+--创建索引提高查询性能
+CREATE INDEX IX_T_User_Account ON T_User(Account);
+CREATE INDEX IX_T_User_Role ON T_User(Role);
+END
+GO

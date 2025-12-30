@@ -20,7 +20,7 @@ namespace SimpleMES.ViewModels
 {
     public partial class ReportViewModel : ViewModelBase
     {
-        private readonly DataRepository _dbService;
+        private readonly IDataRepository _dbService;
         private readonly ProductionRecordModel _record;
         private readonly DispatcherTimer _chartTimer;
         private bool _isRefreshing;

@@ -15,7 +15,6 @@ namespace MESDemo
     {
         // 保持服务的引用，防止被回收
         private DeviceCommunicationService _deviceCommunication;
-        private IDbService _db = new SqlDbService();
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -27,9 +26,11 @@ namespace MESDemo
             _deviceCommunication.Start();
             //3.创建主界面 ViewModel
             var monitorVM = new MonitorViewModel(_deviceCommunication);// 注入 Service
-            var orderVM = new OrderViewModel(_db);
-            var reportVM = new ReportViewModel(_db, _deviceCommunication);
-            var mainViewModel = new MainViewModel(monitorVM, orderVM, reportVM);     // 注入 MonitorVM
+            var orderVM = new OrderViewModel(dbService);
+            var reportVM = new ReportViewModel(dbService, _deviceCommunication);
+            var loginVM = new LoginViewModel(dbService);
+
+            var mainViewModel = new MainViewModel(monitorVM, orderVM, reportVM, loginVM);     // 注入 MonitorVM
             // 4. 创建主窗口，并赋值 DataContext
             var mainWindow = new MainWindow();
             mainWindow.DataContext = mainViewModel;

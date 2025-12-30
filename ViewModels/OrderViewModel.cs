@@ -14,7 +14,7 @@ namespace SimpleMES.ViewModels
 {
     public partial class OrderViewModel:ViewModelBase
     {
-        private readonly DataRepository _repository;
+        private readonly IDataRepository _repository;
         // 表格绑定的数据源
         public ObservableCollection<OrderModel> Orders { get; set; } = new ObservableCollection<OrderModel>();
         // === 新增订单的表单字段 ===

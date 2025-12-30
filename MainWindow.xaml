@@ -19,6 +19,9 @@
         <DataTemplate DataType="{x:Type vm:ReportViewModel}">
             <views:ReportView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+            <views:LoginView />
+        </DataTemplate>
     </Window.Resources>
     <Grid Background="#F0F2F5">
         <Grid.ColumnDefinitions>

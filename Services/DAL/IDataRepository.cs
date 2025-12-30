@@ -50,5 +50,25 @@ namespace SimpleMES.Services.DAL
         /// 获取所有产品信息
         /// </summary>
         Task<IEnumerable<ProductModel>> GetAllProductsAsync();
+        /// <summary>
+        /// 获取所有员工信息
+        /// </summary>
+        Task<IEnumerable<UserModel>> GetAllUserAsync();
+        /// <summary>
+        ///  验证用户身份并检索相关的用户信息。
+        /// </summary>
+        Task<UserModel?> LoginAsync(string account);
+        /// <summary>
+        /// 将新用户插入到数据存储中。
+        /// </summary>
+        Task<int> InsertUserAsync(UserModel newUser);
+        /// <summary>
+        /// 更新数据存储中指定的用户。
+        /// </summary>
+        Task<int> UpdateUserAsync(UserModel oldUser);
+        /// <summary>
+        /// 删除指定ID的用户
+        /// </summary>
+        Task<int> DeleteUserAsync(int userId);
     }
 }
