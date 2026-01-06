@@ -1,0 +1,14 @@
+<Window x:Class="SimpleMES.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:SimpleMES.Views"
+        Title="登录"
+        WindowStartupLocation="CenterScreen"
+        Width="1100"
+        Height="600"
+        MinWidth="800"
+        MinHeight="450"
+        ResizeMode="CanResize"
+        WindowState="Normal">
+    <views:LoginView />
+</Window>

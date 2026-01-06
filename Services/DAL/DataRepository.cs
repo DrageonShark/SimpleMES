@@ -147,9 +147,16 @@ namespace SimpleMES.Services.DAL
 
         public async Task<int> InsertUserAsync(UserModel newUser)
         {
-            const string sql = @"INSERT INTO T_User (UserName, Account, PasswordHash, Salt)
-                                 VALUES(UserName = @UserName, Account = @Account, PasswordHash = @PasswordHash, Salt = @Salt)";
-            return await _db.ExecuteAsync(sql, newUser);
+            const string sql = @"INSERT INTO T_User (UserName, Account, PasswordHash, Salt, Email)
+                                 VALUES(@UserName, @Account, @PasswordHash, @Salt, @Email)";
+            return await _db.ExecuteAsync(sql, new
+            {
+                UserName = newUser.UserName,
+                Account = newUser.Account,
+                PasswordHash = newUser.PasswordHash,
+                Salt = newUser.Salt,
+                Email = newUser.Email 
+            });
         }
 
         public async Task<int> UpdateUserAsync(UserModel oldUser)

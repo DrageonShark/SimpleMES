@@ -5,6 +5,7 @@ using SimpleMES;
 using SimpleMES.Core;
 using SimpleMES.Services.DAL;
 using SimpleMES.ViewModels;
+using SimpleMES.Views;
 
 namespace MESDemo
 {
@@ -18,23 +19,34 @@ namespace MESDemo
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
             //1.创建数据库服务
             var dbService = new SqlDbService();
             var repo = new DataRepository(dbService);
             //2.创建并启动通信服务 (MES 的心脏)
             _deviceCommunication = new DeviceCommunicationService(repo);
             _deviceCommunication.Start();
-            //3.创建主界面 ViewModel
+            //3.登录验证
+            var loginVm = new LoginViewModel(dbService);
+            var loginWindow = new LoginWindow(loginVm);
+            var loginOk = loginWindow.ShowDialog();
+            if (loginOk != true)
+            {
+                Shutdown();
+                //默认 ShutdownMode 为 OnLastWindowClose，当登录窗口关闭后应用被自动关停，随后主窗口还没机会保持进程存活。
+                //需要需要设置窗口关闭逻辑
+                return;
+            }
+            //4.创建主界面 ViewModel
             var monitorVM = new MonitorViewModel(_deviceCommunication);// 注入 Service
             var orderVM = new OrderViewModel(dbService);
             var reportVM = new ReportViewModel(dbService, _deviceCommunication);
-            var loginVM = new LoginViewModel(dbService);
 
-            var mainViewModel = new MainViewModel(monitorVM, orderVM, reportVM, loginVM);     // 注入 MonitorVM
-            // 4. 创建主窗口，并赋值 DataContext
+            var mainViewModel = new MainViewModel(monitorVM, orderVM, reportVM);     // 注入 MonitorVM
+            // 5. 创建主窗口，并赋值 DataContext
             var mainWindow = new MainWindow();
             mainWindow.DataContext = mainViewModel;
-
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
             mainWindow.Show();
         }
 

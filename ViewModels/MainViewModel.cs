@@ -5,7 +5,7 @@ using SimpleMES.Services.Security;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class MainViewModel:ViewModelBase
+    public partial class MainViewModel : ViewModelBase
     {
         [ObservableProperty] private ViewModelBase _currentView;
         private readonly UserSession _session = UserSession.Current;
@@ -15,17 +15,15 @@ namespace SimpleMES.ViewModels
         private MonitorViewModel MonitorView { get; }
         private OrderViewModel OrderView { get; }
         private ReportViewModel ReportView { get; }
-        private LoginViewModel loginView { get; }
 
-        public MainViewModel(MonitorViewModel monitor, OrderViewModel orderView, ReportViewModel reportView, LoginViewModel loginView)
+        public MainViewModel(MonitorViewModel monitor, OrderViewModel orderView, ReportViewModel reportView)
         {
             MonitorView = monitor;
             OrderView = orderView;
             ReportView = reportView;
-            this.loginView = loginView;
 
             User = _session.CurrentUser;
-            ShowLogin();
+            ShowMonitor();
         }
         // 定义按钮命令：切换到监控页
         [RelayCommand]
@@ -50,14 +48,6 @@ namespace SimpleMES.ViewModels
             PageTitle = "报表页面";
             CurrentView = ReportView;
         }
-        [RelayCommand]
-        private void ShowLogin()
-        {
-            PageTitle = "登录页面";
-            CurrentView = loginView;
-        }
-
-        
 
         [RelayCommand]
         private void SingOut()

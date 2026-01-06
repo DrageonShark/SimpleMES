@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SimpleMES.Views"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:helpers="clr-namespace:SimpleMES.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">
     <UserControl.Resources>
@@ -32,17 +33,19 @@
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="Height" Value="38"/>
-            <Setter Property="Padding" Value="10 6"/>
+            <Setter Property="Padding" Value="10 0"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="BorderBrush" Value="#DDDDDD"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         <Style TargetType="PasswordBox">
             <Setter Property="Height" Value="38"/>
-            <Setter Property="Padding" Value="10 6"/>
+            <Setter Property="Padding" Value="10 0"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="BorderBrush" Value="#DDDDDD"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="#444"></Setter>
@@ -78,17 +81,24 @@
                                     VerticalAlignment="Center"
                                     Width="320"
                                     Margin="18">
+                            <TextBlock Text="登录"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Margin="0 0 0 8"/>
                             <DockPanel LastChildFill="True">
-                                <TextBlock Text="邮箱"
+                                <TextBlock Text="账号"
                                            Width="50"
                                            VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding Email}"/>
+                                <TextBox Text="{Binding Account}"/>
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock Text="密码"
                                            Width="50"
                                            VerticalAlignment="Center"/>
-                                <PasswordBox PasswordChar="●"/>
+                                <PasswordBox PasswordChar="●" 
+                                             helpers:PasswordBoxHelper.Attach="True"
+                                             helpers:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DockPanel>
                             <Button Content="登 录"
                                     Command="{Binding LoginCommand}" 
@@ -110,10 +120,10 @@
                                               Opacity="0.7"/>
                         </Border.Effect>
                         <StackPanel VerticalAlignment="Center"
-                                    Width="360"
+                                    Width="320"
                                     Margin="16">
-                            <Button Content="去注册" Width="160" Height="36" Margin="0,12,0,0"
-                                    Command="{Binding GoRegisterCommand}" />
+                            <Button Content="去注册" Width="160" Height="36" 
+                                    Command="{Binding GoRegisterCommand}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -170,10 +180,18 @@
                                 <TextBox Text="{Binding Email}"/>
                             </DockPanel>
                             <DockPanel LastChildFill="True">
+                                <TextBlock Text="账号"
+                                           Width="50"
+                                           VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding Account}"/>
+                            </DockPanel>
+                            <DockPanel LastChildFill="True">
                                 <TextBlock Text="密码"
                                            Width="50"
                                            VerticalAlignment="Center"/>
-                                <PasswordBox PasswordChar="●"/>
+                                <PasswordBox PasswordChar="●"
+                                             helpers:PasswordBoxHelper.Attach="True"
+                                             helpers:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DockPanel>
                             <Button Content="注 册"
                                     Command="{Binding RegisterCommand}"

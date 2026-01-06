@@ -14,6 +14,7 @@ namespace SimpleMES.ViewModels
 {
     public partial class LoginViewModel:ViewModelBase
     {
+        public event Action? LoginSucceeded;
         private readonly IDataRepository _repository;
         private readonly UserSession _session = UserSession.Current;
         [ObservableProperty] private string _account;
@@ -74,6 +75,7 @@ namespace SimpleMES.ViewModels
             };
 
             MessageBox.Show($"欢迎{_roleString}{user.UserName}");
+            LoginSucceeded?.Invoke();
         }
         [RelayCommand]
         private async Task Register()

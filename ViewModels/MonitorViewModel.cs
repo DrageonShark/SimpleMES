@@ -1,22 +1,25 @@
-﻿using System;
+﻿using SimpleMES.Core;
+using SimpleMES.Models.Dto;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using SimpleMES.Core;
-using SimpleMES.Models.Dto;
+using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
     public partial class MonitorViewModel:ViewModelBase
     {
+        private readonly Dispatcher _dispatcher;
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
 
         public MonitorViewModel(DeviceCommunicationService service)
         {
+            _dispatcher = GetCurrentDispatcher();
             // 订阅 Service 的事件
             service.OnDeviceStatusChanged += Service_OnDeviceStatusChanged;
         }
@@ -24,7 +27,7 @@ namespace SimpleMES.ViewModels
         public void Service_OnDeviceStatusChanged(List<DeviceDto> listLatestDeviceDto)
         {
             // 关键点：回到主线程更新 UI
-            Application.Current.Dispatcher.Invoke(() =>
+            _dispatcher.Invoke(() =>
             {
                 // 如果列表是空的（第一次），就全部添加
                 if (ListDeviceDto.Count == 0)
@@ -53,5 +56,17 @@ namespace SimpleMES.ViewModels
                 }
             });
         }
+
+        private static Dispatcher GetCurrentDispatcher()
+        {
+            //尝试多种方式获取UI线程Dispatcher
+            var dispatcher = Dispatcher.FromThread(Thread.CurrentThread);
+            if (dispatcher != null && dispatcher.Thread == Thread.CurrentThread)
+                return dispatcher;
+            if (Application.Current != null)
+                return Application.Current.Dispatcher;
+            return Dispatcher.CurrentDispatcher;
+        }
+
     }
 }
