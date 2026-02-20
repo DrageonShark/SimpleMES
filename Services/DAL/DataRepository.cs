@@ -1,11 +1,4 @@
 ﻿using SimpleMES.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace SimpleMES.Services.DAL
 {
@@ -80,7 +73,7 @@ namespace SimpleMES.Services.DAL
             return await _db.QueryAsync<DeviceModel>(sql);
         }
 
-        public async Task<int> UpdateDeviceStatusAsync(int deviceId, string status, DateTime? lastUpDateTime = null)
+        public async Task<int> UpdateDeviceStateAsync(int deviceId, string status, DateTime? lastUpDateTime = null)
         {
             const string sql = @"UPDATE T_Devices
                                  SET Status = @Status,
@@ -155,7 +148,7 @@ namespace SimpleMES.Services.DAL
                 Account = newUser.Account,
                 PasswordHash = newUser.PasswordHash,
                 Salt = newUser.Salt,
-                Email = newUser.Email 
+                Email = newUser.Email
             });
         }
 

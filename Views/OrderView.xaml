@@ -74,7 +74,7 @@
                     <DataGridTextColumn Header="产品" Binding="{Binding ProductCode}" Width="100"/>
                     <DataGridTextColumn Header="计划数" Binding="{Binding PlanQty}" Width="70"/>
                     <DataGridTextColumn Header="已完成" Binding="{Binding CompletedQty}" Width="70"/>
-                    <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="70"/>
+                    <DataGridTextColumn Header="状态" Binding="{Binding OrderStatus}" Width="70"/>
                     <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime, StringFormat='yyyy-MM-dd HH:mm'}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>

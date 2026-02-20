@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SimpleMES.Models
+﻿namespace SimpleMES.Models
 {
     public class DeviceModel
     {
@@ -14,7 +8,7 @@ namespace SimpleMES.Models
         public int? Port { get; set; }
         public string SerialPort { get; set; }
         public byte SlaveId { get; set; }
-        public string Status { get; set; }
+        public string DeviceState { get; set; }
 
         public DateTime LastUpdateTime { get; set; }
     }

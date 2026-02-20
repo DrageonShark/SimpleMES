@@ -3,18 +3,15 @@ using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
-using SkiaSharp;
-using SimpleMES.Services.DAL;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
 using SimpleMES.Core;
-using System.Windows.Threading;
 using SimpleMES.Models;
 using SimpleMES.Models.Dto;
-using System;
+using SimpleMES.Services.DAL;
+using SimpleMES.Services.State;
+using SkiaSharp;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
@@ -52,7 +49,7 @@ namespace SimpleMES.ViewModels
                     GeometrySize = 0,
                     LineSmoothness = 1,
                     Name = "实时温度",
-                    
+
                 },
                 new LineSeries<double>()
                 {
@@ -146,9 +143,9 @@ namespace SimpleMES.ViewModels
                     {
                         DeviceValues.Add(dto);
                     }
-                    _isRunningValues = DeviceValues.Count(dto => dto.Status == "Running");
-                    _isStoppedValues = DeviceValues.Count(dto => dto.Status == "Stopped");
-                    _isFaultValues = DeviceValues.Count(dto => dto.Status == "Fault");
+                    _isRunningValues = DeviceValues.Count(dto => dto.DeviceState == DeviceState.Running);
+                    _isStoppedValues = DeviceValues.Count(dto => dto.DeviceState == DeviceState.Disconnected);
+                    _isFaultValues = DeviceValues.Count(dto => dto.DeviceState == DeviceState.Fault);
                     _runningValues[0] = _isRunningValues;
                     _stoppedValues[0] = _isStoppedValues + _isFaultValues;
                 }
@@ -162,12 +159,12 @@ namespace SimpleMES.ViewModels
                             oldDeviceDto.Temperature = newDeviceDto.Temperature;
                             oldDeviceDto.Pressure = newDeviceDto.Pressure;
                             oldDeviceDto.Speed = newDeviceDto.Speed;
-                            oldDeviceDto.Status = newDeviceDto.Status;
+                            oldDeviceDto.DeviceState = newDeviceDto.DeviceState;
                         }
                     }
-                    _isRunningValues = DeviceValues.Count(dto => dto.Status == "Running");
-                    _isStoppedValues = DeviceValues.Count(dto => dto.Status == "Stopped");
-                    _isFaultValues = DeviceValues.Count(dto => dto.Status == "Fault");
+                    _isRunningValues = DeviceValues.Count(dto => dto.DeviceState == DeviceState.Running);
+                    _isStoppedValues = DeviceValues.Count(dto => dto.DeviceState == DeviceState.Disconnected);
+                    _isFaultValues = DeviceValues.Count(dto => dto.DeviceState == DeviceState.Fault);
                     PieSeries = new ISeries[]
                     {
                         new PieSeries<int>()

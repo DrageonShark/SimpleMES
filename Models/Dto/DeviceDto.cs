@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using SimpleMES.Services.State;
 
 namespace SimpleMES.Models.Dto
 {
-    public partial class DeviceDto:ObservableObject
+    public partial class DeviceDto : ObservableObject
     {
         [ObservableProperty] private int _deviceId;
         [ObservableProperty] private string _deviceName;
@@ -16,7 +12,7 @@ namespace SimpleMES.Models.Dto
         [ObservableProperty] private decimal? _temperature;
         [ObservableProperty] private decimal? _pressure;
         [ObservableProperty] private int _speed;
-        [ObservableProperty] private string _status;
+        [ObservableProperty] private DeviceState _deviceState;
         [ObservableProperty] private DateTime _lastUpdateTime;
     }
 }

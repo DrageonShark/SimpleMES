@@ -1,17 +1,12 @@
 ﻿using SimpleMES.Core;
 using SimpleMES.Models.Dto;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class MonitorViewModel:ViewModelBase
+    public partial class MonitorViewModel : ViewModelBase
     {
         private readonly Dispatcher _dispatcher;
         // 界面绑定的设备列表
@@ -49,7 +44,7 @@ namespace SimpleMES.ViewModels
                             oldDeviceDto.Temperature = newDeviceDto.Temperature;
                             oldDeviceDto.Pressure = newDeviceDto.Pressure;
                             oldDeviceDto.Speed = newDeviceDto.Speed;
-                            oldDeviceDto.Status = newDeviceDto.Status;
+                            oldDeviceDto.DeviceState = newDeviceDto.DeviceState;
                             oldDeviceDto.LastUpdateTime = newDeviceDto.LastUpdateTime;
                         }
                     }

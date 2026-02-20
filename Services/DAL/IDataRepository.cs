@@ -33,7 +33,7 @@ namespace SimpleMES.Services.DAL
         /// <summary>
         /// 更新设备状态
         /// </summary>
-        Task<int> UpdateDeviceStatusAsync(int deviceId, string status, DateTime? lastUpDateTime = null);
+        Task<int> UpdateDeviceStateAsync(int deviceId, string status, DateTime? lastUpDateTime = null);
         /// <summary>
         ///  更新生产记录
         /// </summary>

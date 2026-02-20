@@ -27,21 +27,20 @@
                                     <StackPanel Margin="10 0 0 0" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding DeviceName}" FontWeight="Bold" FontSize="16" Foreground="#333"/>
                                         <TextBlock Text="{Binding IpAddress}" FontSize="12" Foreground="#888"/>
-                                        <TextBlock Text="{Binding IpAddress}" FontSize="12" Foreground="#888"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <Separator Background="#F0F0F0" Margin="0 0 0 15"/>
                                 <DockPanel Margin="0 5">
                                     <TextBlock Text="运行状态" Foreground="#666"/>
-                                    <TextBlock Text="{Binding Status}" FontWeight="Bold" HorizontalAlignment="Right">
+                                    <TextBlock Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" FontWeight="Bold"  HorizontalAlignment="Right">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Foreground" Value="Green"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Fault">
+                                                    <DataTrigger Binding="{Binding DeviceState}" Value="Fault">
                                                         <Setter Property="Foreground" Value="Red"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Stopped">
+                                                    <DataTrigger Binding="{Binding DeviceState}" Value="Stopped">
                                                         <Setter Property="Foreground" Value="Gray"></Setter>
                                                     </DataTrigger>
                                                 </Style.Triggers>

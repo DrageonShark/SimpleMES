@@ -2,17 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using SimpleMES.Models;
 using SimpleMES.Services.DAL;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class OrderViewModel:ViewModelBase
+    public partial class OrderViewModel : ViewModelBase
     {
         private readonly IDataRepository _repository;
         // 表格绑定的数据源
@@ -58,7 +53,7 @@ namespace SimpleMES.ViewModels
                         Products.Add(product);
                     }
                 });
-                
+
             }
             catch (Exception ex)
             {
@@ -83,7 +78,7 @@ namespace SimpleMES.ViewModels
                     OrderNo = NewOrderNo,
                     ProductCode = NewProductCode,
                     PlanQty = NewPlanQty,
-                    OrderStatus = 0,
+                    OrderStatus = "Pending",
                     CreateTime = DateTime.Now
                 };
                 // 3. 写入数据库
@@ -101,6 +96,6 @@ namespace SimpleMES.ViewModels
                 MessageBox.Show($"创建失败: {ex.Message}");
             }
         }
-       
+
     }
 }

@@ -1,15 +1,11 @@
 ﻿using NModbus;
 using SimpleMES.Models;
+using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
-using System;
-using System.Collections.Generic;
+using SimpleMES.Services.State;
 using System.Diagnostics;
 using System.IO.Ports;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using SimpleMES.Models.Dto;
 
 namespace SimpleMES.Core
 {
@@ -20,9 +16,9 @@ namespace SimpleMES.Core
         private CancellationTokenSource _cts;
         public event Action<List<DeviceDto>> OnDeviceStatusChanged;
 
-        // 模拟配置：假设我们有两个 Modbus TCP 设备
         private List<DeviceModel> _monitoredDevices;
-
+        //使用字典更快，避免重复赋值影响性能
+        private readonly Dictionary<int, IDeviceState> _deviceStates = new();
         public DeviceCommunicationService(IDataRepository repository)
         {
             _repository = repository;
@@ -37,7 +33,7 @@ namespace SimpleMES.Core
 
         public void Start()
         {
-            if(_isRunning) return;
+            if (_isRunning) return;
             _isRunning = true;
             _cts = new CancellationTokenSource();
             // 开启一个后台长任务
@@ -59,6 +55,9 @@ namespace SimpleMES.Core
                 List<DeviceDto> devices = new List<DeviceDto>();
                 foreach (var device in _monitoredDevices)
                 {
+                    if (!_deviceStates.TryGetValue(device.DeviceId, out var state))
+                        state = _deviceStates[device.DeviceId] = new DisconnectedState();
+
                     try
                     {
                         // 模拟数据容器
@@ -116,12 +115,11 @@ namespace SimpleMES.Core
                         // === 数据处理与入库 (通用逻辑) ===
                         if (data != null)
                         {
-                            decimal temp = data[0] / 10.0m;
-                            decimal press = data[1] / 12.0m;
+                            decimal temp = Math.Round(data[0] / 10.0m, 3);
+                            decimal press = Math.Round(data[1] / 12.0m, 3);
                             int speed = data[2] / 15;
 
                             // 内存更新
-                            device.Status = "Running";
                             device.LastUpdateTime = DateTime.Now;
                             devices.Add(new DeviceDto
                             {
@@ -131,7 +129,7 @@ namespace SimpleMES.Core
                                 LastUpdateTime = device.LastUpdateTime,
                                 Pressure = press,
                                 SerialPort = device.SerialPort,
-                                Status = device.Status,
+                                DeviceState = DeviceState.Running,
                                 Temperature = temp,
                                 Speed = speed
                             });
@@ -147,17 +145,17 @@ namespace SimpleMES.Core
                             };
 
                             _ = _repository.InsertProductionRecordAsync(record);
-                            _ = _repository.UpdateDeviceStatusAsync(device.DeviceId, "Running", DateTime.Now);
+                            _ = _repository.UpdateDeviceStateAsync(device.DeviceId, "Running", DateTime.Now);
 
                             Debug.WriteLine($"SUCCESS >>> [{device.DeviceName}] 温度:{temp} 压力:{press}");
                         }
                     }
                     catch (Exception ex)
                     {
-                        device.Status = "Fault";
-                        await _repository.UpdateDeviceStatusAsync(device.DeviceId, "Fault", DateTime.Now);
+                        device.DeviceState = "Fault";
+                        await _repository.UpdateDeviceStateAsync(device.DeviceId, "Fault", DateTime.Now);
                         // 打印详细错误方便调试
-                        Console.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
+                        Debug.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
                     }
                 }
                 OnDeviceStatusChanged?.Invoke(devices);
