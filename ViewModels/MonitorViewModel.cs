@@ -1,29 +1,33 @@
-﻿using SimpleMES.Core;
-using SimpleMES.Models.Dto;
+﻿using SimpleMES.Models.Dto;
+using SimpleMES.Services.Observer;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class MonitorViewModel : ViewModelBase
+    public partial class MonitorViewModel : ViewModelBase, IDisposable
     {
         private readonly Dispatcher _dispatcher;
+        private readonly IDeviceStatusNotifier _notifier;
+        private bool _disposed;
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
 
-        public MonitorViewModel(DeviceCommunicationService service)
+        public MonitorViewModel(IDeviceStatusNotifier notifier)
         {
             _dispatcher = GetCurrentDispatcher();
+            _notifier = notifier;
             // 订阅 Service 的事件
-            service.OnDeviceStatusChanged += Service_OnDeviceStatusChanged;
+            _notifier.DeviceStatusChanged += OnDeviceStatusChanged;
         }
 
-        public void Service_OnDeviceStatusChanged(List<DeviceDto> listLatestDeviceDto)
+        public void OnDeviceStatusChanged(object? sender, DeviceStatusChangedEventArgs e)
         {
             // 关键点：回到主线程更新 UI
             _dispatcher.Invoke(() =>
             {
+                var listLatestDeviceDto = e.LatestDevices;
                 // 如果列表是空的（第一次），就全部添加
                 if (ListDeviceDto.Count == 0)
                 {
@@ -63,5 +67,12 @@ namespace SimpleMES.ViewModels
             return Dispatcher.CurrentDispatcher;
         }
 
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _notifier.DeviceStatusChanged -= OnDeviceStatusChanged;
+            _disposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 }

@@ -3,10 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
-using SimpleMES.Core;
 using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
+using SimpleMES.Services.Observer;
 using SimpleMES.Services.State;
 using SkiaSharp;
 using System.Collections.ObjectModel;
@@ -15,20 +15,25 @@ using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class ReportViewModel : ViewModelBase
+    public partial class ReportViewModel : ViewModelBase, IDisposable
     {
         private readonly IDataRepository _dbService;
         private readonly ProductionRecordModel _record;
         private readonly DispatcherTimer _chartTimer;
+        private readonly Dispatcher _dispatcher;
+        private readonly IDeviceStatusNotifier _notifier;
+        private bool _disposed;
         private bool _isRefreshing;
         private readonly ObservableCollection<int> _runningValues = new ObservableCollection<int> { 0 };
         private readonly ObservableCollection<int> _stoppedValues = new ObservableCollection<int> { 0 };
         private PieSeries<int> _runningSeries;
         private PieSeries<int> _stoppedSeries;
-        public ReportViewModel(IDbService dbService, DeviceCommunicationService service)
+        public ReportViewModel(IDbService dbService, Dispatcher dispatcher, IDeviceStatusNotifier notifier)
         {
+            _dispatcher = dispatcher;
+            _notifier = notifier;
             _dbService = new DataRepository(dbService);
-            service.OnDeviceStatusChanged += Service_OnDeviceStatusChanged;
+            _notifier.DeviceStatusChanged += OnDeviceStatusChanged;
             // 初始化图表绑定集合
             ChartTValues = new ObservableCollection<double>();
             ChartPValues = new ObservableCollection<double>();
@@ -133,10 +138,11 @@ namespace SimpleMES.ViewModels
         public SolidColorPaint? ChinesTextPaint { get; set; }
 
 
-        private void Service_OnDeviceStatusChanged(List<DeviceDto> listDeviceDto)
+        private void OnDeviceStatusChanged(object? sender, DeviceStatusChangedEventArgs e)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                var listDeviceDto = e.LatestDevices;
                 if (DeviceValues.Count == 0)
                 {
                     foreach (var dto in listDeviceDto)
@@ -215,6 +221,14 @@ namespace SimpleMES.ViewModels
             {
                 _isRefreshing = false;
             }
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _notifier.DeviceStatusChanged -= OnDeviceStatusChanged;
+            _disposed = true;
+            GC.SuppressFinalize(this);
         }
     }
 }

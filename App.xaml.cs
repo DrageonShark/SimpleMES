@@ -39,7 +39,7 @@ namespace MESDemo
             //4.创建主界面 ViewModel
             var monitorVM = new MonitorViewModel(_deviceCommunication);// 注入 Service
             var orderVM = new OrderViewModel(dbService);
-            var reportVM = new ReportViewModel(dbService, _deviceCommunication);
+            var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 
             var mainViewModel = new MainViewModel(monitorVM, orderVM, reportVM);     // 注入 MonitorVM
             // 5. 创建主窗口，并赋值 DataContext

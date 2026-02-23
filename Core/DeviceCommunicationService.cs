@@ -14,8 +14,6 @@ namespace SimpleMES.Core
         private readonly IDeviceClientFactory _deviceClientFactory;
         private bool _isRunning = false;
         private CancellationTokenSource _cts;
-        public event Action<List<DeviceDto>> OnDeviceStatusChanged;
-
         private List<DeviceModel> _monitoredDevices;
         //使用字典更快，避免重复赋值影响性能
         private readonly Dictionary<int, IDeviceState> _deviceStates = new();
@@ -31,6 +29,8 @@ namespace SimpleMES.Core
         public async Task LoadDevicesAsync()
         {
             _monitoredDevices = (await _repository.GetAllDevicesAsync()).ToList();
+            foreach (var d in _monitoredDevices)
+                _deviceStates.TryAdd(d.DeviceId, new DisconnectedState());
         }
 
         public void Start()
@@ -108,7 +108,7 @@ namespace SimpleMES.Core
                         Debug.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
                     }
                 }
-                OnDeviceStatusChanged?.Invoke(devices);
+                DeviceStatusChanged?.Invoke(this, new DeviceStatusChangedEventArgs(devices.AsReadOnly()));
                 // 暂停 5 秒
                 try { await Task.Delay(5000, token); } catch { break; }
             }

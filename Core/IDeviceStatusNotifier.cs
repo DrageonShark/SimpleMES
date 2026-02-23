@@ -1,9 +1,0 @@
-﻿using SimpleMES.Services.Observer;
-
-namespace SimpleMES.Core
-{
-    public interface IDeviceStatusNotifier
-    {
-        event EventHandler<DeviceStatusChangedEventArgs>? DeviceStatusChanged;
-    }
-}
