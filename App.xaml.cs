@@ -1,11 +1,9 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
-using SimpleMES;
+﻿using SimpleMES;
 using SimpleMES.Core;
 using SimpleMES.Services.DAL;
 using SimpleMES.ViewModels;
 using SimpleMES.Views;
+using System.Windows;
 
 namespace MESDemo
 {
@@ -23,8 +21,9 @@ namespace MESDemo
             //1.创建数据库服务
             var dbService = new SqlDbService();
             var repo = new DataRepository(dbService);
+            var clientFactory = new DeviceClientFactory();
             //2.创建并启动通信服务 (MES 的心脏)
-            _deviceCommunication = new DeviceCommunicationService(repo);
+            _deviceCommunication = new DeviceCommunicationService(repo, clientFactory);
             _deviceCommunication.Start();
             //3.登录验证
             var loginVm = new LoginViewModel(dbService);

@@ -1,6 +1,4 @@
-﻿using SimpleMES.Services.Observer;
-
-namespace SimpleMES.Core
+﻿namespace SimpleMES.Services.Observer
 {
     public interface IDeviceStatusNotifier
     {

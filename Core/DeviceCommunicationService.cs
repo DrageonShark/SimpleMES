@@ -2,16 +2,16 @@
 using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
+using SimpleMES.Services.Observer;
 using SimpleMES.Services.State;
 using System.Diagnostics;
-using System.IO.Ports;
-using System.Net.Sockets;
 
 namespace SimpleMES.Core
 {
-    public class DeviceCommunicationService
+    public class DeviceCommunicationService : Services.Observer.IDeviceStatusNotifier
     {
         private readonly IDataRepository _repository;
+        private readonly IDeviceClientFactory _deviceClientFactory;
         private bool _isRunning = false;
         private CancellationTokenSource _cts;
         public event Action<List<DeviceDto>> OnDeviceStatusChanged;
@@ -19,9 +19,11 @@ namespace SimpleMES.Core
         private List<DeviceModel> _monitoredDevices;
         //使用字典更快，避免重复赋值影响性能
         private readonly Dictionary<int, IDeviceState> _deviceStates = new();
-        public DeviceCommunicationService(IDataRepository repository)
+        public event EventHandler<DeviceStatusChangedEventArgs>? DeviceStatusChanged;
+        public DeviceCommunicationService(IDataRepository repository, IDeviceClientFactory deviceClientFactory)
         {
             _repository = repository;
+            _deviceClientFactory = deviceClientFactory;
             _monitoredDevices = new List<DeviceModel>();
             _ = LoadDevicesAsync();
         }
@@ -62,55 +64,16 @@ namespace SimpleMES.Core
                     {
                         // 模拟数据容器
                         ushort[] data = null;
+                        await using var client = _deviceClientFactory.Create(device);
+                        data = await client.ReadHoldingRegistersAsync(0, 3, token);
+                        var pollResult = new DevicePollResult(
+                            IsSuccess: data != null,
+                            RawData: data,
+                            Exception: null,
+                            Timestamp: DateTime.Now);
 
-                        // === TCP 设备处理 ===
-                        if (!string.IsNullOrWhiteSpace(device.IpAddress))
-                        {
-                            using (TcpClient client = new TcpClient())
-                            {
-                                // 1. 连接
-                                var connectTask = client.ConnectAsync(device.IpAddress, device.Port ?? 502);
-                                // 等待连接，超时时间 2秒
-                                if (await Task.WhenAny(connectTask, Task.Delay(2000, token)) != connectTask)
-                                {
-                                    throw new TimeoutException("连接超时");
-                                }
-
-                                // 2. 读取
-                                var master = factory.CreateMaster(client);
-                                master.Transport.ReadTimeout = 2000;
-                                master.Transport.WriteTimeout = 2000;
-
-                                // 注意：这里要把硬编码的 '1' 改成 device.SlaveId
-                                data = await master.ReadHoldingRegistersAsync(device.SlaveId, 0, 3);
-                            }
-                        }
-                        // === 串口 (RTU) 设备处理 ===
-                        else if (!string.IsNullOrWhiteSpace(device.SerialPort))
-                        {
-                            // 使用 using 确保每次读取完都关闭串口，释放 COM 口资源
-                            // 虽然效率不如长连接，但最稳定，不会报 "Port Already Open"
-                            using (SerialPort serialPort = new SerialPort(device.SerialPort))
-                            {
-                                serialPort.BaudRate = 9600;
-                                serialPort.DataBits = 8;
-                                serialPort.Parity = Parity.None;
-                                serialPort.StopBits = StopBits.One;
-
-                                serialPort.Open(); // 打开串口
-
-                                var adapter = new SerialPortAdapter(serialPort);
-                                using (var master = factory.CreateRtuMaster(adapter))
-                                {
-                                    master.Transport.ReadTimeout = 2000;
-                                    master.Transport.WriteTimeout = 2000;
-
-                                    // 注意：改为 device.SlaveId
-                                    data = await master.ReadHoldingRegistersAsync(device.SlaveId, 0, 3);
-                                }
-                            }
-                            // 离开 using 块，serialPort 自动 Close()
-                        }
+                        state = await state.HandleAsync(device, pollResult, _repository, token);
+                        _deviceStates[device.DeviceId] = state;
 
                         // === 数据处理与入库 (通用逻辑) ===
                         if (data != null)
@@ -129,31 +92,18 @@ namespace SimpleMES.Core
                                 LastUpdateTime = device.LastUpdateTime,
                                 Pressure = press,
                                 SerialPort = device.SerialPort,
-                                DeviceState = DeviceState.Running,
+                                DeviceState = Enum.Parse<DeviceState>(device.DeviceState, true),
                                 Temperature = temp,
-                                Speed = speed
-                            });
-
-                            // 数据库写入
-                            var record = new ProductionRecordModel
-                            {
-                                DeviceId = device.DeviceId,
-                                Temperature = temp,
-                                Pressure = press,
                                 Speed = speed,
-                                RecordTime = DateTime.Now
-                            };
-
-                            _ = _repository.InsertProductionRecordAsync(record);
-                            _ = _repository.UpdateDeviceStateAsync(device.DeviceId, "Running", DateTime.Now);
-
+                            });
                             Debug.WriteLine($"SUCCESS >>> [{device.DeviceName}] 温度:{temp} 压力:{press}");
                         }
                     }
                     catch (Exception ex)
                     {
-                        device.DeviceState = "Fault";
-                        await _repository.UpdateDeviceStateAsync(device.DeviceId, "Fault", DateTime.Now);
+                        var pollResult = new DevicePollResult(false, null, ex, DateTime.Now);
+                        state = await state.HandleAsync(device, pollResult, _repository, token);
+                        _deviceStates[device.DeviceId] = state;
                         // 打印详细错误方便调试
                         Debug.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
                     }

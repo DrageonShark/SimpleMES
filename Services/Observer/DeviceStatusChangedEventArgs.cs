@@ -1,6 +1,6 @@
 ﻿using SimpleMES.Models.Dto;
 
-namespace SimpleMES.Core
+namespace SimpleMES.Services.Observer
 {
     public sealed class DeviceStatusChangedEventArgs : EventArgs
     {

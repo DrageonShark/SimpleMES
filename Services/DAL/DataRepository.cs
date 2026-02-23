@@ -73,13 +73,13 @@ namespace SimpleMES.Services.DAL
             return await _db.QueryAsync<DeviceModel>(sql);
         }
 
-        public async Task<int> UpdateDeviceStateAsync(int deviceId, string status, DateTime? lastUpDateTime = null)
+        public async Task<int> UpdateDeviceStateAsync(int deviceId, string deviceState, DateTime? lastUpDateTime = null)
         {
             const string sql = @"UPDATE T_Devices
-                                 SET Status = @Status,
+                                 SET DeviceState = @DeviceState,
                                  LastUpdateTime = ISNULL(@LastUpdateTime, LastUpdateTime)
                                  WHERE DeviceId = @DeviceId;";
-            return await _db.ExecuteAsync(sql, new { DeviceId = deviceId, Status = status, LastUpdateTime = lastUpDateTime });
+            return await _db.ExecuteAsync(sql, new { DeviceId = deviceId, DeviceState = deviceState, LastUpdateTime = lastUpDateTime });
         }
 
         public async Task<int> InsertProductionRecordAsync(ProductionRecordModel productionRecord)
