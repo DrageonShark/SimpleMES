@@ -30,20 +30,46 @@ namespace SimpleMES.ViewModels
         private PieSeries<int> _stoppedSeries;
         public ReportViewModel(IDbService dbService, Dispatcher dispatcher, IDeviceStatusNotifier notifier)
         {
+            var font = SKTypeface.FromFamilyName("Microsoft YaHei");
             _dispatcher = dispatcher;
             _notifier = notifier;
             _dbService = new DataRepository(dbService);
             _notifier.DeviceStatusChanged += OnDeviceStatusChanged;
+
+            // 1. 坐标轴画笔 (黑色)
+            AxisPaint = new SolidColorPaint
+            {
+                Color = SKColors.Black,
+                SKTypeface = font,
+                IsAntialias = true // 开启抗锯齿，文字更平滑
+            };
+            // 2. 图例画笔 (深灰色，看起来更有层次)
+            LegendPaint = new SolidColorPaint
+            {
+                Color = SKColors.DarkSlateGray,
+                SKTypeface = font,
+                IsAntialias = true
+            };
+
+            // 3. 提示框文字画笔 (比如设为浅色，搭配深色背景；或者深色搭配浅色背景)
+            // 这里为了稳妥，我们用深色文字
+            TooltipTextPaint = new SolidColorPaint
+            {
+                Color = SKColors.Black, // 提示文字颜色
+                SKTypeface = font,
+                IsAntialias = true
+            };
+
+            // 4. 提示框背景画笔 (白色背景，带一点透明度)
+            TooltipBgPaint = new SolidColorPaint
+            {
+                Color = SKColors.White.WithAlpha(240) // 略微透明的白色背景
+            };
             // 初始化图表绑定集合
             ChartTValues = new ObservableCollection<double>();
             ChartPValues = new ObservableCollection<double>();
             ChartSValues = new ObservableCollection<double>();
             TimeValues = new ObservableCollection<string>();
-            ChinesTextPaint = new SolidColorPaint()
-            {
-                Color = SKColors.Black,
-                SKTypeface = SKTypeface.FromFamilyName("宋体")
-            };
             DeviceValues = new ObservableCollection<DeviceDto>();
             LineSeries = new ISeries[]
             {
@@ -81,8 +107,8 @@ namespace SimpleMES.ViewModels
                     Labels = TimeValues,
                     LabelsRotation = 45, // 标签斜着放，防止拥挤
                     TextSize = 10,
-                    LabelsPaint = ChinesTextPaint,
-                    NamePaint = ChinesTextPaint
+                    LabelsPaint = AxisPaint,
+                    NamePaint = AxisPaint
                 }
             };
             YAxes = new Axis[]
@@ -91,8 +117,8 @@ namespace SimpleMES.ViewModels
                 {
                     Name = "℃/Bar/Rpm",
                     TextSize = 10,
-                    LabelsPaint = ChinesTextPaint,
-                    NamePaint = ChinesTextPaint
+                    LabelsPaint = AxisPaint,
+                    NamePaint = AxisPaint
                 }
             };
             _runningSeries = new PieSeries<int>()
@@ -135,8 +161,11 @@ namespace SimpleMES.ViewModels
         private int _isRunningValues;
         private int _isStoppedValues;
         private int _isFaultValues;
-        public SolidColorPaint? ChinesTextPaint { get; set; }
 
+        public SolidColorPaint AxisPaint { get; set; }      // 坐标轴字体
+        public SolidColorPaint LegendPaint { get; set; }    // 图例字体
+        public SolidColorPaint TooltipTextPaint { get; set; } // 提示框字体
+        public SolidColorPaint TooltipBgPaint { get; set; }   // 提示框背景
 
         private void OnDeviceStatusChanged(object? sender, DeviceStatusChangedEventArgs e)
         {

@@ -30,7 +30,15 @@
                 </Border.Effect>
                 <Grid Margin="15">
                     <TextBlock Text="设备 A01 温度/压力/转速趋势" FontWeight="Bold" Foreground="#555" VerticalAlignment="Top"/>
-                    <wpf:CartesianChart Series="{Binding LineSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"  TooltipTextPaint="{Binding ChinesTextPaint}"  Margin="0,30,0,0"/>
+                    <wpf:CartesianChart Series="{Binding LineSeries}" 
+                                        XAxes="{Binding XAxes}" 
+                                        YAxes="{Binding YAxes}"
+                    
+                                        LegendTextPaint="{Binding LegendPaint}"
+                                        TooltipTextPaint="{Binding TooltipTextPaint}"  
+                                        TooltipBackgroundPaint="{Binding TooltipBgPaint}"
+                    
+                                        Margin="0,30,0,0"/>
                 </Grid>
             </Border>
 
@@ -41,8 +49,11 @@
                 <Grid Margin="15">
                     <TextBlock Text="全厂设备状态分布" FontWeight="Bold" Foreground="#555" VerticalAlignment="Top"/>
                     <wpf:PieChart Series="{Binding PieSeries}" 
-                                  LegendTextPaint="{Binding ChinesTextPaint}"
-                                  TooltipTextPaint="{Binding ChinesTextPaint}"
+              
+                                  LegendTextPaint="{Binding LegendPaint}"
+                                  TooltipTextPaint="{Binding TooltipTextPaint}"
+                                  TooltipBackgroundPaint="{Binding TooltipBgPaint}"
+              
                                   LegendPosition="Bottom" 
                                   Margin="0,30,0,0"/>
                 </Grid>
