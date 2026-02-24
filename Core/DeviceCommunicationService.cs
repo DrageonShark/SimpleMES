@@ -12,16 +12,18 @@ namespace SimpleMES.Core
     {
         private readonly IDataRepository _repository;
         private readonly IDeviceClientFactory _deviceClientFactory;
+        private readonly IDevicePollingStrategyResolver _strategyResolver;
         private bool _isRunning = false;
         private CancellationTokenSource _cts;
         private List<DeviceModel> _monitoredDevices;
         //使用字典更快，避免重复赋值影响性能
         private readonly Dictionary<int, IDeviceState> _deviceStates = new();
         public event EventHandler<DeviceStatusChangedEventArgs>? DeviceStatusChanged;
-        public DeviceCommunicationService(IDataRepository repository, IDeviceClientFactory deviceClientFactory)
+        public DeviceCommunicationService(IDataRepository repository, IDeviceClientFactory deviceClientFactory, IDevicePollingStrategyResolver strategyResolver)
         {
             _repository = repository;
             _deviceClientFactory = deviceClientFactory;
+            _strategyResolver = strategyResolver;
             _monitoredDevices = new List<DeviceModel>();
             _ = LoadDevicesAsync();
         }
@@ -62,48 +64,48 @@ namespace SimpleMES.Core
 
                     try
                     {
-                        // 模拟数据容器
-                        ushort[] data = null;
                         await using var client = _deviceClientFactory.Create(device);
-                        data = await client.ReadHoldingRegistersAsync(0, 3, token);
-                        var pollResult = new DevicePollResult(
-                            IsSuccess: data != null,
-                            RawData: data,
-                            Exception: null,
-                            Timestamp: DateTime.Now);
-
-                        state = await state.HandleAsync(device, pollResult, _repository, token);
+                        var strategy = _strategyResolver.Resolve(device);
+                        var outcome = await strategy.PollAsync(client, device, token);
+                        if (outcome.PersistAsync != null)
+                            await outcome.PersistAsync(_repository, token);
+                        state = await state.HandleAsync(device, outcome.PollResult, _repository, token);
                         _deviceStates[device.DeviceId] = state;
 
-                        // === 数据处理与入库 (通用逻辑) ===
-                        if (data != null)
+                        var snapshot = outcome.Snapshot ?? new DeviceDto
                         {
-                            decimal temp = Math.Round(data[0] / 10.0m, 3);
-                            decimal press = Math.Round(data[1] / 12.0m, 3);
-                            int speed = data[2] / 15;
+                            DeviceId = device.DeviceId,
+                            DeviceName = device.DeviceName,
+                            IpAddress = device.IpAddress,
+                            SerialPort = device.SerialPort,
+                            Temperature = 0,
+                            Pressure = 0,
+                            Speed = 0,
+                            DeviceState = Enum.TryParse<DeviceState>(device.DeviceState, true, out var ds) ? ds : DeviceState.Disconnected,
+                            LastUpdateTime = device.LastUpdateTime
+                        };
 
-                            // 内存更新
-                            device.LastUpdateTime = DateTime.Now;
-                            devices.Add(new DeviceDto
-                            {
-                                DeviceId = device.DeviceId,
-                                DeviceName = device.DeviceName,
-                                IpAddress = device.IpAddress,
-                                LastUpdateTime = device.LastUpdateTime,
-                                Pressure = press,
-                                SerialPort = device.SerialPort,
-                                DeviceState = Enum.Parse<DeviceState>(device.DeviceState, true),
-                                Temperature = temp,
-                                Speed = speed,
-                            });
-                            Debug.WriteLine($"SUCCESS >>> [{device.DeviceName}] 温度:{temp} 压力:{press}");
-                        }
+                        snapshot.DeviceState = Enum.TryParse<DeviceState>(device.DeviceState, true, out var parsed) ? parsed : DeviceState.Disconnected;
+                        snapshot.LastUpdateTime = device.LastUpdateTime;
+                        devices.Add(snapshot);
                     }
                     catch (Exception ex)
                     {
                         var pollResult = new DevicePollResult(false, null, ex, DateTime.Now);
                         state = await state.HandleAsync(device, pollResult, _repository, token);
                         _deviceStates[device.DeviceId] = state;
+                        devices.Add(new DeviceDto
+                        {
+                            DeviceId = device.DeviceId,
+                            DeviceName = device.DeviceName,
+                            IpAddress = device.IpAddress,
+                            SerialPort = device.SerialPort,
+                            Temperature = 0,
+                            Pressure = 0,
+                            Speed = 0,
+                            DeviceState = DeviceState.Disconnected,
+                            LastUpdateTime = device.LastUpdateTime
+                        });
                         // 打印详细错误方便调试
                         Debug.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
                     }

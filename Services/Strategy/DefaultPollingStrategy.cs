@@ -1,10 +1,10 @@
-﻿using SimpleMES.Models;
+﻿using SimpleMES.Core;
+using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.State;
-using SimpleMES.Services.Strategy;
 
-namespace SimpleMES.Core
+namespace SimpleMES.Services.Strategy
 {
     /// <summary>
     /// 默认寄存器布局（温/压/速各 1 个寄存器）的轮询与解析策略。
@@ -39,9 +39,9 @@ namespace SimpleMES.Core
                     await repository.InsertProductionRecordAsync(new ProductionRecordModel
                     {
                         DeviceId = device.DeviceId,
-                        Temperature = temp,
                         Pressure = press,
                         Speed = speed,
+                        Temperature = temp,
                         RecordTime = occurredAt
                     });
                 };

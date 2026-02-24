@@ -1,7 +1,7 @@
-﻿using SimpleMES.Models;
-using SimpleMES.Services.Strategy;
+﻿using SimpleMES.Core;
+using SimpleMES.Models;
 
-namespace SimpleMES.Core
+namespace SimpleMES.Services.Strategy
 {
     public interface IDevicePollingStrategy
     {

@@ -15,7 +15,23 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="220" Height="280" Background="White" CornerRadius="8" Margin="0 0 20 20" Padding="15">
+                        <Border Width="220" Height="280" Background="White" CornerRadius="8" Margin="0 0 20 20" Padding="15" BorderThickness="2">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderBrush" Value="#E0E0E0"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DeviceState}" Value="Disconnected">
+                                            <Setter Property="BorderBrush" Value="#FFC107"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding DeviceState}" Value="Fault">
+                                            <Setter Property="BorderBrush" Value="#E53935"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding DeviceState}" Value="Running">
+                                            <Setter Property="BorderBrush" Value="#4CAF50"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <Border.Effect>
                                 <DropShadowEffect Color="#DDDDDD" BlurRadius="10" ShadowDepth="2" Direction="270" Opacity="15"/>
                             </Border.Effect>

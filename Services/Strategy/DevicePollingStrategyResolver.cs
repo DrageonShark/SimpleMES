@@ -1,6 +1,6 @@
 ﻿using SimpleMES.Models;
 
-namespace SimpleMES.Core
+namespace SimpleMES.Services.Strategy
 {
     public class DevicePollingStrategyResolver : IDevicePollingStrategyResolver
     {
@@ -9,17 +9,19 @@ namespace SimpleMES.Core
 
         public DevicePollingStrategyResolver(IEnumerable<IDevicePollingStrategy> strategies)
         {
-            var dict = strategies.ToDictionary(s => s.Key,
-                StringComparer.OrdinalIgnoreCase);
+            var dict = strategies.ToDictionary(s => s.Key, StringComparer.OrdinalIgnoreCase);
             _strategies = dict;
             _fallback = dict.Values.First();
         }
+
         public IDevicePollingStrategy Resolve(DeviceModel device)
         {
             if (!string.IsNullOrWhiteSpace(device.SerialPort) && _strategies.TryGetValue("rtu", out var rtu))
                 return rtu;
+
             if (_strategies.TryGetValue("default", out var dft))
                 return dft;
+
             return _fallback;
         }
     }

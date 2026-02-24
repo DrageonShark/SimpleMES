@@ -22,8 +22,12 @@ namespace MESDemo
             var dbService = new SqlDbService();
             var repo = new DataRepository(dbService);
             var clientFactory = new DeviceClientFactory();
+            var strategyResolver = new DevicePollingStrategyResolver(new IDevicePollingStrategy[]
+            {
+                new DefaultPollingStrategy()
+            });
             //2.创建并启动通信服务 (MES 的心脏)
-            _deviceCommunication = new DeviceCommunicationService(repo, clientFactory);
+            _deviceCommunication = new DeviceCommunicationService(repo, clientFactory, strategyResolver);
             _deviceCommunication.Start();
             //3.登录验证
             var loginVm = new LoginViewModel(dbService);

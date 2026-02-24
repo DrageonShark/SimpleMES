@@ -1,7 +1,7 @@
 ﻿using SimpleMES.Models.Dto;
 using SimpleMES.Services.State;
 
-namespace SimpleMES.Core
+namespace SimpleMES.Services.Strategy
 {
     public record PollingResult(
         DevicePollResult PollResult,

@@ -15,7 +15,7 @@ namespace SimpleMES.Converters
             return state switch
             {
                 DeviceState.Running => "运行中",
-                DeviceState.Disconnected => "已停止",
+                DeviceState.Disconnected => "未连接",
                 _ => "故障"
             };
         }
