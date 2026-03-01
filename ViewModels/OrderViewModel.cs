@@ -13,7 +13,7 @@ namespace SimpleMES.ViewModels
         // 表格绑定的数据源
         public ObservableCollection<OrderModel> Orders { get; set; } = new ObservableCollection<OrderModel>();
         // === 新增订单的表单字段 ===
-        [ObservableProperty] private string _newOrderNo;
+        [ObservableProperty] private string _newOrderNo = DateTime.Now.ToString("yyyyMMMMddHHmm");
         [ObservableProperty] private string _newProductCode;
         [ObservableProperty] private int _newPlanQty = 100;
 
@@ -87,7 +87,7 @@ namespace SimpleMES.ViewModels
                 await LoadOrders().ConfigureAwait(false);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    NewOrderNo = "";
+                    NewOrderNo = DateTime.Now.ToString("yyyyMMMMddHHmm");
                     MessageBox.Show("订单创建成功！");
                 });
             }

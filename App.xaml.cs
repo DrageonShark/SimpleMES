@@ -1,5 +1,6 @@
 ﻿using SimpleMES;
 using SimpleMES.Core;
+using SimpleMES.Helpers.Log;
 using SimpleMES.Services.DAL;
 using SimpleMES.ViewModels;
 using SimpleMES.Views;
@@ -16,6 +17,7 @@ namespace MESDemo
         private DeviceCommunicationService _deviceCommunication;
         protected override void OnStartup(StartupEventArgs e)
         {
+            Logging.Initialize();
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             //1.创建数据库服务
@@ -57,6 +59,7 @@ namespace MESDemo
         {
             // 程序退出时停止通信
             _deviceCommunication?.Stop();
+            Logging.Shutdown();
             base.OnExit(e);
         }
     }

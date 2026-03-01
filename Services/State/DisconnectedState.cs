@@ -1,4 +1,5 @@
-﻿using SimpleMES.Models;
+﻿using Serilog;
+using SimpleMES.Models;
 using SimpleMES.Services.DAL;
 
 namespace SimpleMES.Services.State
@@ -13,11 +14,12 @@ namespace SimpleMES.Services.State
             if (!result.IsSuccess)
             {
                 // 仍然连接失败：保持断连，记故障日志
+                Log.Error("设备连接失败，设备名：{DeviceName}，设备ID：{DeviceId}，错误信息：{Message}", device.DeviceName, device.DeviceId, result?.Exception?.Message);
                 device.DeviceState = nameof(DeviceState.Disconnected);
                 await repository.UpdateDeviceStateAsync(device.DeviceId, Name, result.OccurredAt);
                 return this;
             }
-
+            Log.Information("设备状态变化，设备名：{DeviceName}，设备ID：{DeviceId}， 状态：未连接 -> 连接", device.DeviceName, device.DeviceId);
             device.DeviceState = nameof(DeviceState.Running);
             device.LastUpdateTime = result.OccurredAt;
             await repository.UpdateDeviceStateAsync(device.DeviceId, device.DeviceState, result.OccurredAt);

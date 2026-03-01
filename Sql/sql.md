@@ -19,7 +19,7 @@ BEGIN
 		Port int DEFAULT 502 NULL, --端口
 		SerialPort nvarchar(50) NULL, --串口名
         SlaveId tinyint NULL DEFAULT 1, --从站ID
-		Status nvarchar(20) DEFAULT 'Stopped', --状态: Running/Stopped/Fault
+		DeviceState nvarchar(20) DEFAULT 'Stopped', --状态: Running/Disconnected/Fault
 		LastUpdateTime datetime DEFAULT GETDATE() --最后通信时间
 		);
 		
@@ -63,9 +63,10 @@ BEGIN
 		ProductCode nvarchar(50) FOREIGN KEY REFERENCES T_Products (ProductCode), --产品编号
 		PlanQty int NOT NULL, --计划数量
 		CompletedQty int DEFAULT 0, --已完成数量
-		OrderStatus int	DEFAULT 0, --状态：0=待产, 1=生产中, 2=暂停, 3=完工
+		OrderStatus string	DEFAULT "Pending", --状态：Pending, Producing, Paused,Completed, Scrapped
 		StartTime datetime NULL,  --开始时间
 		EndTime datetime NULL, --结束时间
+		LastOperationTime datetime NULL, --上次操作时间
 		CreateTime datetime DEFAULT GETDATE()
 	);
 

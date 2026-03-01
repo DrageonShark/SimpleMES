@@ -19,7 +19,7 @@ BEGIN
 		Port int DEFAULT 502 NULL, --端口
 		SerialPort nvarchar(50) NULL, --串口名
         SlaveId tinyint NULL DEFAULT 1, --从站ID
-		Status nvarchar(20) DEFAULT 'Stopped', --状态: Running/Stopped/Fault
+		DeviceState nvarchar(20) DEFAULT 'Stopped', --状态: Running/Disconnected/Fault
 		LastUpdateTime datetime DEFAULT GETDATE() --最后通信时间
 		);
 		
@@ -63,9 +63,10 @@ BEGIN
 		ProductCode nvarchar(50) FOREIGN KEY REFERENCES T_Products (ProductCode), --产品编号
 		PlanQty int NOT NULL, --计划数量
 		CompletedQty int DEFAULT 0, --已完成数量
-		OrderStatus int	DEFAULT 0, --状态：0=待产, 1=生产中, 2=暂停, 3=完工
+		OrderStatus string	DEFAULT "Pending", --状态：Pending, Producing, Paused,Completed, Scrapped
 		StartTime datetime NULL,  --开始时间
 		EndTime datetime NULL, --结束时间
+		LastOperationTime datetime NULL, --上次操作时间
 		CreateTime datetime DEFAULT GETDATE()
 	);
 
@@ -107,18 +108,21 @@ GO
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID( N'dbo.T_User') AND type in(N'U'))
 BEGIN
-CREATE TABLE T_User(
-                       UserId int IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                       UserName nvarchar(60) NOT NULL,
-                       Role int NOT NULL DEFAULT 3, --角色1:admin，2:leader，3:employee 
-                       Account nvarchar(50) NOT NULL UNIQUE,
-                       PasswordHash nvarchar(255) NOT NULL, --密码哈希值
-                       Salt nvarchar(128) NULL, --密码盐值
-                       Email nvarchar(100) NULL UNIQUE, --邮箱
-                       IsActive bit DEFAULT 1 --是否启用
-);
---创建索引提高查询性能
-CREATE INDEX IX_T_User_Account ON T_User(Account);
-CREATE INDEX IX_T_User_Role ON T_User(Role);
+	CREATE TABLE T_User(
+	UserId int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	UserName nvarchar(60) NOT NULL,
+	Role int NOT NULL DEFAULT 3, --角色1:admin，2:leader，3:employee 
+	Account nvarchar(50) NOT NULL UNIQUE, 
+	PasswordHash nvarchar(255) NOT NULL, --密码哈希值
+	Salt nvarchar(128) NULL, --密码盐值
+	Email nvarchar(100) NULL UNIQUE, --邮箱
+	IsActive bit DEFAULT 1 --是否启用
+	);
+	--创建索引提高查询性能
+	CREATE INDEX IX_T_User_Account ON T_User(Account);
+    CREATE INDEX IX_T_User_Role ON T_User(Role);
 END
 GO
+
+
+

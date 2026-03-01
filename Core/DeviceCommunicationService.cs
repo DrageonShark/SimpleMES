@@ -1,10 +1,10 @@
 ﻿using NModbus;
+using Serilog;
 using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.Observer;
 using SimpleMES.Services.State;
-using System.Diagnostics;
 
 namespace SimpleMES.Core
 {
@@ -52,6 +52,7 @@ namespace SimpleMES.Core
 
         private async Task PollingLoop(CancellationToken token)
         {
+            Log.Information("连接设备");
             var factory = new ModbusFactory();
 
             while (!token.IsCancellationRequested)
@@ -64,6 +65,7 @@ namespace SimpleMES.Core
 
                     try
                     {
+                        Log.Debug("尝试连接设备：DeviceId={DeviceId}，DeviceName={DeviceName}", device.DeviceId, device.DeviceName);
                         await using var client = _deviceClientFactory.Create(device);
                         var strategy = _strategyResolver.Resolve(device);
                         var outcome = await strategy.PollAsync(client, device, token);
@@ -88,6 +90,7 @@ namespace SimpleMES.Core
                         snapshot.DeviceState = Enum.TryParse<DeviceState>(device.DeviceState, true, out var parsed) ? parsed : DeviceState.Disconnected;
                         snapshot.LastUpdateTime = device.LastUpdateTime;
                         devices.Add(snapshot);
+                        Log.Debug("设备连接成功：DeviceId={DeviceId}，DeviceName={DeviceName}", device.DeviceId, device.DeviceName);
                     }
                     catch (Exception ex)
                     {
@@ -107,7 +110,7 @@ namespace SimpleMES.Core
                             LastUpdateTime = device.LastUpdateTime
                         });
                         // 打印详细错误方便调试
-                        Debug.WriteLine($"[{device.DeviceName}] 错误: {ex.Message}");
+                        Log.Error("[{DeviceName}] 错误: {ex}", device.DeviceName, ex.Message);
                     }
                 }
                 DeviceStatusChanged?.Invoke(this, new DeviceStatusChangedEventArgs(devices.AsReadOnly()));

@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:SimpleMES.Views"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:helpers="clr-namespace:SimpleMES.Helpers"
+             xmlns:password="clr-namespace:SimpleMES.Helpers.Password"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">
     <UserControl.Resources>
@@ -97,8 +98,8 @@
                                            Width="50"
                                            VerticalAlignment="Center"/>
                                 <PasswordBox PasswordChar="●" 
-                                             helpers:PasswordBoxHelper.Attach="True"
-                                             helpers:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                             password:PasswordBoxHelper.Attach="True"
+                                             password:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DockPanel>
                             <Button Content="登 录"
                                     Command="{Binding LoginCommand}" 
@@ -190,8 +191,8 @@
                                            Width="50"
                                            VerticalAlignment="Center"/>
                                 <PasswordBox PasswordChar="●"
-                                             helpers:PasswordBoxHelper.Attach="True"
-                                             helpers:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                             password:PasswordBoxHelper.Attach="True"
+                                             password:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DockPanel>
                             <Button Content="注 册"
                                     Command="{Binding RegisterCommand}"

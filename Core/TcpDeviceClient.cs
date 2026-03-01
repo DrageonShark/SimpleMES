@@ -1,4 +1,5 @@
 ﻿using NModbus;
+using Serilog;
 using SimpleMES.Models;
 using System.Net.Sockets;
 
@@ -22,7 +23,11 @@ namespace SimpleMES.Core
             using TcpClient client = new TcpClient();
             var connectTask = client.ConnectAsync(_device.IpAddress!, _device.Port ?? 502);
             if (await Task.WhenAny(connectTask, Task.Delay(2000, token)) != connectTask)
+            {
+                Log.Error("设备连接超时：DeviceId={DeviceId}，DeviceName={DeviceName}", _device.DeviceId, _device.DeviceName);
                 throw new TimeoutException("连接超时");
+            }
+            Log.Information("设备连接成功：DeviceId={DeviceId}，DeviceName={DeviceName}", _device.DeviceId, _device.DeviceName);
             var master = _factory.CreateMaster(client);
             master.Transport.ReadTimeout = 2000;
             master.Transport.WriteTimeout = 2000;

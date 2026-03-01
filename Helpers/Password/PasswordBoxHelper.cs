@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace SimpleMES.Helpers
+namespace SimpleMES.Helpers.Password
 {
     public static class PasswordBoxHelper
     {
