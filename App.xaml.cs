@@ -2,6 +2,7 @@
 using SimpleMES.Core;
 using SimpleMES.Helpers.Log;
 using SimpleMES.Services.DAL;
+using SimpleMES.Services.Observer;
 using SimpleMES.ViewModels;
 using SimpleMES.Views;
 using System.Windows;
@@ -28,9 +29,10 @@ namespace MESDemo
             {
                 new DefaultPollingStrategy()
             });
+            var configNotifier = new DeviceConfigNotifier();
             //2.创建并启动通信服务 (MES 的心脏)
-            _deviceCommunication = new DeviceCommunicationService(repo, clientFactory, strategyResolver);
-            _deviceCommunication.Start();
+            _deviceCommunication = new DeviceCommunicationService(repo, clientFactory, strategyResolver, configNotifier);
+            _deviceCommunication.StartAsync();
             //3.登录验证
             var loginVm = new LoginViewModel(dbService);
             var loginWindow = new LoginWindow(loginVm);

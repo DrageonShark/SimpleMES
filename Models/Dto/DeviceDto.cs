@@ -8,6 +8,7 @@ namespace SimpleMES.Models.Dto
         [ObservableProperty] private int _deviceId;
         [ObservableProperty] private string _deviceName;
         [ObservableProperty] private string _ipAddress;
+        [ObservableProperty] private int? _port;
         [ObservableProperty] private string _serialPort;
         [ObservableProperty] private decimal? _temperature;
         [ObservableProperty] private decimal? _pressure;
