@@ -42,29 +42,33 @@ namespace SimpleMES.ViewModels
                 MessageBox.Show("账号或密码不能为空或空格");
                 return;
             }
-            Log.Information("校验用户登录信息，用户名：{UserName}", UserName);
+            Log.Information("校验用户登录信息，账号：{Account}", Account);
             var user = await _repository.LoginAsync(Account);
             if (user == null)
             {
                 MessageBox.Show("用户不存在，请注册");
-                Log.Information("用户[{UserName}]不存在", UserName);
+                Log.Information("账号[{Account}]不存在", Account);
                 return;
             }
 
             if (!PasswordHasher.VerifyPassword(Password, user.PasswordHash, user.Salt))
             {
                 MessageBox.Show("用户名或密码错误");
-                Log.Information("用户[{UserName}]用户名或密码错误", UserName);
+                Log.Information("账号[{Account}]密码错误", Account);
                 return;
             }
 
             if (user.IsActive == 0)
             {
                 MessageBox.Show("账号已被禁用，请联系管理员！");
-                Log.Information("用户[{UserName}]账号已被禁用", UserName);
+                Log.Information("账号[{Account}]已被禁用", Account);
                 return;
             }
-            Log.Information("用户[{UserName}]登录成功，用户Id：{UserId}", UserName, user.UserId);
+
+            // 同步 ViewModel 的用户名，供后续显示/绑定
+            UserName = user.UserName;
+
+            Log.Information("用户[{UserName}]登录成功，用户Id：{UserId}", user.UserName, user.UserId);
             _session.SignIn(user);
 
             _roleString = user.Role switch
