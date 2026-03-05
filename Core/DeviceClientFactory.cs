@@ -19,7 +19,7 @@ namespace SimpleMES.Core
                 return new TcpDeviceClient(device, _modbusFactory);
             if (!string.IsNullOrWhiteSpace(device.SerialPort))
                 return new RtuDeviceClient(device, _modbusFactory);
-            return new MockDeviceClient(device);
+            throw new ArgumentException("设备必须配置 IP 地址或串口号", nameof(device));
         }
     }
 }
