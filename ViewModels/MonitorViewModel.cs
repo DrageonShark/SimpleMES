@@ -1,5 +1,7 @@
-﻿using SimpleMES.Models.Dto;
+﻿using MaterialDesignThemes.Wpf;
+using SimpleMES.Models.Dto;
 using SimpleMES.Services.Observer;
+using SimpleMES.Services.State;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
@@ -13,11 +15,15 @@ namespace SimpleMES.ViewModels
         private bool _disposed;
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
+        // Snackbar 消息队列（自动关闭，含进度条动画）
+        public SnackbarMessageQueue SnackbarQueue { get; }
 
         public MonitorViewModel(IDeviceStatusNotifier notifier)
         {
             _dispatcher = GetCurrentDispatcher();
             _notifier = notifier;
+            // Snackbar 队列绑定到 UI 线程 Dispatcher，确保线程安全
+            SnackbarQueue = new SnackbarMessageQueue(TimeSpan.FromSeconds(3), _dispatcher);
             // 订阅 Service 的事件
             _notifier.DeviceStatusChanged += OnDeviceStatusChanged;
         }
@@ -45,6 +51,16 @@ namespace SimpleMES.ViewModels
                             ListDeviceDto.FirstOrDefault(d => d.DeviceId == newDeviceDto.DeviceId);
                         if (oldDeviceDto != null)
                         {
+                            // 状态发生变化时弹出 Snackbar 提示
+                            if (oldDeviceDto.DeviceState != newDeviceDto.DeviceState)
+                            {
+                                if (newDeviceDto.DeviceState == DeviceState.Fault)
+                                    SnackbarQueue.Enqueue($"⚠️ 设备 [{newDeviceDto.DeviceName}] 发生故障！");
+                                else if (newDeviceDto.DeviceState == DeviceState.Disconnected)
+                                    SnackbarQueue.Enqueue($"🔌 设备 [{newDeviceDto.DeviceName}] 已断开连接！");
+                                else if (newDeviceDto.DeviceState == DeviceState.Running)
+                                    SnackbarQueue.Enqueue($"✅ 设备 [{newDeviceDto.DeviceName}] 已恢复运行！");
+                            }
                             oldDeviceDto.Temperature = newDeviceDto.Temperature;
                             oldDeviceDto.Pressure = newDeviceDto.Pressure;
                             oldDeviceDto.Speed = newDeviceDto.Speed;
