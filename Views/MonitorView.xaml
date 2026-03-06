@@ -6,6 +6,16 @@
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
+        <Button Content="➕ 添加设备" Command="{Binding AddDeviceCommand}"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,8,20,0" Height="32" Width="110"
+                Background="#1976D2" Foreground="White" BorderThickness="0" Cursor="Hand">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+            </Button.Resources>
+        </Button>
         <ScrollViewer Margin="0 40 0 0">
             <ItemsControl ItemsSource="{Binding ListDeviceDto}">
                 <ItemsControl.ItemsPanel>
@@ -86,6 +96,10 @@
                                     </StackPanel>
                                 </DockPanel>
                                 <TextBlock Text="{Binding LastUpdateTime, StringFormat='更新于: HH:mm:ss'}" FontSize="10" Foreground="#AAA" Margin="0,20,0,0" HorizontalAlignment="Right"/>
+                                <Button Content="✏️ 编辑" Command="{Binding DataContext.EditDeviceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        HorizontalAlignment="Right" Margin="0,8,0,0" Height="26" Width="60"
+                                        Background="#E3F2FD" Foreground="#1976D2" BorderThickness="0" Cursor="Hand"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
