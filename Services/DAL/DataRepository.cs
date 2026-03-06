@@ -73,6 +73,35 @@ namespace SimpleMES.Services.DAL
             return await _db.QueryAsync<DeviceModel>(sql);
         }
 
+        public async Task<int> AddDeviceAsync(DeviceModel device)
+        {
+            if (device == null)
+            {
+                throw new ArgumentNullException(nameof(device));
+            }
+            const string sql = @"INSERT INTO T_Devices 
+                                 (DeviceName, IpAddress, Port, SerialPort, SlaveId, DeviceState, LastUpdateTime)
+                                 VALUES (@DeviceName, @IpAddress, @Port, @SerialPort, @SlaveId, @DeviceState, @LastUpdateTime);
+                                 SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            return await _db.ExecuteScalarAsync<int?>(sql, device) ?? 0;
+        }
+
+        public async Task<int> UpdateDeviceAsync(DeviceModel device)
+        {
+            if (device == null)
+            {
+                throw new ArgumentNullException(nameof(device));
+            }
+            const string sql = @"UPDATE T_Devices
+                                 SET DeviceName = @DeviceName,
+                                 IpAddress = @IpAddress,
+                                 Port = @Port,
+                                 SerialPort = @SerialPort,
+                                 SlaveId = @SlaveId
+                                 WHERE DeviceId = @DeviceId;";
+            return await _db.ExecuteAsync(sql, device);
+        }
+
         public async Task<int> UpdateDeviceStateAsync(int deviceId, string deviceState, DateTime? lastUpDateTime = null)
         {
             const string sql = @"UPDATE T_Devices
