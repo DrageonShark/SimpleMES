@@ -10,6 +10,7 @@ namespace SimpleMES.ViewModels
     public partial class OrderViewModel : ViewModelBase
     {
         private readonly IDataRepository _repository;
+        public event Action<string>? Notification;
         // 表格绑定的数据源
         public ObservableCollection<OrderModel> Orders { get; set; } = new ObservableCollection<OrderModel>();
         // === 新增订单的表单字段 ===
@@ -57,7 +58,7 @@ namespace SimpleMES.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"加载失败: {ex.Message}");
+                Notification?.Invoke($"加载失败: {ex.Message}");
             }
         }
         [RelayCommand]
@@ -66,7 +67,7 @@ namespace SimpleMES.ViewModels
             //1.简单的校验
             if (string.IsNullOrWhiteSpace(NewOrderNo) || string.IsNullOrWhiteSpace(NewProductCode))
             {
-                MessageBox.Show("请填写完整订单信息！");
+                Notification?.Invoke("请填写完整订单信息！");
                 return;
             }
 
@@ -88,12 +89,12 @@ namespace SimpleMES.ViewModels
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     NewOrderNo = DateTime.Now.ToString("yyyyMMMMddHHmm");
-                    MessageBox.Show("订单创建成功！");
+                    Notification?.Invoke("订单创建成功！");
                 });
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"创建失败: {ex.Message}");
+                Notification?.Invoke($"创建失败: {ex.Message}");
             }
         }
 
