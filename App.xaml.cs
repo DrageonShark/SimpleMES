@@ -45,7 +45,7 @@ namespace MESDemo
                 return;
             }
             //4.创建主界面 ViewModel
-            var monitorVM = new MonitorViewModel(_deviceCommunication);// 注入 Service
+            var monitorVM = new MonitorViewModel(_deviceCommunication, repo);// 注入 Service
             var orderVM = new OrderViewModel(dbService);
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 

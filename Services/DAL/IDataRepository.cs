@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SimpleMES.Models;
+﻿using SimpleMES.Models;
 
 namespace SimpleMES.Services.DAL
 {
@@ -20,7 +15,9 @@ namespace SimpleMES.Services.DAL
         /// 新增生产工单
         /// </summary>
         Task<int> CreateOrderAsync(OrderModel order);
-
+        /// <summary>
+        /// 获取所有订单
+        /// </summary>
         Task<IEnumerable<OrderModel>> GetAllOrdersAsync();
         /// <summary>
         /// 更新生产工单
@@ -34,6 +31,14 @@ namespace SimpleMES.Services.DAL
         /// 更新设备状态
         /// </summary>
         Task<int> UpdateDeviceStateAsync(int deviceId, string status, DateTime? lastUpDateTime = null);
+        /// <summary>
+        /// 修改设备配置
+        /// </summary>
+        Task<int> UpdateDeviceAsync(DeviceModel device);
+        /// <summary>
+        /// 新增设备
+        /// </summary>
+        Task<int> InsertDeviceAsync(DeviceModel device);
         /// <summary>
         ///  更新生产记录
         /// </summary>

@@ -144,6 +144,7 @@ namespace SimpleMES.Core
                 DeviceName = device.DeviceName,
                 IpAddress = device.IpAddress,
                 SerialPort = device.SerialPort,
+                SlaveId = device.SlaveId,
                 Temperature = 0,
                 Pressure = 0,
                 Speed = 0,

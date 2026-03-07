@@ -82,6 +82,27 @@ namespace SimpleMES.Services.DAL
             return await _db.ExecuteAsync(sql, new { DeviceId = deviceId, DeviceState = deviceState, LastUpdateTime = lastUpDateTime });
         }
 
+        public async Task<int> UpdateDeviceAsync(DeviceModel device)
+        {
+            const string sql = @"UPDATE T_Devices
+                         SET DeviceName   = @DeviceName,
+                             IpAddress    = @IpAddress,
+                             Port         = ISNULL(@Port, Port),
+                             SerialPort   = @SerialPort,
+                             SlaveId      = ISNULL(@SlaveId, SlaveId),
+                             LastUpdateTime = GETDATE()
+                         WHERE DeviceId   = @DeviceId;";
+            return await _db.ExecuteAsync(sql, device);
+        }
+
+        public async Task<int> InsertDeviceAsync(DeviceModel device)
+        {
+            const string sql = @"INSERT INTO T_Devices(
+                                 DeviceName, IpAddress, Port, SerialPort, SlaveId)
+                                 VALUES (@DeviceName, @IpAddress, @Port, @SerialPort, @SlaveId)";
+            return await _db.ExecuteAsync(sql, device);
+        }
+
         public async Task<int> InsertProductionRecordAsync(ProductionRecordModel productionRecord)
         {
             if (productionRecord == null)

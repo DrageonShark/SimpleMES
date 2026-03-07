@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SimpleMES.Views"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:helpers="clr-namespace:SimpleMES.Helpers"
              xmlns:password="clr-namespace:SimpleMES.Helpers.Password"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">

@@ -31,7 +31,7 @@ namespace SimpleMES.Core
             var master = _factory.CreateMaster(client);
             master.Transport.ReadTimeout = 2000;
             master.Transport.WriteTimeout = 2000;
-            return await master.ReadHoldingRegistersAsync(_device.SlaveId, startAddress, numberOfPoints);
+            return await master.ReadHoldingRegistersAsync(_device.SlaveId ?? 0, startAddress, numberOfPoints);
         }
     }
 }

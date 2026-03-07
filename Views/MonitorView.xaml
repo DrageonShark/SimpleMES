@@ -5,8 +5,31 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <ScrollViewer Margin="0 40 0 0">
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <WrapPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 40 10">
+            <Button 
+                Content="添加设备"
+                Command="{Binding AddDeviceCommand}"
+                Width="100"
+                Height="40"
+                BorderThickness="0"
+                FontWeight="Bold"
+                FontSize="15"
+                Cursor="Hand"
+                Foreground="White"
+                Background="#1976D2">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"></Setter>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </WrapPanel>
+        <ScrollViewer Grid.Row="1" Margin="0 10 0 0">
             <ItemsControl ItemsSource="{Binding ListDeviceDto}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -85,7 +108,28 @@
                                         <TextBlock Text="Rpm" Foreground="DarkRed" VerticalAlignment="Bottom"/>
                                     </StackPanel>
                                 </DockPanel>
-                                <TextBlock Text="{Binding LastUpdateTime, StringFormat='更新于: HH:mm:ss'}" FontSize="10" Foreground="#AAA" Margin="0,20,0,0" HorizontalAlignment="Right"/>
+                                <DockPanel Margin="0 5">
+                                    <Button 
+                                        Content="编辑" 
+                                        Command="{Binding DataContext.EditDeviceConfigCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Height="40"
+                                        Background="#1976D2"
+                                        Foreground="White"
+                                        FontWeight="Bold"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Margin="0 5 0 0 ">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="4"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding LastUpdateTime, StringFormat='更新于: HH:mm:ss'}" FontSize="10" Foreground="#AAA" Margin="0,20,0,0" HorizontalAlignment="Right"/>
+                                    </StackPanel>
+                                </DockPanel>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

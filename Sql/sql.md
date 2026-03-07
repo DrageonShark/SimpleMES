@@ -19,16 +19,16 @@ BEGIN
 		Port int DEFAULT 502 NULL, --端口
 		SerialPort nvarchar(50) NULL, --串口名
         SlaveId tinyint NULL DEFAULT 1, --从站ID
-		DeviceState nvarchar(20) DEFAULT 'Stopped', --状态: Running/Disconnected/Fault
+		DeviceState nvarchar(20) DEFAULT 'Disconnected', --状态: Running/Disconnected/Fault
 		LastUpdateTime datetime DEFAULT GETDATE() --最后通信时间
 		);
 		
 		--插入模拟数据(3台设备)
 		INSERT INTO T_Devices (DeviceName, IpAddress, Status, Port) VALUES
-		('注塑机-A01', '127.0.0.1', 'Stopped', 501),
-		('冲压机-B02', '127.0.0.1', 'Stopped', 502);
+		('注塑机-A01', '127.0.0.1', 'Disconnected', 501),
+		('冲压机-B02', '127.0.0.1', 'Disconnected', 502);
 		INSERT INTO T_Devices (DeviceName, SerialPort, Status) VALUES
-		('包装机-C03', 'COM1', 'Stopped');
+		('包装机-C03', 'COM1', 'Disconnected');
 END;
 GO
 

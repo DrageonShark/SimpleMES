@@ -29,7 +29,7 @@ namespace SimpleMES.ViewModels
         [RelayCommand]
         private void ShowMonitor()
         {
-            PageTitle = "设备监控页面";
+            PageTitle = "设备监控";
             CurrentView = MonitorView;
         }
 
@@ -37,7 +37,7 @@ namespace SimpleMES.ViewModels
         [RelayCommand]
         private void ShowOrder()
         {
-            PageTitle = "订单页面 ";
+            PageTitle = "订单管理";
             CurrentView = OrderView;
         }
 
@@ -45,7 +45,7 @@ namespace SimpleMES.ViewModels
         [RelayCommand]
         private void ShowReport()
         {
-            PageTitle = "报表页面";
+            PageTitle = "数据报表";
             CurrentView = ReportView;
         }
 

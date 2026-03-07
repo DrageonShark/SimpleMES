@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NModbus.IO;
+using Serilog;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NModbus.IO;
 
 namespace SimpleMES.Core
 {
@@ -12,7 +8,7 @@ namespace SimpleMES.Core
     /// 将 <see cref="SerialPort"/> 适配为 NModbus 所需的 <see cref="IStreamResource"/>。
     /// 作用：为 Modbus RTU Master 提供统一的字节流读写、超时与缓冲区控制接口。
     /// </summary>
-    public class SerialPortAdapter:IStreamResource
+    public class SerialPortAdapter : IStreamResource
     {
         private readonly SerialPort _serialPort;
 
@@ -38,7 +34,7 @@ namespace SimpleMES.Core
         /// </summary>
         public void DiscardInBuffer()
         {
-            if(_serialPort.IsOpen)
+            if (_serialPort.IsOpen)
                 _serialPort.DiscardInBuffer();
         }
 
@@ -53,10 +49,16 @@ namespace SimpleMES.Core
         /// <returns>实际读取到的字节数。</returns>
         public int Read(byte[] buffer, int offset, int count)
         {
-            return !_serialPort.IsOpen
-                    ? throw new InvalidOperationException("串口未连接")
-                    : _serialPort.Read(buffer, offset, count)
-                ;
+            try
+            {
+                return !_serialPort.IsOpen ?
+                    throw new InvalidOperationException("串口未连接") : _serialPort.Read(buffer, offset, count);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("{Message}", ex.Message);
+                return 0;
+            }
         }
 
         /// <summary>
@@ -85,7 +87,7 @@ namespace SimpleMES.Core
         /// 作用：控制 <see cref="Read(byte[], int, int)"/> 等读取在超过该时间未收到数据时抛出超时异常
         /// 使用场景：RTU 请求后等待从站响应；若没有响应则触发超时用于重试或错误处理。
         /// </summary>
-        public int ReadTimeout { get=> _serialPort.ReadTimeout; set => _serialPort.ReadTimeout = value; }
+        public int ReadTimeout { get => _serialPort.ReadTimeout; set => _serialPort.ReadTimeout = value; }
         /// <summary>
         /// 写入操作的超时时间（毫秒）。
         /// 作用：控制 <see cref="Write(byte[], int, int)"/> 在写入阻塞超过该时间时抛出超时异常。

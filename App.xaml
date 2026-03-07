@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters1:DeviceStateConverter x:Key="DeviceStateConverter" />
+            <converters1:NullableNumberConverter x:Key="NullableNumberConverter" />
         </ResourceDictionary>
     </Application.Resources>
 
