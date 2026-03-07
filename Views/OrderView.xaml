@@ -46,7 +46,14 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="📋 订单列表" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
-            <Button Content="刷新数据" Command="{Binding LoadOrdersCommand}" HorizontalAlignment="Right" Margin="0,0,0,10" Width="80"/>
+            <Button 
+                Content="刷新数据" 
+                Command="{Binding LoadOrdersCommand}"  
+                HorizontalAlignment="Right" 
+                Margin="0,0,0,10" Width="100"
+                Background="#2563EB"
+                Foreground="White"
+                BorderBrush="#2563EB"/>
 
             <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" AutoGenerateColumns="False" 
                       CanUserAddRows="False" IsReadOnly="True"

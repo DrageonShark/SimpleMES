@@ -28,10 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Resource Include="Views\云海.jpg" />
   </ItemGroup>
 
