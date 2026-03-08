@@ -11,6 +11,37 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <WrapPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 40 10">
+            <!-- Toast 通知测试按钮 -->
+            <!--<Button Content="✅ 成功" Click="OnToastSuccess"
+                    Height="34" Margin="0 0 6 0" Padding="10 0"
+                    BorderThickness="0" Cursor="Hand"
+                    Foreground="White" Background="#4CAF50">
+                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="4"/></Style></Button.Resources>
+            </Button>
+            <Button Content="❌ 错误" Click="OnToastError"
+                    Height="34" Margin="0 0 6 0" Padding="10 0"
+                    BorderThickness="0" Cursor="Hand"
+                    Foreground="White" Background="#F44336">
+                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="4"/></Style></Button.Resources>
+            </Button>
+            <Button Content="ℹ 提示" Click="OnToastInfo"
+                    Height="34" Margin="0 0 6 0" Padding="10 0"
+                    BorderThickness="0" Cursor="Hand"
+                    Foreground="White" Background="#2196F3">
+                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="4"/></Style></Button.Resources>
+            </Button>
+            <Button Content="⚠ 警告" Click="OnToastWarning"
+                    Height="34" Margin="0 0 6 0" Padding="10 0"
+                    BorderThickness="0" Cursor="Hand"
+                    Foreground="White" Background="#FF9800">
+                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="4"/></Style></Button.Resources>
+            </Button>
+            <Button Content="❓ 询问" Click="OnToastQuestion"
+                    Height="34" Margin="0 0 12 0" Padding="10 0"
+                    BorderThickness="0" Cursor="Hand"
+                    Foreground="White" Background="#9C27B0">
+                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="4"/></Style></Button.Resources>
+            </Button>-->
             <Button 
                 Content="添加设备"
                 Command="{Binding AddDeviceCommand}"

@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows.Controls;
 
 namespace SimpleMES.Views
 {
@@ -24,5 +11,22 @@ namespace SimpleMES.Views
         {
             InitializeComponent();
         }
+
+        //private void OnToastSuccess(object sender, RoutedEventArgs e) =>
+        //    ToastWindow.Success("设备配置更新成功！");
+
+        //private void OnToastError(object sender, RoutedEventArgs e) =>
+        //    ToastWindow.Error("连接设备失败，请检查网络配置。");
+
+        //private void OnToastInfo(object sender, RoutedEventArgs e) =>
+        //    ToastWindow.Info("系统正在同步数据，请稍候。");
+
+        //private void OnToastWarning(object sender, RoutedEventArgs e) =>
+        //    ToastWindow.Warning("设备温度超出正常范围，请注意！");
+
+        //private void OnToastQuestion(object sender, RoutedEventArgs e) =>
+        //    ToastWindow.Question("确认要删除该设备配置吗？",
+        //        onConfirm: () => ToastWindow.Info("已确认删除。"));
     }
 }
+

@@ -1,131 +1,235 @@
-﻿using MaterialDesignThemes.Wpf;
+using MaterialDesignThemes.Wpf;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace SimpleMES.Views
 {
     /// <summary>
-    /// ToastWindow.xaml 的交互逻辑
+    /// 右下角 Toast 通知窗口
+    /// 支持 Success / Error / Info / Warning / Question 五种类型
+    /// 多条通知自动堆叠，带滑入/滑出动画和圆形倒计时环
     /// </summary>
     public partial class ToastWindow : Window
     {
-        public enum ToastType { Success, Error, Info }
-        private ToastWindow(string message, ToastType type, double durationSeconds)
+        // ── 类型枚举 ──────────────────────────────────────────────────────────
+        public enum ToastType { Success, Error, Info, Warning, Question }
+
+        // ── 布局常量 ──────────────────────────────────────────────────────────
+        private const double ToastWidth          = 340;
+        private const double ScreenMargin        = 16;
+        private const double ToastSpacing        = 10;
+        // 2π × radius / strokeThickness = 2π × 12 / 3 ≈ 25.13（弧长对应的笔画单位数）
+        private const double CircumferenceUnits  = 25.13;
+
+        // ── 多实例管理 ────────────────────────────────────────────────────────
+        private static readonly List<ToastWindow> _activeToasts = new();
+        private static readonly object _lock = new();
+
+        // ── 实例字段 ──────────────────────────────────────────────────────────
+        private DispatcherTimer? _timer;
+        private readonly double  _durationSeconds;
+        private double           _elapsed;
+        private readonly Action? _onConfirm;
+        private bool             _isClosing;
+
+        // ── 构造 ──────────────────────────────────────────────────────────────
+        private ToastWindow(string message, ToastType type, double durationSeconds, Action? onConfirm = null)
         {
             InitializeComponent();
-            MessageText.Text = message;
-            // 设置不同类型的样式
+            _durationSeconds = durationSeconds;
+            _onConfirm       = onConfirm;
+
+            MessageText.Text  = message;
+            DateTimeText.Text = DateTime.Now.ToString("yyyy/M/d HH:mm:ss");
+
             SetToastStyle(type);
-            // 定位到主窗口居中偏上位置
-            PositionToast();
-            // 加载后执行动画
-            Loaded += (_, _) => StartToastAnimation(durationSeconds);
-            //switch (type)
-            //{
-            //    case ToastType.Success:
-            //        RootBorder.Background = new SolidColorBrush(Color.FromRgb(46, 125, 50));
-            //        ProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(165, 214, 167));
-            //        IconText.Text = "✅";
-            //        break;
-            //    case ToastType.Error:
-            //        RootBorder.Background = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-            //        ProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(239, 154, 154));
-            //        IconText.Text = "❌";
-            //        break;
-            //    case ToastType.Info:
-            //    default:
-            //        RootBorder.Background = new SolidColorBrush(Color.FromRgb(13, 71, 161));
-            //        ProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(144, 202, 209));
-            //        IconText.Text = "ℹ️";
-            //        break;
-            //}
 
-            //var owner = Application.Current.MainWindow;
-            //if (owner != null)
-            //{
-            //    Left = owner.Left + (owner.Width - Width) / 2;
-            //    Top = owner.Top + 50;
-            //}
+            // 初始化进度环为满圆
+            ProgressRing.StrokeDashArray = new DoubleCollection { CircumferenceUnits, 999 };
 
-            //Loaded += (_, _) =>
-            //{
-            //    // // 创建动画：进度条从100→0，耗时durationSeconds秒
-            //    var anim = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(durationSeconds));
-            //    // 动画结束后，关闭提示框
-            //    anim.Completed += (sender, args) => Close();
-            //    // 把动画绑定到进度条的Value属性，开始播放
-            //    ProgressBar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, anim);
-            //};
+            HeaderCloseBtn.Click += (_, _) => BeginCloseAnimation();
+            CloseBtn.Click       += (_, _) => BeginCloseAnimation();
+            ConfirmBtn.Click     += (_, _) => { _onConfirm?.Invoke(); BeginCloseAnimation(); };
+
+            Loaded += OnLoaded;
         }
-        /// <summary>
-        /// 设置不同类型Toast的样式（颜色+图标）
-        /// </summary>
+
+        // ── 加载后：定位 + 滑入动画 + 启动倒计时 ────────────────────────────
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            lock (_lock) { _activeToasts.Add(this); }
+
+            double targetLeft = SystemParameters.WorkArea.Right - ToastWidth - ScreenMargin;
+
+            // 计算所有 Toast 的目标 Top
+            var positions = GetToastPositions();
+            foreach (var (toast, targetTop) in positions)
+            {
+                if (toast == this)
+                {
+                    this.Top = targetTop;
+                }
+                else
+                {
+                    // 已有 Toast 向上动画腾出空间
+                    var anim = new DoubleAnimation(toast.Top, targetTop,
+                        new Duration(TimeSpan.FromSeconds(0.3)))
+                    { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+                    toast.BeginAnimation(TopProperty, anim);
+                }
+            }
+
+            // 从屏幕右侧外滑入
+            this.Left = SystemParameters.WorkArea.Right + 20;
+            var slideIn = new DoubleAnimation(this.Left, targetLeft,
+                new Duration(TimeSpan.FromSeconds(0.4)))
+            { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+            BeginAnimation(LeftProperty, slideIn);
+
+            StartProgressRing();
+        }
+
+        // ── 样式设置：颜色 + 图标 ─────────────────────────────────────────────
         private void SetToastStyle(ToastType type)
         {
             switch (type)
             {
                 case ToastType.Success:
-                    RootBorder.Background = new SolidColorBrush(Color.FromRgb(40, 167, 69)); // 更现代的成功绿
-                    StatusIcon.Kind = PackIconKind.CheckCircle;
+                    TitleText.Text          = "成功";
+                    HeaderBorder.Background = new SolidColorBrush(Color.FromRgb(33, 150, 243));
+                    StatusIcon.Kind         = PackIconKind.CheckCircle;
+                    StatusIcon.Foreground   = new SolidColorBrush(Color.FromRgb(76, 175, 80));
                     break;
                 case ToastType.Error:
-                    RootBorder.Background = new SolidColorBrush(Color.FromRgb(220, 53, 69)); // 标准错误红
-                    StatusIcon.Kind = PackIconKind.AlertCircle;  // 修复：ErrorCircle -> AlertCircle
+                    TitleText.Text          = "错误";
+                    HeaderBorder.Background = new SolidColorBrush(Color.FromRgb(244, 67, 54));
+                    StatusIcon.Kind         = PackIconKind.AlertCircle;
+                    StatusIcon.Foreground   = new SolidColorBrush(Color.FromRgb(244, 67, 54));
                     break;
                 case ToastType.Info:
-                    RootBorder.Background = new SolidColorBrush(Color.FromRgb(0, 123, 255)); // 信息蓝
-                    StatusIcon.Kind = PackIconKind.InfoCircle;
+                    TitleText.Text          = "提示";
+                    HeaderBorder.Background = new SolidColorBrush(Color.FromRgb(33, 150, 243));
+                    StatusIcon.Kind         = PackIconKind.InformationCircle;
+                    StatusIcon.Foreground   = new SolidColorBrush(Color.FromRgb(33, 150, 243));
+                    break;
+                case ToastType.Warning:
+                    TitleText.Text          = "警告";
+                    HeaderBorder.Background = new SolidColorBrush(Color.FromRgb(255, 152, 0));
+                    StatusIcon.Kind         = PackIconKind.AlertOutline;
+                    StatusIcon.Foreground   = new SolidColorBrush(Color.FromRgb(255, 152, 0));
+                    break;
+                case ToastType.Question:
+                    TitleText.Text          = "询问";
+                    HeaderBorder.Background = new SolidColorBrush(Color.FromRgb(103, 58, 183));
+                    StatusIcon.Kind         = PackIconKind.HelpCircle;
+                    StatusIcon.Foreground   = new SolidColorBrush(Color.FromRgb(103, 58, 183));
                     break;
             }
         }
 
-        /// <summary>
-        /// 定位Toast到主窗口居中偏上位置
-        /// </summary>
-        private void PositionToast()
+        // ── 圆形进度环倒计时（DispatcherTimer，每 50ms 更新一次弧线长度）────
+        private void StartProgressRing()
         {
-            var owner = Application.Current.MainWindow;
-            if (owner != null)
+            _elapsed = 0;
+            _timer   = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            _timer.Tick += (_, _) =>
             {
-                Left = owner.Left + (owner.ActualWidth - Width) / 2;
-                Top = owner.Top + 60; // 距离顶部60px，更符合视觉习惯
-            }
+                if (_isClosing) { _timer!.Stop(); return; }
+
+                _elapsed += 0.05;
+                double remaining = CircumferenceUnits * (1.0 - _elapsed / _durationSeconds);
+                if (remaining < 0) remaining = 0;
+
+                // 动态缩短弧线，实现顺时针消失效果
+                ProgressRing.StrokeDashArray = new DoubleCollection { remaining, 999 };
+
+                if (_elapsed >= _durationSeconds)
+                {
+                    _timer!.Stop();
+                    BeginCloseAnimation();
+                }
+            };
+            _timer.Start();
         }
 
-        /// <summary>
-        /// 执行Toast动画（淡入→停留→淡出）
-        /// </summary>
-        private void StartToastAnimation(double durationSeconds)
+        // ── 关闭动画：向右滑出 + 淡出（约 1 秒）────────────────────────────
+        private void BeginCloseAnimation()
         {
-            // 初始透明度0
-            Opacity = 0;
+            if (_isClosing) return;
+            _isClosing = true;
+            _timer?.Stop();
 
-            // 淡入动画：0→1，耗时0.3秒
-            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.3));
+            double targetLeft = SystemParameters.WorkArea.Right + 30;
 
-            // 淡出动画：1→0，耗时0.5秒，延迟durationSeconds秒执行
-            var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.5))
+            var slideOut = new DoubleAnimation(Left, targetLeft,
+                new Duration(TimeSpan.FromSeconds(0.9)))
+            { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn } };
+
+            var fadeOut = new DoubleAnimation(1.0, 0.0,
+                new Duration(TimeSpan.FromSeconds(0.9)));
+
+            slideOut.Completed += (_, _) =>
             {
-                BeginTime = TimeSpan.FromSeconds(durationSeconds)
+                lock (_lock) { _activeToasts.Remove(this); }
+
+                // 剩余 Toast 向下补位
+                foreach (var (toast, targetTop) in GetToastPositions())
+                {
+                    var anim = new DoubleAnimation(toast.Top, targetTop,
+                        new Duration(TimeSpan.FromSeconds(0.3)))
+                    { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+                    toast.BeginAnimation(TopProperty, anim);
+                }
+                Close();
             };
 
-            // 动画完成后关闭窗口
-            fadeOut.Completed += (_, _) => Close();
-
-            // 组合动画并播放
-            var storyboard = new Storyboard();
-            storyboard.Children.Add(fadeIn);
-            storyboard.Children.Add(fadeOut);
-            Storyboard.SetTarget(storyboard, this);
-            Storyboard.SetTargetProperty(storyboard, new PropertyPath(OpacityProperty));
-            storyboard.Begin();
+            BeginAnimation(LeftProperty,    slideOut);
+            BeginAnimation(OpacityProperty, fadeOut);
         }
-        public static void Success(string message, double second = 3) =>
-            new ToastWindow(message, ToastType.Success, second).Show();
-        public static void Error(string message, double second = 3) =>
-            new ToastWindow(message, ToastType.Error, second).Show();
-        public static void Info(string message, double second = 3) =>
-            new ToastWindow(message, ToastType.Info, second).Show();
+
+        // ── 计算所有活跃 Toast 的目标 Top（最新在最下，旧的往上叠）─────────
+        private static List<(ToastWindow toast, double targetTop)> GetToastPositions()
+        {
+            var screenArea = SystemParameters.WorkArea;
+            var result     = new List<(ToastWindow, double)>();
+            double bottom  = screenArea.Bottom - ScreenMargin;
+
+            lock (_lock)
+            {
+                for (int i = _activeToasts.Count - 1; i >= 0; i--)
+                {
+                    var toast     = _activeToasts[i];
+                    double height = toast.ActualHeight > 0 ? toast.ActualHeight : 180;
+                    double top    = bottom - height;
+                    result.Add((toast, top));
+                    bottom = top - ToastSpacing;
+                }
+            }
+            return result;
+        }
+
+        // ── 静态入口 API ──────────────────────────────────────────────────────
+        public static void Show(string message, ToastType type, Action? onConfirm = null, double second = 4) =>
+            Application.Current.Dispatcher.Invoke(() =>
+                new ToastWindow(message, type, second, onConfirm).Show());
+
+        public static void Success(string message, Action? onConfirm = null, double second = 4) =>
+            Show(message, ToastType.Success, onConfirm, second);
+
+        public static void Error(string message, Action? onConfirm = null, double second = 4) =>
+            Show(message, ToastType.Error, onConfirm, second);
+
+        public static void Info(string message, Action? onConfirm = null, double second = 4) =>
+            Show(message, ToastType.Info, onConfirm, second);
+
+        public static void Warning(string message, Action? onConfirm = null, double second = 4) =>
+            Show(message, ToastType.Warning, onConfirm, second);
+
+        public static void Question(string message, Action? onConfirm = null, double second = 5) =>
+            Show(message, ToastType.Question, onConfirm, second);
     }
 }
