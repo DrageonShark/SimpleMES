@@ -87,7 +87,7 @@ namespace SimpleMES.ViewModels
                 await LoadOrders().ConfigureAwait(false);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    NewOrderNo = DateTime.Now.ToString("yyyyMMMMddHHmm");
+                    NewOrderNo = DateTime.Now.ToString("yyyyMMddHHmm");
                     MessageBox.Show("订单创建成功！");
                 });
             }

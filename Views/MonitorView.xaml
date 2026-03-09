@@ -5,12 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
-    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <WrapPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 40 10">
+        <WrapPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 10 10">
             <!-- Toast 通知测试按钮 -->
             <!--<Button Content="✅ 成功" Click="OnToastSuccess"
                     Height="34" Margin="0 0 6 0" Padding="10 0"
@@ -64,7 +64,7 @@
             <ItemsControl ItemsSource="{Binding ListDeviceDto}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel/>
+                        <WrapPanel HorizontalAlignment="Center"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
