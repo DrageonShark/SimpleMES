@@ -46,9 +46,12 @@ namespace SimpleMES.ViewModels
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
         public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
+        // 右侧告警面板数据源
+        public ObservableCollection<AlarmRecordModel> PendingAlarms { get; } = new();
         public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository, IToastService toast, IDeviceConfigNotifier configNotifier, IDeviceClientFactory deviceClientFactory)
         {
             _dispatcher = GetCurrentDispatcher();
+            _ = RefreshAlarms();
             _statusNotifier = notifier;
             _repository = repository;
             _toast = toast;
@@ -57,7 +60,7 @@ namespace SimpleMES.ViewModels
             // 订阅 Service 的事件
             _statusNotifier.DeviceStatusChanged += OnDeviceStatusChanged;
         }
-
+        //设备面板数据源处理
         public void OnDeviceStatusChanged(object? sender, DeviceStatusChangedEventArgs e)
         {
             // 关键点：回到主线程更新 UI
@@ -375,6 +378,43 @@ namespace SimpleMES.ViewModels
             catch (Exception ex)
             {
                 return (false, $"连接失败：{ex.Message}");
+            }
+        }
+        //告警面板数据源实现逻辑
+        [RelayCommand]
+        private async Task RefreshAlarms()
+        {
+            try
+            {
+                var alarms = await _repository.GetUnAckAlarmsAsync(30);
+                PendingAlarms.Clear();
+                foreach (var alarm in alarms)
+                {
+                    PendingAlarms.Add(alarm);
+                }
+            }
+            catch (Exception ex)
+            {
+                _toast.Error($"加载警告失败：{ex.Message}", null, 3);
+            }
+        }
+        //确认警告
+        [RelayCommand]
+        private async Task AckAlarm(AlarmRecordModel? alarm)
+        {
+            if (alarm is null) return;
+            try
+            {
+                var rows = await _repository.AckAlarmAsync(alarm.AlarmId);
+                if (rows > 0)
+                {
+                    PendingAlarms.Remove(alarm);
+                    _toast.Success($"已确认警告 #{alarm.AlarmId}", null, 3);
+                }
+            }
+            catch (Exception ex)
+            {
+                _toast.Error($"确认告警失败：{ex.Message}", null, 3);
             }
         }
     }
