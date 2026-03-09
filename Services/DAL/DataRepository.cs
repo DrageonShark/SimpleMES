@@ -97,10 +97,11 @@ namespace SimpleMES.Services.DAL
 
         public async Task<int> InsertDeviceAsync(DeviceModel device)
         {
-            const string sql = @"INSERT INTO T_Devices(
-                                 DeviceName, IpAddress, Port, SerialPort, SlaveId)
-                                 VALUES (@DeviceName, @IpAddress, @Port, @SerialPort, @SlaveId)";
-            return await _db.ExecuteAsync(sql, device);
+            const string sql = @"INSERT INTO T_Devices
+                                 (DeviceName, IpAddress, Port, SerialPort, SlaveId)
+                                 VALUES (@DeviceName, @IpAddress, @Port, @SerialPort, @SlaveId);
+                                 SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            return await _db.ExecuteScalarAsync<int>(sql, device);
         }
 
         public async Task<int> InsertProductionRecordAsync(ProductionRecordModel productionRecord)

@@ -22,7 +22,7 @@ namespace MESDemo
             Logging.Initialize();
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            //1.创建数据库服务
+            //1.创建各种服务
             var dbService = new SqlDbService();
             var repo = new DataRepository(dbService);
             var clientFactory = new DeviceClientFactory();
@@ -47,7 +47,7 @@ namespace MESDemo
                 return;
             }
             //4.创建主界面 ViewModel
-            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast);// 注入 Service
+            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier);// 注入 Service
             var orderVM = new OrderViewModel(dbService, toast);
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 

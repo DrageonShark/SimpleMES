@@ -42,6 +42,23 @@
                     Foreground="White" Background="#9C27B0">
                 <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="4"/></Style></Button.Resources>
             </Button>-->
+            <StackPanel 
+                Orientation="Horizontal" 
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="0 0 10 0">
+                <TextBox Width="180" Height="30"
+                         Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
+                <ComboBox Width="100" Height="30" Margin="8,0,0,0"
+                          ItemsSource="{Binding StateFilterOptions}"
+                          SelectedItem="{Binding StateFilter}" />
+                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center"
+                           Text="{Binding RunningCount, StringFormat=运行:{0}}" />
+                <TextBlock Margin="8,0,0,0" VerticalAlignment="Center"
+                           Text="{Binding DisconnectedCount, StringFormat=断连:{0}}" />
+                <TextBlock Margin="8,0,0,0" VerticalAlignment="Center"
+                           Text="{Binding FaultCount, StringFormat=故障:{0}}" />
+            </StackPanel>
             <Button 
                 Content="添加设备"
                 Command="{Binding AddDeviceCommand}"
@@ -52,7 +69,9 @@
                 FontSize="15"
                 Cursor="Hand"
                 Foreground="White"
-                Background="#1976D2">
+                Background="#1976D2"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="4"></Setter>
@@ -61,7 +80,7 @@
             </Button>
         </WrapPanel>
         <ScrollViewer Grid.Row="1" Margin="0 10 0 0">
-            <ItemsControl ItemsSource="{Binding ListDeviceDto}">
+            <ItemsControl ItemsSource="{Binding FilteredDeviceDto}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel HorizontalAlignment="Center"/>

@@ -5,6 +5,7 @@ using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.Observer;
+using SimpleMES.Services.State;
 using SimpleMES.Services.Toast;
 using SimpleMES.Views;
 using System.Collections.ObjectModel;
@@ -15,6 +16,7 @@ namespace SimpleMES.ViewModels
 {
     public partial class MonitorViewModel : ViewModelBase, IDisposable
     {
+        private readonly IDeviceConfigNotifier _configNotifier;
         private readonly Dispatcher _dispatcher;
         private readonly IDeviceStatusNotifier _notifier;
         private readonly IDataRepository _repository;
@@ -28,15 +30,28 @@ namespace SimpleMES.ViewModels
         [ObservableProperty] private int? _port;
         [ObservableProperty] private string? _serialPort;
         [ObservableProperty] private byte _slaveId = 1;
+        //筛选条件
+        [ObservableProperty] private string _searchKeyword = string.Empty;
+
+        [ObservableProperty] private string _stateFilter = "全部";
+
+        public IReadOnlyList<string> StateFilterOptions { get; } = new[] { "全部", "运行", "断连", "故障" };
+        //状态统计数字
+        [ObservableProperty] private int _runningCount;
+
+        [ObservableProperty] private int _disconnectedCount;
+
+        [ObservableProperty] private int _faultCount;
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
-
-        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository, IToastService toast)
+        public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
+        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository, IToastService toast, IDeviceConfigNotifier configNotifier)
         {
             _dispatcher = GetCurrentDispatcher();
             _notifier = notifier;
             _repository = repository;
             _toast = toast;
+            _configNotifier = configNotifier;
             // 订阅 Service 的事件
             _notifier.DeviceStatusChanged += OnDeviceStatusChanged;
         }
@@ -75,6 +90,7 @@ namespace SimpleMES.ViewModels
                     var newItems = listLatestDeviceDto.Where(n => ListDeviceDto.All(o => o.DeviceId != n.DeviceId));
                     foreach (var item in newItems) ListDeviceDto.Add(item);
                 }
+                ApplyDeviceFilter();
             });
         }
 
@@ -120,6 +136,8 @@ namespace SimpleMES.ViewModels
                     device.Port = dto.Port;
                     device.SerialPort = dto.SerialPort;
                     device.SlaveId = dto.SlaveId;
+                    // 告诉通信层：这个设备配置变了，需要重启该设备采集任务
+                    _configNotifier.NotifyConfigChanged(newDevice, ConfigChangeType.Updated);
                     return true;
                 }
                 catch (Exception ex)
@@ -148,7 +166,7 @@ namespace SimpleMES.ViewModels
         {
             Log.Information("添加新设备");
             DeviceModel newDevice = new DeviceModel();
-
+            var newId = 1;
             async Task<bool> OnSure(DeviceModel device)
             {
                 try
@@ -164,7 +182,7 @@ namespace SimpleMES.ViewModels
                                 Port = device.Port,
                                 SlaveId = device.SlaveId ?? 0
                             };
-                            await _repository.InsertDeviceAsync(newDevice);
+                            newId = await _repository.InsertDeviceAsync(newDevice);
                             return true;
                         }
                         if (!string.IsNullOrWhiteSpace(device.SerialPort))
@@ -175,7 +193,7 @@ namespace SimpleMES.ViewModels
                                 SerialPort = device.SerialPort.Trim(),
                                 SlaveId = device.SlaveId
                             };
-                            await _repository.InsertDeviceAsync(newDevice);
+                            newId = await _repository.InsertDeviceAsync(newDevice);
                             return true;
                         }
                         throw new Exception("IP地址或串口至少一个不为空");
@@ -198,6 +216,9 @@ namespace SimpleMES.ViewModels
             var result = dialog.ShowDialog();
             if (result == true)
             {
+                newDevice.DeviceId = newId;
+                // 告诉通信层：新增设备，启动采集任务
+                _configNotifier.NotifyConfigChanged(newDevice, ConfigChangeType.Added);
                 Log.Information("设备添加成功，设备名：{DeviceName}", newDevice.DeviceName);
                 _toast.Success($"设备添加成功，设备名：{newDevice.DeviceName}", null, 3.5);
                 //MessageBox.Show("设备添加成功");
@@ -221,5 +242,42 @@ namespace SimpleMES.ViewModels
             _disposed = true;
             GC.SuppressFinalize(this);
         }
+        //设备状态统计和搜索功能相关代码
+        partial void OnSearchKeywordChanged(string value) => ApplyDeviceFilter();
+        partial void OnStateFilterChanged(string value) => ApplyDeviceFilter();
+
+        private void ApplyDeviceFilter()
+        {
+            IEnumerable<DeviceDto> query = ListDeviceDto;
+
+            //关键字可匹配：设备名/IP/串口
+            if (!string.IsNullOrWhiteSpace(SearchKeyword))
+            {
+                var kw = SearchKeyword.Trim();
+                query = query.Where(d =>
+                    (!string.IsNullOrWhiteSpace(d.DeviceName) && d.DeviceName.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(d.IpAddress) && d.IpAddress.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(d.SerialPort) && d.SerialPort.Contains(kw, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            //状态筛选
+            query = StateFilter switch
+            {
+                "运行" => query.Where(d => d.DeviceState == DeviceState.Running),
+                "断连" => query.Where(d => d.DeviceState == DeviceState.Disconnected),
+                "故障" => query.Where(d => d.DeviceState == DeviceState.Fault),
+                _ => query
+            };
+            FilteredDeviceDto.Clear();
+            foreach (var item in query.OrderBy(d => d.DeviceId))
+            {
+                FilteredDeviceDto.Add(item);
+            }
+            // 统计基于全量数据，不受筛选条件影响
+            RunningCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Running);
+            DisconnectedCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Disconnected);
+            FaultCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Fault);
+        }
+
     }
 }
