@@ -125,6 +125,14 @@
                 Grid.Row="2"
                 Orientation="Horizontal"
                 HorizontalAlignment="Right">
+                <Button Content="测试连接"
+                        Width="90"
+                        Height="34"
+                        Background="#10B981"
+                        Foreground="White"
+                        BorderBrush="#10B981"
+                        Margin="0 0 10 0"
+                        Click="OnTestConnection"/>
                 <Button 
                     Content="保存"
                     Click="OnSave"

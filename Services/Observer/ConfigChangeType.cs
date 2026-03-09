@@ -13,6 +13,14 @@
         /// <summary>
         /// 设备删除
         /// </summary>
-        Deleted
+        Deleted,
+        /// <summary>
+        /// 停用
+        /// </summary>
+        Disabled,
+        /// <summary>
+        /// 启用
+        /// </summary>
+        Enabled
     }
 }

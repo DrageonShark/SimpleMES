@@ -95,6 +95,21 @@ namespace SimpleMES.Services.DAL
             return await _db.ExecuteAsync(sql, device);
         }
 
+        public async Task<int> SetDeviceEnabledAsync(int deviceId, bool isEnabled, DateTime? changedAt = null)
+        {
+            const string sql = @"UPDATE T_Devices
+                                 SET DeviceState = CASE WHEN @IsEnabled = 1 THEN 'Disconnected' ELSE 'Disabled' END,
+                                 LastUpdateTime = ISNULL(@ChangedAt, GETDATE())
+                                 WHERE DeviceId = @DeviceId;";
+
+            return await _db.ExecuteAsync(sql, new
+            {
+                DeviceId = deviceId,
+                IsEnabled = isEnabled,
+                ChangedAt = changedAt
+            });
+        }
+
         public async Task<int> InsertDeviceAsync(DeviceModel device)
         {
             const string sql = @"INSERT INTO T_Devices
@@ -135,6 +150,22 @@ namespace SimpleMES.Services.DAL
                                  VALUES (@DeviceId, @AlarmMessage, @AlarmTime, @IsAck);";
             return await _db.ExecuteAsync(sql, alarmRecord);
         }
+
+        public async Task<IEnumerable<AlarmRecordModel>> GetUnAckAlarmsAsync(int top = 20)
+        {
+            const string sql = @"SELECT TOP (@Top) AlarmId, DeviceId, AlarmMessage, AlarmTime, IsAck
+                                 FROM T_AlarmRecord
+                                 WHERE IsAck = 0
+                                 ORDER BY AlarmTime DESC;";
+            return await _db.QueryAsync<AlarmRecordModel>(sql, new { Top = top });
+        }
+
+        public async Task<int> AckAlarmAsync(int alarmId)
+        {
+            const string sql = @"UPDATE T_AlarmRecord SET IsAck = 1 WHERE AlarmId = @AlarmId;";
+            return await _db.ExecuteAsync(sql, new { AlarmId = alarmId });
+        }
+
 
         public async Task<IEnumerable<ProductModel>> GetAllProductsAsync()
         {

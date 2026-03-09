@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
+using SimpleMES.Core;
 using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
@@ -16,9 +17,10 @@ namespace SimpleMES.ViewModels
 {
     public partial class MonitorViewModel : ViewModelBase, IDisposable
     {
+        private readonly IDeviceClientFactory _deviceClientFactory;
         private readonly IDeviceConfigNotifier _configNotifier;
         private readonly Dispatcher _dispatcher;
-        private readonly IDeviceStatusNotifier _notifier;
+        private readonly IDeviceStatusNotifier _statusNotifier;
         private readonly IDataRepository _repository;
         private bool _disposed;
 
@@ -35,25 +37,25 @@ namespace SimpleMES.ViewModels
 
         [ObservableProperty] private string _stateFilter = "全部";
 
-        public IReadOnlyList<string> StateFilterOptions { get; } = new[] { "全部", "运行", "断连", "故障" };
+        public IReadOnlyList<string> StateFilterOptions { get; } = new[] { "全部", "运行", "断连", "故障", "停用" };
         //状态统计数字
         [ObservableProperty] private int _runningCount;
-
         [ObservableProperty] private int _disconnectedCount;
-
         [ObservableProperty] private int _faultCount;
+        [ObservableProperty] private int _disabledCount;
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
         public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
-        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository, IToastService toast, IDeviceConfigNotifier configNotifier)
+        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository, IToastService toast, IDeviceConfigNotifier configNotifier, IDeviceClientFactory deviceClientFactory)
         {
             _dispatcher = GetCurrentDispatcher();
-            _notifier = notifier;
+            _statusNotifier = notifier;
             _repository = repository;
             _toast = toast;
             _configNotifier = configNotifier;
+            _deviceClientFactory = deviceClientFactory;
             // 订阅 Service 的事件
-            _notifier.DeviceStatusChanged += OnDeviceStatusChanged;
+            _statusNotifier.DeviceStatusChanged += OnDeviceStatusChanged;
         }
 
         public void OnDeviceStatusChanged(object? sender, DeviceStatusChangedEventArgs e)
@@ -93,7 +95,7 @@ namespace SimpleMES.ViewModels
                 ApplyDeviceFilter();
             });
         }
-
+        //设备配置修改逻辑
         [RelayCommand]
         private async Task EditDeviceConfig(DeviceDto? device)
         {
@@ -147,8 +149,20 @@ namespace SimpleMES.ViewModels
                     return false;
                 }
             }
-
-            var dialog = new DeviceEditWindow(SaveAsync)
+            async Task<(bool IsSuccess, string Message)> TestAsync(DeviceDto dto)
+            {
+                var model = new DeviceModel
+                {
+                    DeviceId = dto.DeviceId,
+                    DeviceName = dto.DeviceName,
+                    IpAddress = dto.IpAddress,
+                    Port = dto.Port,
+                    SerialPort = dto.SerialPort,
+                    SlaveId = dto.SlaveId
+                };
+                return await TestConnectionAsync(model);
+            }
+            var dialog = new DeviceEditWindow(SaveAsync, TestAsync)
             {
                 Owner = Application.Current.MainWindow,
                 DataContext = editing
@@ -161,6 +175,7 @@ namespace SimpleMES.ViewModels
             }
         }
 
+        //设备添加逻辑
         [RelayCommand]
         private async Task AddDevice()
         {
@@ -208,7 +223,11 @@ namespace SimpleMES.ViewModels
                     return false;
                 }
             }
-            var dialog = new DeviceAddWindow(OnSure)
+            async Task<(bool IsSuccess, string Message)> TestAsync(DeviceModel draft)
+            {
+                return await TestConnectionAsync(draft);
+            }
+            var dialog = new DeviceAddWindow(OnSure, TestAsync)
             {
                 Owner = Application.Current.MainWindow,
                 DataContext = newDevice
@@ -238,7 +257,7 @@ namespace SimpleMES.ViewModels
         public void Dispose()
         {
             if (_disposed) return;
-            _notifier.DeviceStatusChanged -= OnDeviceStatusChanged;
+            _statusNotifier.DeviceStatusChanged -= OnDeviceStatusChanged;
             _disposed = true;
             GC.SuppressFinalize(this);
         }
@@ -266,6 +285,7 @@ namespace SimpleMES.ViewModels
                 "运行" => query.Where(d => d.DeviceState == DeviceState.Running),
                 "断连" => query.Where(d => d.DeviceState == DeviceState.Disconnected),
                 "故障" => query.Where(d => d.DeviceState == DeviceState.Fault),
+                "停用" => query.Where(d => d.DeviceState == DeviceState.Disabled),
                 _ => query
             };
             FilteredDeviceDto.Clear();
@@ -277,7 +297,85 @@ namespace SimpleMES.ViewModels
             RunningCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Running);
             DisconnectedCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Disconnected);
             FaultCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Fault);
+            DisabledCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Disabled);
         }
+        //UI界面设备停用和启用逻辑
+        private async Task ToggleDeviceEnabled(DeviceDto? device)
+        {
+            if (device is null) return;
+            //前是停用 -> 启用；否则停用
+            bool toEnable = device.DeviceState == DeviceState.Disabled;
+            try
+            {
+                var updateTime = DateTime.Now;
+                await _repository.SetDeviceEnabledAsync(device.DeviceId, toEnable, updateTime);
+                // 更新前端状态，保证 UI 立即反馈
+                device.DeviceState = toEnable ? DeviceState.Disconnected : DeviceState.Disabled;
+                device.LastUpdateTime = updateTime;
+                if (!toEnable)
+                {
+                    // 停用后清零实时值，避免显示旧数据
+                    device.Temperature = 0;
+                    device.Pressure = 0;
+                    device.Speed = 0;
+                }
+                // 通知通信服务停止/恢复采集线程
+                var changed = new DeviceModel
+                {
+                    DeviceId = device.DeviceId,
+                    DeviceName = device.DeviceName,
+                    IpAddress = device.IpAddress,
+                    Port = device.Port,
+                    SerialPort = device.SerialPort,
+                    SlaveId = device.SlaveId,
+                    DeviceState = toEnable ? nameof(DeviceState.Disconnected) : nameof(DeviceState.Disabled),
+                    LastUpdateTime = device.LastUpdateTime
+                };
+                _configNotifier.NotifyConfigChanged(changed, toEnable ? ConfigChangeType.Enabled : ConfigChangeType.Disabled);
+                ApplyDeviceFilter();
+                _toast.Success(toEnable ? $"已启用：{device.DeviceName}" : $"已停用：{device.DeviceName}");
+            }
+            catch (Exception ex)
+            {
+                _toast.Error($"设备状态切换失败：{ex.Message}");
+            }
+        }
+        //新增设备界面的测试设备连接按钮
+        private async Task<(bool IsSuccess, string Message)> TestConnectionAsync(DeviceModel raw)
+        {
+            var device = new DeviceModel
+            {
+                DeviceId = raw.DeviceId,
+                DeviceName = string.IsNullOrWhiteSpace(raw.DeviceName) ? $"设备{raw.DeviceId}" : raw.DeviceName.Trim(),
+                IpAddress = raw.IpAddress?.Trim(),
+                Port = raw.Port is > 0 ? raw.Port : 502,
+                SerialPort = raw.SerialPort?.Trim(),
+                SlaveId = raw.SlaveId is null or 0 ? (byte)1 : raw.SlaveId
+            };
+            if (string.IsNullOrWhiteSpace(device.IpAddress) && string.IsNullOrWhiteSpace(device.SerialPort))
+            {
+                return (false, "IP地址和串口不能同时为空");
+            }
 
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                await using var client = _deviceClientFactory.Create(device);
+                // 读取 1 个寄存器作为连接性验证
+                var data = await client.ReadHoldingRegistersAsync(0, 1, cts.Token);
+                if (data is { Length: > 0 })
+                    return (true, $"连接成功，寄存器值：{data[0]}");
+
+                return (false, "连接成功，但未读取到寄存器数据");
+            }
+            catch (TimeoutException)
+            {
+                return (false, "连接超时，请检查设备地址、端口或串口");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"连接失败：{ex.Message}");
+            }
+        }
     }
 }

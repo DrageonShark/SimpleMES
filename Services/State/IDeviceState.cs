@@ -29,6 +29,10 @@ namespace SimpleMES.Services.State
         /// <summary>
         /// 设备故障
         /// </summary>
-        Fault
+        Fault,
+        /// <summary>
+        /// 设备停用
+        /// </summary>
+        Disabled
     }
 }

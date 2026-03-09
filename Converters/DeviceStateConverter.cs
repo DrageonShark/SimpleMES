@@ -16,7 +16,9 @@ namespace SimpleMES.Converters
             {
                 DeviceState.Running => "运行中",
                 DeviceState.Disconnected => "未连接",
-                _ => "故障"
+                DeviceState.Fault => "故障",
+                DeviceState.Disabled => "已停用",
+                _ => "未知"
             };
         }
 
@@ -28,6 +30,8 @@ namespace SimpleMES.Converters
             {
                 "运行中" => DeviceState.Running,
                 "已停止" => DeviceState.Disconnected,
+                "故障" => DeviceState.Fault,
+                "已停用" => DeviceState.Disabled,
                 _ => DeviceState.Fault
             };
         }

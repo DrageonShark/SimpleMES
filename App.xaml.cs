@@ -32,6 +32,7 @@ namespace MESDemo
             });
             var configNotifier = new DeviceConfigNotifier();
             var toast = new ToastService();
+            var deviceClientFactory = new DeviceClientFactory();
             //2.创建并启动通信服务 (MES 的心脏)
             _deviceCommunication = new DeviceCommunicationService(repo, clientFactory, strategyResolver, configNotifier);
             _deviceCommunication.StartAsync();
@@ -47,7 +48,7 @@ namespace MESDemo
                 return;
             }
             //4.创建主界面 ViewModel
-            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier);// 注入 Service
+            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier, deviceClientFactory);// 注入 Service
             var orderVM = new OrderViewModel(dbService, toast);
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 

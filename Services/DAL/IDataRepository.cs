@@ -36,6 +36,10 @@ namespace SimpleMES.Services.DAL
         /// </summary>
         Task<int> UpdateDeviceAsync(DeviceModel device);
         /// <summary>
+        /// 启用或停用设备
+        /// </summary>
+        Task<int> SetDeviceEnabledAsync(int deviceId, bool isEnabled, DateTime? changedAt = null);
+        /// <summary>
         /// 新增设备
         /// </summary>
         Task<int> InsertDeviceAsync(DeviceModel device);
@@ -51,6 +55,14 @@ namespace SimpleMES.Services.DAL
         ///  更新报警信息
         /// </summary>
         Task<int> InsertAlarmRecordAsync(AlarmRecordModel alarmRecord);
+        /// <summary>
+        ///  获取最新未确认的20条报警记录
+        /// </summary>
+        Task<IEnumerable<AlarmRecordModel>> GetUnAckAlarmsAsync(int top = 20);
+        /// <summary>
+        ///  确认ID为alarmId的报警记录
+        /// </summary>
+        Task<int> AckAlarmAsync(int alarmId);
         /// <summary>
         /// 获取所有产品信息
         /// </summary>

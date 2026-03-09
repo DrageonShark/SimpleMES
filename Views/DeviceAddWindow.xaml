@@ -129,16 +129,24 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0 10 0 0 ">
-                <Button
-                        Content="确定"
-                        Width="80"
+                <Button Content="测试连接"
+                        Width="90"
                         Height="34"
-                        Background="#2563EB"
+                        Background="#10B981"
                         Foreground="White"
-                        BorderBrush="#2563EB"
-                        Cursor="Hand"
-                        Click="OnSure"
-                        IsDefault="True"/>
+                        BorderBrush="#10B981"
+                        Margin="0 0 10 0"
+                        Click="OnTestConnection"/>
+                <Button
+                    Content="确定"
+                    Width="80"
+                    Height="34"
+                    Background="#2563EB"
+                    Foreground="White"
+                    BorderBrush="#2563EB"
+                    Cursor="Hand"
+                    Click="OnSure"
+                    IsDefault="True"/>
                 <Button
                         Content="取消"
                         Width="80"
