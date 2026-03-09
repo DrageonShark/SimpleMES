@@ -51,6 +51,8 @@ namespace SimpleMES.Views
             // 初始化进度环为满圆
             ProgressRing.StrokeDashArray = new DoubleCollection { CircumferenceUnits, 999 };
 
+            ConfirmBtn.Visibility = onConfirm is null ? Visibility.Collapsed : Visibility.Visible;
+
             HeaderCloseBtn.Click += (_, _) => BeginCloseAnimation();
             CloseBtn.Click       += (_, _) => BeginCloseAnimation();
             ConfirmBtn.Click     += (_, _) => { _onConfirm?.Invoke(); BeginCloseAnimation(); };
