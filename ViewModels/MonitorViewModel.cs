@@ -5,6 +5,7 @@ using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.Observer;
+using SimpleMES.Services.Toast;
 using SimpleMES.Views;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -18,6 +19,8 @@ namespace SimpleMES.ViewModels
         private readonly IDeviceStatusNotifier _notifier;
         private readonly IDataRepository _repository;
         private bool _disposed;
+
+        private IToastService _toast;
         //编辑页面属性绑定
         [ObservableProperty] private int _deviceId;
         [ObservableProperty] private string? _deviceName;
@@ -28,11 +31,12 @@ namespace SimpleMES.ViewModels
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
 
-        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository)
+        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository, IToastService toast)
         {
             _dispatcher = GetCurrentDispatcher();
             _notifier = notifier;
             _repository = repository;
+            _toast = toast;
             // 订阅 Service 的事件
             _notifier.DeviceStatusChanged += OnDeviceStatusChanged;
         }
@@ -121,8 +125,7 @@ namespace SimpleMES.ViewModels
                 catch (Exception ex)
                 {
                     Log.Error("设备配置修改失败，设备Id：{DeviceId},设备名：{DeviceName}，错误内容：{Message}", device.DeviceId, device.DeviceName, ex.Message);
-                    //ToastWindow.Error($"保存失败，错误：{ex.Message}", 5);
-                    MessageBox.Show($"保存失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _toast.Error($"保存失败，错误：{ex.Message}", null, 3.5);
                     return false;
                 }
             }
@@ -136,7 +139,7 @@ namespace SimpleMES.ViewModels
             if (result == true)
             {
                 Log.Information("设备配置修改成功，设备Id：{DeviceId},设备名：{DeviceName}", device.DeviceId, device.DeviceName);
-                ToastWindow.Success("设备配置更新成功");
+                _toast.Success("设备配置更新成功", null, 3.5);
             }
         }
 
@@ -182,8 +185,8 @@ namespace SimpleMES.ViewModels
                 catch (Exception ex)
                 {
                     Log.Error("新增设备失败，错误：{Message}", ex.Message);
-                    //ToastWindow.Error($"新增设备失败，错误：{ex.Message}");
-                    MessageBox.Show($"新增设备失败:{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _toast.Error($"新增设备失败，错误：{ex.Message}", null, 3.5);
+                    //MessageBox.Show($"新增设备失败:{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
             }
@@ -196,7 +199,7 @@ namespace SimpleMES.ViewModels
             if (result == true)
             {
                 Log.Information("设备添加成功，设备名：{DeviceName}", newDevice.DeviceName);
-                ToastWindow.Success("设备添加成功");
+                _toast.Success($"设备添加成功，设备名：{newDevice.DeviceName}", null, 3.5);
                 //MessageBox.Show("设备添加成功");
             }
         }

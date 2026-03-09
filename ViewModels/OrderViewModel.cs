@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using SimpleMES.Models;
 using SimpleMES.Services.DAL;
+using SimpleMES.Services.Toast;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -12,8 +13,10 @@ namespace SimpleMES.ViewModels
         private readonly IDataRepository _repository;
         // 表格绑定的数据源
         public ObservableCollection<OrderModel> Orders { get; set; } = new ObservableCollection<OrderModel>();
+
+        private IToastService _toast;
         // === 新增订单的表单字段 ===
-        [ObservableProperty] private string _newOrderNo = DateTime.Now.ToString("yyyyMMddHHmm");
+        [ObservableProperty] private string _newOrderNo = DateTime.Now.ToString("yyyyMMddHHmmss");
         [ObservableProperty] private string _newProductCode;
         [ObservableProperty] private int _newPlanQty = 100;
 
@@ -21,14 +24,16 @@ namespace SimpleMES.ViewModels
         //下拉框用的产品列表
         public ObservableCollection<ProductModel> Products { get; } = new ObservableCollection<ProductModel>();
         [ObservableProperty] private ProductModel _productOrder;
-        public OrderViewModel()
+        public OrderViewModel(IToastService toast)
         {
+            _toast = toast;
             _repository = new DataRepository(new SqlDbService());
             _ = LoadOrders();
         }
 
-        public OrderViewModel(IDbService dbService)
+        public OrderViewModel(IDbService dbService, IToastService toast)
         {
+            _toast = toast;
             _repository = new DataRepository(dbService);
             _ = LoadOrders();
         }
@@ -57,7 +62,7 @@ namespace SimpleMES.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"加载失败: {ex.Message}");
+                _toast.Error($"加载失败: {ex.Message}", null, 3);
             }
         }
         [RelayCommand]
@@ -66,7 +71,7 @@ namespace SimpleMES.ViewModels
             //1.简单的校验
             if (string.IsNullOrWhiteSpace(NewOrderNo) || string.IsNullOrWhiteSpace(NewProductCode))
             {
-                MessageBox.Show("请填写完整订单信息！");
+                _toast.Warning("请填写完整订单信息！", null, 2);
                 return;
             }
 
@@ -87,13 +92,13 @@ namespace SimpleMES.ViewModels
                 await LoadOrders().ConfigureAwait(false);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    NewOrderNo = DateTime.Now.ToString("yyyyMMddHHmm");
-                    MessageBox.Show("订单创建成功！");
+                    NewOrderNo = DateTime.Now.ToString("yyyyMMddHHmmss");
+                    _toast.Success("订单创建成功！", null, 2);
                 });
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"创建失败: {ex.Message}");
+                _toast.Error($"创建失败: {ex.Message}", null, 2);
             }
         }
 

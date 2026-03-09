@@ -3,6 +3,7 @@ using SimpleMES.Core;
 using SimpleMES.Helpers.Log;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.Observer;
+using SimpleMES.Services.Toast;
 using SimpleMES.ViewModels;
 using SimpleMES.Views;
 using System.Windows;
@@ -30,11 +31,12 @@ namespace MESDemo
                 new DefaultPollingStrategy()
             });
             var configNotifier = new DeviceConfigNotifier();
+            var toast = new ToastService();
             //2.创建并启动通信服务 (MES 的心脏)
             _deviceCommunication = new DeviceCommunicationService(repo, clientFactory, strategyResolver, configNotifier);
             _deviceCommunication.StartAsync();
             //3.登录验证
-            var loginVm = new LoginViewModel(dbService);
+            var loginVm = new LoginViewModel(dbService, toast);
             var loginWindow = new LoginWindow(loginVm);
             var loginOk = loginWindow.ShowDialog();
             if (loginOk != true)
@@ -45,8 +47,8 @@ namespace MESDemo
                 return;
             }
             //4.创建主界面 ViewModel
-            var monitorVM = new MonitorViewModel(_deviceCommunication, repo);// 注入 Service
-            var orderVM = new OrderViewModel(dbService);
+            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast);// 注入 Service
+            var orderVM = new OrderViewModel(dbService, toast);
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 
             var mainViewModel = new MainViewModel(monitorVM, orderVM, reportVM);     // 注入 MonitorVM

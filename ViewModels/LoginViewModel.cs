@@ -4,7 +4,7 @@ using Serilog;
 using SimpleMES.Models;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.Security;
-using System.Windows;
+using SimpleMES.Services.Toast;
 
 namespace SimpleMES.ViewModels
 {
@@ -13,6 +13,7 @@ namespace SimpleMES.ViewModels
         public event Action? LoginSucceeded;
         private readonly IDataRepository _repository;
         private readonly UserSession _session = UserSession.Current;
+        private IToastService _toast;
         [ObservableProperty] private string _account;
         [ObservableProperty] private string _password;
         [ObservableProperty] private string _userName;
@@ -28,8 +29,9 @@ namespace SimpleMES.ViewModels
         private void GoRegister() => SlideIndex = 1;
         private string _roleString;
 
-        public LoginViewModel(IDbService repository)
+        public LoginViewModel(IDbService repository, IToastService toast)
         {
+            _toast = toast;
             _repository = new DataRepository(repository);
         }
 
@@ -39,28 +41,28 @@ namespace SimpleMES.ViewModels
             Log.Information("用户登录");
             if (string.IsNullOrWhiteSpace(Account) || string.IsNullOrWhiteSpace(Password))
             {
-                MessageBox.Show("账号或密码不能为空或空格");
+                _toast.Error("账号或密码不能为空或空格", null, 1.5);
                 return;
             }
             Log.Information("校验用户登录信息，账号：{Account}", Account);
             var user = await _repository.LoginAsync(Account);
             if (user == null)
             {
-                MessageBox.Show("用户不存在，请注册");
+                _toast.Error("用户不存在，请注册", null, 2);
                 Log.Information("账号[{Account}]不存在", Account);
                 return;
             }
 
             if (!PasswordHasher.VerifyPassword(Password, user.PasswordHash, user.Salt))
             {
-                MessageBox.Show("用户名或密码错误");
+                _toast.Error("用户名或密码错误", null, 2);
                 Log.Information("账号[{Account}]密码错误", Account);
                 return;
             }
 
             if (user.IsActive == 0)
             {
-                MessageBox.Show("账号已被禁用，请联系管理员！");
+                _toast.Warning("账号已被禁用，请联系管理员！");
                 Log.Information("账号[{Account}]已被禁用", Account);
                 return;
             }
@@ -79,7 +81,7 @@ namespace SimpleMES.ViewModels
                 _ => "游客"
             };
 
-            MessageBox.Show($"欢迎{_roleString}{user.UserName}");
+            _toast.Success($"欢迎{_roleString}{user.UserName}", null, 2);
             LoginSucceeded?.Invoke();
         }
         [RelayCommand]
@@ -88,13 +90,13 @@ namespace SimpleMES.ViewModels
             Log.Information("用户注册");
             if (string.IsNullOrWhiteSpace(Account) || string.IsNullOrWhiteSpace(Password))
             {
-                MessageBox.Show("账号或密码不能为空或空格");
+                _toast.Error("账号或密码不能为空或空格", null, 1.5);
                 return;
             }
             var user = await _repository.LoginAsync(Account);
             if (user?.Account != null)
             {
-                MessageBox.Show("账号已注册，请登录！");
+                _toast.Info("账号已注册，请登录！", null, 2);
                 return;
             }
             var saltAndHash = PasswordHasher.HashPassword(Password);
@@ -108,17 +110,17 @@ namespace SimpleMES.ViewModels
             };
             if (await _repository.InsertUserAsync(newUser) == 0)
             {
-                MessageBox.Show("注册失败，请联系管理员！");
+                _toast.Error("注册失败，请联系管理员！", null, 3);
                 return;
             }
             Log.Information("用户注册成功，用户Id：{UserName}", UserName);
-            MessageBox.Show("注册成功请登录");
+            _toast.Success("注册成功请登录", null, 2);
         }
 
         [RelayCommand]
         private void UpdatePassword()
         {
-            MessageBox.Show("暂不支持修改，请联系管理员！");
+            _toast.Warning("暂不支持修改，请联系管理员！", null, 2.5);
         }
     }
 }
