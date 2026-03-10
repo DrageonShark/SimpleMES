@@ -3,155 +3,152 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SimpleMES.Views"
         mc:Ignorable="d"
-        Title="编辑设备配置" Height="360" Width="420"
+        Title="编辑设备"
+        Height="430"
+        Width="500"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#F6F7F8">
+        Background="#F3F4F6">
+
     <Window.Resources>
-        <Style TargetType="TextBlock" x:Key="UniversalTBk">
-            <Setter Property="FontSize" Value="14"/>
+        <Style x:Key="TitleTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#374151"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-        <Style TargetType="TextBox"  x:Key="UniversalTBx">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="8,0"/>
+
+        <Style x:Key="InputStyle" TargetType="TextBox">
             <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="BorderBrush" Value="#2563EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="GhostButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="TestButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="#059669"/>
+            <Setter Property="BorderBrush" Value="#059669"/>
         </Style>
     </Window.Resources>
-    <Border 
-        Margin="16" 
-        Padding="20"
-        Background="White"
-        CornerRadius="12">
-        <Border.Effect>
-            <DropShadowEffect 
-                Color="#1A000000" 
-                BlurRadius="14"
-                ShadowDepth="2"
-                Opacity="0.4"/>
-        </Border.Effect>
-        <Grid RowSpan="16">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0">
-                <TextBlock 
-                    Text="设备配置" 
-                    FontSize="18" 
-                    FontWeight="bold" 
-                    Foreground="#1F2937"
-                    Style="{StaticResource UniversalTBk}"/>
-                <TextBlock 
-                    Text="请填写设备连接信息" 
-                    FontSize="12" 
-                    Foreground="#6B7280" 
-                    Margin="0 4 0 0"
-                    Style="{StaticResource UniversalTBk}"/>
-            </StackPanel>
-            <Grid Grid.Row="1"
-                RowSpan="12" 
-                ColumnSpan="12">
+
+    <Grid Margin="18">
+        <Border CornerRadius="14" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" Padding="18">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="2"/>
+            </Border.Effect>
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="18"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock 
-                    Grid.Row="0" 
-                    Grid.Column="0"
-                    Text="设备名" 
-                    Style="{StaticResource UniversalTBk}"/>
-                <TextBox 
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Text="{Binding DeviceName, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource UniversalTBx}"/>
-                <TextBlock 
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Text="IP地址" 
-                    Style="{StaticResource UniversalTBk}"/>
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource UniversalTBx}"/>
-                <TextBlock 
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Text="端口" 
-                    Style="{StaticResource UniversalTBk}"/>
-                <TextBox
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}"
-                    Style="{StaticResource UniversalTBx}"/>
-                <TextBlock 
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    Text="串口" 
-                    Style="{StaticResource UniversalTBk}"/>
-                <TextBox
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Text="{Binding SerialPort, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource UniversalTBx}"/>
-                <TextBlock 
-                    Grid.Row="4"
-                    Grid.Column="0"
-                    Text="从站号" 
-                    Style="{StaticResource UniversalTBk}"/>
-                <TextBox
-                    Grid.Row="4"
-                    Grid.Column="1"
-                    Text="{Binding SlaveId, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}"
-                    Style="{StaticResource UniversalTBx}"/>
+
+                <!-- 头部 -->
+                <StackPanel Grid.Row="0">
+                    <TextBlock Style="{StaticResource TitleTextStyle}" FontSize="20" Text="编辑设备"/>
+                    <TextBlock Margin="0,4,0,0" Foreground="#6B7280" FontSize="12"
+                               Text="修改后可先测试连接，再保存配置。"/>
+                </StackPanel>
+
+                <!-- 表单 -->
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="86"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="设备名称" Style="{StaticResource LabelStyle}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Style="{StaticResource InputStyle}"
+                             Text="{Binding DeviceName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="IP地址" Style="{StaticResource LabelStyle}"/>
+                    <TextBox Grid.Row="2" Grid.Column="1"
+                             Style="{StaticResource InputStyle}"
+                             Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="端口" Style="{StaticResource LabelStyle}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1"
+                             Style="{StaticResource InputStyle}"
+                             Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}"/>
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="串口号" Style="{StaticResource LabelStyle}"/>
+                    <TextBox Grid.Row="6" Grid.Column="1"
+                             Style="{StaticResource InputStyle}"
+                             Text="{Binding SerialPort, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="从站号" Style="{StaticResource LabelStyle}"/>
+                    <TextBox Grid.Row="8" Grid.Column="1"
+                             Style="{StaticResource InputStyle}"
+                             Text="{Binding SlaveId, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}"/>
+                </Grid>
+
+                <!-- 底部按钮 -->
+                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!-- 测试连接按钮：需要你在 code-behind 有 OnTestConnection -->
+                    <Button x:Name="BtnTestConnection"
+                            Content="测试连接"
+                            Margin="0,0,10,0"
+                            Style="{StaticResource TestButtonStyle}"
+                            Click="OnTestConnection"/>
+
+                    <Button Content="保存"
+                            Margin="0,0,10,0"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Click="OnSave"
+                            IsDefault="True"/>
+
+                    <Button Content="取消"
+                            Style="{StaticResource GhostButtonStyle}"
+                            IsCancel="True"/>
+                </StackPanel>
             </Grid>
-            <StackPanel 
-                Grid.Row="2"
-                Orientation="Horizontal"
-                HorizontalAlignment="Right">
-                <Button Content="测试连接"
-                        Width="90"
-                        Height="34"
-                        Background="#10B981"
-                        Foreground="White"
-                        BorderBrush="#10B981"
-                        Margin="0 0 10 0"
-                        Click="OnTestConnection"/>
-                <Button 
-                    Content="保存"
-                    Click="OnSave"
-                    Width="80" 
-                    Height="34"
-                    IsDefault="True"
-                    Background="#2563EB"
-                    Foreground="White"
-                    BorderBrush="#2563EB"/>
-                <Button 
-                    Content="取消"
-                    Width="80"
-                    Height="34"
-                    IsCancel="True"
-                    Background="#E5E7EB"
-                    Foreground="#374151"
-                    BorderBrush="#E5E7EB"
-                    Margin="10 0 0 0"/>
-            </StackPanel>
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </Window>
