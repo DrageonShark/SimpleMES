@@ -123,8 +123,31 @@
                     <!-- 搜索关键词：匹配设备名/IP/串口 -->
                     <TextBox Width="220"
                              Margin="0,0,8,0"
-                             Style="{StaticResource FilterTextBoxStyle}"
-                             Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"/>
+                             Height="34" Padding="10 0"
+                             VerticalContentAlignment="Center"
+                             FontSize="13" BorderBrush="#D1D5DB" BorderThickness="1" 
+                             Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.Resources>
+                            <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.3" Stretch="None" AlignmentX="Left">
+                                <VisualBrush.Visual>
+                                    <TextBlock FontStyle="Italic" Text="输入设备名/IP/串口，支持模糊查询。"/>
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </TextBox.Resources>
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Background" Value="White"/>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource HelpBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background" Value="{StaticResource HelpBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
 
                     <!-- 状态筛选 -->
                     <ComboBox Width="120"
@@ -214,28 +237,20 @@
                                         </StackPanel>
 
                                         <!-- 状态徽标 -->
-                                        <Border DockPanel.Dock="Right"
-                                                Padding="14,6"
-                                                CornerRadius="12"
-                                                BorderThickness="1"
-                                                Margin="8,0,0,0"
-                                                MinWidth="86">
+                                        <Border DockPanel.Dock="Right" Padding="8,3" CornerRadius="10" BorderThickness="1" 
+                                                Margin="8,0,0,0">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#F8FAFC"/>
-                                                    <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                                                    <Setter Property="Background" Value="#ECFDF5"/>
+                                                    <Setter Property="BorderBrush" Value="#A7F3D0"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Running}">
-                                                            <Setter Property="Background" Value="#ECFDF3"/>
-                                                            <Setter Property="BorderBrush" Value="#B7E4CC"/>
-                                                        </DataTrigger>
                                                         <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disconnected}">
-                                                            <Setter Property="Background" Value="#FFF9ED"/>
-                                                            <Setter Property="BorderBrush" Value="#F2D39B"/>
+                                                            <Setter Property="Background" Value="#FFFBEB"/>
+                                                            <Setter Property="BorderBrush" Value="#FDE68A"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
                                                             <Setter Property="Background" Value="#FEF2F2"/>
-                                                            <Setter Property="BorderBrush" Value="#E9B4B4"/>
+                                                            <Setter Property="BorderBrush" Value="#FECACA"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disabled}">
                                                             <Setter Property="Background" Value="#F3F4F6"/>
@@ -244,15 +259,9 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-
-                                            <TextBlock Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}"
-                                                       FontWeight="SemiBold"
-                                                       FontSize="12"
-                                                       Foreground="#1F2937"
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" 
+                                                       FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                         </Border>
-
                                     </DockPanel>
 
                                     <!-- 指标区 -->
@@ -263,27 +272,26 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Border Grid.Column="0" Background="#F8FAFC" CornerRadius="10" Padding="10" Margin="0,0,8,0">
+                                        <Border Grid.Column="0" Background="#EFF6FF" CornerRadius="8" Padding="8" Margin="0,0,6,0">
                                             <StackPanel>
                                                 <TextBlock Text="温度(℃)" FontSize="11" Foreground="#6B7280"/>
-                                                <TextBlock Text="{Binding Temperature}" FontSize="18" FontWeight="Bold" Foreground="#2563EB"/>
+                                                <TextBlock Text="{Binding Temperature}" FontSize="18" FontWeight="Bold" Foreground="#1D4ED8"/>
                                             </StackPanel>
                                         </Border>
 
-                                        <Border Grid.Column="1" Background="#FAFAF7" CornerRadius="10" Padding="10" Margin="0,0,8,0">
+                                        <Border Grid.Column="1" Background="#FFFBEB" CornerRadius="8" Padding="8" Margin="0,0,6,0">
                                             <StackPanel>
                                                 <TextBlock Text="压力(Bar)" FontSize="11" Foreground="#6B7280"/>
-                                                <TextBlock Text="{Binding Pressure}" FontSize="18" FontWeight="Bold" Foreground="#D97706"/>
+                                                <TextBlock Text="{Binding Pressure}" FontSize="18" FontWeight="Bold" Foreground="#B45309"/>
                                             </StackPanel>
                                         </Border>
 
-                                        <Border Grid.Column="2" Background="#FCF7F7" CornerRadius="10" Padding="10">
+                                        <Border Grid.Column="2" Background="#FEF2F2" CornerRadius="8" Padding="8">
                                             <StackPanel>
                                                 <TextBlock Text="转速(Rpm)" FontSize="11" Foreground="#6B7280"/>
-                                                <TextBlock Text="{Binding Speed}" FontSize="18" FontWeight="Bold" Foreground="#DC2626"/>
+                                                <TextBlock Text="{Binding Speed}" FontSize="18" FontWeight="Bold" Foreground="#991B1B"/>
                                             </StackPanel>
                                         </Border>
-
                                     </Grid>
 
                                     <!-- 操作按钮 -->

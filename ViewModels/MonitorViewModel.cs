@@ -48,15 +48,16 @@ namespace SimpleMES.ViewModels
         public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
         // 右侧告警面板数据源
         public ObservableCollection<AlarmRecordModel> PendingAlarms { get; } = new();
-        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository, IToastService toast, IDeviceConfigNotifier configNotifier, IDeviceClientFactory deviceClientFactory)
+        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository,
+            IToastService toast, IDeviceConfigNotifier configNotifier, IDeviceClientFactory deviceClientFactory)
         {
             _dispatcher = GetCurrentDispatcher();
-            _ = RefreshAlarms();
             _statusNotifier = notifier;
             _repository = repository;
             _toast = toast;
             _configNotifier = configNotifier;
             _deviceClientFactory = deviceClientFactory;
+            _ = RefreshAlarms();
             // 订阅 Service 的事件
             _statusNotifier.DeviceStatusChanged += OnDeviceStatusChanged;
         }
