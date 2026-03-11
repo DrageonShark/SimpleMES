@@ -1,4 +1,5 @@
 ﻿using SimpleMES.Views;
+using System.Windows;
 
 namespace SimpleMES.Services.Toast
 {
@@ -9,18 +10,35 @@ namespace SimpleMES.Services.Toast
     public class ToastService : IToastService
     {
         public void Success(string message, Action? onConfirm = null, double second = 4) =>
-            ToastWindow.Success(message, onConfirm, second);
+            Show(message, ToastWindow.ToastType.Success, onConfirm, second);
 
         public void Error(string message, Action? onConfirm = null, double second = 4) =>
-            ToastWindow.Error(message, onConfirm, second);
+            Show(message, ToastWindow.ToastType.Error, onConfirm, second);
 
         public void Info(string message, Action? onConfirm = null, double second = 4) =>
-            ToastWindow.Info(message, onConfirm, second);
+            Show(message, ToastWindow.ToastType.Info, onConfirm, second);
 
         public void Warning(string message, Action? onConfirm = null, double second = 4) =>
-            ToastWindow.Warning(message, onConfirm, second);
+            Show(message, ToastWindow.ToastType.Warning, onConfirm, second);
 
         public void Question(string message, Action? onConfirm = null, double second = 5) =>
-            ToastWindow.Question(message, onConfirm, second);
+            Show(message, ToastWindow.ToastType.Question, onConfirm, second);
+
+        private static void Show(string message, ToastWindow.ToastType type, Action? onConfirm, double second)
+        {
+            if (Application.Current?.Dispatcher is null)
+            {
+                var w = new ToastWindow(message, type, second, onConfirm);
+                w.Show();
+                return;
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var w = new ToastWindow(message, type, second, onConfirm);
+                w.Show();
+            });
+        }
     }
 }
+

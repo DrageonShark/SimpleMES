@@ -5,9 +5,9 @@ using SimpleMES.Services.Security;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class MainViewModel : ViewModelBase
+    public partial class MainViewModel : DialogViewModelBase 
     {
-        [ObservableProperty] private ViewModelBase _currentView;
+        [ObservableProperty] private DialogViewModelBase  _currentView;
         private readonly UserSession _session = UserSession.Current;
 
         public UserModel? User;

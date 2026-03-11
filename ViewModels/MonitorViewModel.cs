@@ -5,26 +5,29 @@ using SimpleMES.Core;
 using SimpleMES.Models;
 using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
+using SimpleMES.Services.Dialog;
 using SimpleMES.Services.Observer;
 using SimpleMES.Services.State;
 using SimpleMES.Services.Toast;
-using SimpleMES.Views;
+using SimpleMES.Services.UI;
 using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class MonitorViewModel : ViewModelBase, IDisposable
+    public partial class MonitorViewModel : DialogViewModelBase, IDisposable
     {
         private readonly IDeviceClientFactory _deviceClientFactory;
         private readonly IDeviceConfigNotifier _configNotifier;
         private readonly Dispatcher _dispatcher;
         private readonly IDeviceStatusNotifier _statusNotifier;
         private readonly IDataRepository _repository;
+        private IToastService _toast;
+        private readonly IDeviceDialogService _deviceDialogService;
+        private readonly IUiDispatcher _uiDispatcher;
         private bool _disposed;
 
-        private IToastService _toast;
+
         //编辑页面属性绑定
         [ObservableProperty] private int _deviceId;
         [ObservableProperty] private string? _deviceName;
@@ -48,24 +51,29 @@ namespace SimpleMES.ViewModels
         public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
         // 右侧告警面板数据源
         public ObservableCollection<AlarmRecordModel> PendingAlarms { get; } = new();
-        public MonitorViewModel(IDeviceStatusNotifier notifier, IDataRepository repository,
-            IToastService toast, IDeviceConfigNotifier configNotifier, IDeviceClientFactory deviceClientFactory)
+        public MonitorViewModel(
+            IDeviceStatusNotifier notifier, IDataRepository repository,
+            IToastService toast, IDeviceConfigNotifier configNotifier,
+            IDeviceClientFactory deviceClientFactory,
+            IDeviceDialogService? deviceDialogService = null,
+            IUiDispatcher? uiDispatcher = null)
         {
-            _dispatcher = GetCurrentDispatcher();
             _statusNotifier = notifier;
             _repository = repository;
             _toast = toast;
             _configNotifier = configNotifier;
             _deviceClientFactory = deviceClientFactory;
-            _ = RefreshAlarms();
-            // 订阅 Service 的事件
+            _deviceDialogService = deviceDialogService ?? new DeviceDialogService();
+            _uiDispatcher = uiDispatcher ?? WpfUiDispatcher.CreateDefault();
+
             _statusNotifier.DeviceStatusChanged += OnDeviceStatusChanged;
+            _ = RefreshAlarms();
         }
         //设备面板数据源处理
         public void OnDeviceStatusChanged(object? sender, DeviceStatusChangedEventArgs e)
         {
-            // 关键点：回到主线程更新 UI
-            _dispatcher.Invoke(() =>
+            //回到主线程更新 UI
+            _uiDispatcher.Invoke(() =>
             {
                 var listLatestDeviceDto = e.LatestDevices;
                 // 如果列表是空的（第一次），就全部添加
@@ -83,14 +91,15 @@ namespace SimpleMES.ViewModels
                     {
                         var oldDeviceDto =
                             ListDeviceDto.FirstOrDefault(d => d.DeviceId == newDeviceDto.DeviceId);
-                        if (oldDeviceDto != null)
+                        if (oldDeviceDto is null)
                         {
-                            oldDeviceDto.Temperature = newDeviceDto.Temperature;
-                            oldDeviceDto.Pressure = newDeviceDto.Pressure;
-                            oldDeviceDto.Speed = newDeviceDto.Speed;
-                            oldDeviceDto.DeviceState = newDeviceDto.DeviceState;
-                            oldDeviceDto.LastUpdateTime = newDeviceDto.LastUpdateTime;
+                            continue;
                         }
+                        oldDeviceDto.Temperature = newDeviceDto.Temperature;
+                        oldDeviceDto.Pressure = newDeviceDto.Pressure;
+                        oldDeviceDto.Speed = newDeviceDto.Speed;
+                        oldDeviceDto.DeviceState = newDeviceDto.DeviceState;
+                        oldDeviceDto.LastUpdateTime = newDeviceDto.LastUpdateTime;
                     }
                     //处理新增设备
                     var newItems = listLatestDeviceDto.Where(n => ListDeviceDto.All(o => o.DeviceId != n.DeviceId));
@@ -120,20 +129,21 @@ namespace SimpleMES.ViewModels
             {
                 try
                 {
+                    if (string.IsNullOrWhiteSpace(dto.DeviceName.Trim()))
+                        throw new Exception("设备名不能为空和空格");
                     if (string.IsNullOrWhiteSpace(dto.IpAddress) && string.IsNullOrWhiteSpace(dto.SerialPort))
                     {
                         throw new Exception("设备IP地址或串口至少一个不为空和空格");
                     }
-                    if (string.IsNullOrWhiteSpace(dto.DeviceName.Trim()))
-                        throw new Exception("设备名不能为空和空格");
+
                     var newDevice = new DeviceModel
                     {
                         DeviceId = dto.DeviceId,
                         DeviceName = dto.DeviceName.Trim(),
-                        IpAddress = dto.IpAddress?.Trim(),
+                        IpAddress = dto.IpAddress?.Trim() ?? string.Empty,
                         Port = dto.Port,
-                        SerialPort = dto.SerialPort?.Trim(),
-                        SlaveId = dto.SlaveId ?? 0,
+                        SerialPort = dto.SerialPort?.Trim() ?? string.Empty,
+                        SlaveId = dto.SlaveId is null or 0 ? (byte)1 : dto.SlaveId,
                     };
                     await _repository.UpdateDeviceAsync(newDevice);
                     // 回写到原始对象，刷新 UI
@@ -166,17 +176,11 @@ namespace SimpleMES.ViewModels
                 };
                 return await TestConnectionAsync(model);
             }
-            var dialog = new DeviceEditWindow(SaveAsync, TestAsync)
-            {
-                Owner = Application.Current.MainWindow,
-                DataContext = editing
-            };
-            var result = dialog.ShowDialog();// 成功时窗口会在 SaveAsync 返回 true 后关闭
-            if (result == true)
-            {
-                Log.Information("设备配置修改成功，设备Id：{DeviceId},设备名：{DeviceName}", device.DeviceId, device.DeviceName);
-                _toast.Success("设备配置更新成功", null, 3.5);
-            }
+            var confirmed = await _deviceDialogService.ShowEditDeviceDialogAsync(editing, SaveAsync, TestAsync);
+            if (!confirmed) return;
+
+            Log.Information("设备配置修改成功，设备Id：{DeviceId},设备名：{DeviceName}", device.DeviceId, device.DeviceName);
+            _toast.Success("设备配置更新成功", null, 3.5);
         }
 
         //设备添加逻辑
@@ -184,46 +188,39 @@ namespace SimpleMES.ViewModels
         private async Task AddDevice()
         {
             Log.Information("添加新设备");
-            DeviceModel newDevice = new DeviceModel();
-            var newId = 1;
-            async Task<bool> OnSure(DeviceModel device)
+            var draft = new DeviceModel { SlaveId = 1 };
+            DeviceModel? savedDevice = null;
+            var newId = 0;
+            async Task<bool> SaveAsync(DeviceModel device)
             {
                 try
                 {
-                    if (!string.IsNullOrWhiteSpace(device.DeviceName))
+                    if (string.IsNullOrWhiteSpace(device.DeviceName))
                     {
-                        if (!string.IsNullOrWhiteSpace(device.IpAddress))
-                        {
-                            newDevice = new DeviceModel
-                            {
-                                DeviceName = device.DeviceName.Trim(),
-                                IpAddress = device.IpAddress.Trim(),
-                                Port = device.Port,
-                                SlaveId = device.SlaveId ?? 0
-                            };
-                            newId = await _repository.InsertDeviceAsync(newDevice);
-                            return true;
-                        }
-                        if (!string.IsNullOrWhiteSpace(device.SerialPort))
-                        {
-                            newDevice = new DeviceModel
-                            {
-                                DeviceName = device.DeviceName.Trim(),
-                                SerialPort = device.SerialPort.Trim(),
-                                SlaveId = device.SlaveId
-                            };
-                            newId = await _repository.InsertDeviceAsync(newDevice);
-                            return true;
-                        }
+                        throw new Exception("设备名为空或空格");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(device.IpAddress) && string.IsNullOrWhiteSpace(device.SerialPort))
+                    {
                         throw new Exception("IP地址或串口至少一个不为空");
                     }
-                    throw new Exception("设备名为空或空格");
+
+                    savedDevice = new DeviceModel
+                    {
+                        DeviceName = device.DeviceName.Trim(),
+                        IpAddress = device.IpAddress?.Trim() ?? string.Empty,
+                        Port = device.Port,
+                        SerialPort = device.SerialPort?.Trim() ?? string.Empty,
+                        SlaveId = device.SlaveId is null or 0 ? (byte)1 : device.SlaveId
+                    };
+
+                    newId = await _repository.InsertDeviceAsync(savedDevice);
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     Log.Error("新增设备失败，错误：{Message}", ex.Message);
                     _toast.Error($"新增设备失败，错误：{ex.Message}", null, 3.5);
-                    //MessageBox.Show($"新增设备失败:{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
             }
@@ -231,33 +228,14 @@ namespace SimpleMES.ViewModels
             {
                 return await TestConnectionAsync(draft);
             }
-            var dialog = new DeviceAddWindow(OnSure, TestAsync)
-            {
-                Owner = Application.Current.MainWindow,
-                DataContext = newDevice
-            };
-            var result = dialog.ShowDialog();
-            if (result == true)
-            {
-                newDevice.DeviceId = newId;
-                // 告诉通信层：新增设备，启动采集任务
-                _configNotifier.NotifyConfigChanged(newDevice, ConfigChangeType.Added);
-                Log.Information("设备添加成功，设备名：{DeviceName}", newDevice.DeviceName);
-                _toast.Success($"设备添加成功，设备名：{newDevice.DeviceName}", null, 3.5);
-                //MessageBox.Show("设备添加成功");
-            }
-        }
-        private static Dispatcher GetCurrentDispatcher()
-        {
-            //尝试多种方式获取UI线程Dispatcher
-            var dispatcher = Dispatcher.FromThread(Thread.CurrentThread);
-            if (dispatcher != null && dispatcher.Thread == Thread.CurrentThread)
-                return dispatcher;
-            if (Application.Current != null)
-                return Application.Current.Dispatcher;
-            return Dispatcher.CurrentDispatcher;
-        }
+            var confirmed = await _deviceDialogService.ShowAddDeviceDialogAsync(draft, SaveAsync, TestAsync);
+            if (!confirmed || savedDevice is null) return;
 
+            savedDevice.DeviceId = newId;
+            _configNotifier.NotifyConfigChanged(savedDevice, ConfigChangeType.Added);
+            Log.Information("设备添加成功，设备名：{DeviceName}", savedDevice.DeviceName);
+            _toast.Success($"设备添加成功，设备名：{savedDevice.DeviceName}", null, 3.5);
+        }
         public void Dispose()
         {
             if (_disposed) return;
@@ -351,9 +329,9 @@ namespace SimpleMES.ViewModels
             {
                 DeviceId = raw.DeviceId,
                 DeviceName = string.IsNullOrWhiteSpace(raw.DeviceName) ? $"设备{raw.DeviceId}" : raw.DeviceName.Trim(),
-                IpAddress = raw.IpAddress?.Trim(),
+                IpAddress = raw.IpAddress?.Trim() ?? string.Empty,
                 Port = raw.Port is > 0 ? raw.Port : 502,
-                SerialPort = raw.SerialPort?.Trim(),
+                SerialPort = raw.SerialPort?.Trim() ?? string.Empty,
                 SlaveId = raw.SlaveId is null or 0 ? (byte)1 : raw.SlaveId
             };
             if (string.IsNullOrWhiteSpace(device.IpAddress) && string.IsNullOrWhiteSpace(device.SerialPort))
@@ -407,11 +385,10 @@ namespace SimpleMES.ViewModels
             try
             {
                 var rows = await _repository.AckAlarmAsync(alarm.AlarmId);
-                if (rows > 0)
-                {
-                    PendingAlarms.Remove(alarm);
-                    _toast.Success($"已确认警告 #{alarm.AlarmId}", null, 3);
-                }
+                if (rows <= 0) return;
+
+                PendingAlarms.Remove(alarm);
+                _toast.Success($"已确认警告 #{alarm.AlarmId}", null, 3);
             }
             catch (Exception ex)
             {

@@ -136,12 +136,12 @@
                             Content="测试连接"
                             Margin="0,0,10,0"
                             Style="{StaticResource TestButtonStyle}"
-                            Click="OnTestConnection"/>
+                            Command="{Binding TestConnectionCommand}"/>
 
                     <Button Content="保存"
                             Margin="0,0,10,0"
                             Style="{StaticResource PrimaryButtonStyle}"
-                            Click="OnSave"
+                            Command="{Binding SaveCommand}"
                             IsDefault="True"/>
 
                     <Button Content="取消"

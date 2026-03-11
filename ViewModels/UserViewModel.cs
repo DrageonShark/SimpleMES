@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class UserViewModel:ViewModelBase
+    public partial class UserViewModel:DialogViewModelBase 
     {
         
     }

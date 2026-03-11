@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class OrderViewModel : ViewModelBase
+    public partial class OrderViewModel : DialogViewModelBase 
     {
         private readonly IDataRepository _repository;
         // 表格绑定的数据源

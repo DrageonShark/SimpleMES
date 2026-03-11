@@ -8,7 +8,7 @@ using SimpleMES.Services.Toast;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class LoginViewModel : ViewModelBase
+    public partial class LoginViewModel : DialogViewModelBase 
     {
         public event Action? LoginSucceeded;
         private readonly IDataRepository _repository;
