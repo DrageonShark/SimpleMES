@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:SimpleMES.Converters"
         WindowStyle="None"
         AllowsTransparency="True"
         ResizeMode="NoResize"
@@ -10,54 +11,114 @@
         ShowInTaskbar="False"
         WindowStartupLocation="Manual"
         Width="340"
-        SizeToContent="Height">
-
+        SizeToContent="Height"
+        Left="{Binding DataContext.Left, RelativeSource={RelativeSource Self}, Mode=OneWay}"
+        Top="{Binding DataContext.Top, RelativeSource={RelativeSource Self}, Mode=OneWay}"
+>
+    <Window.Resources>
+        <converters:ProgressToDashArrayConverter x:Key="ProgressToDashArrayConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+    <!-- 整个卡片的进入/退出动画都在 XAML，避免 code-behind 写动画逻辑 -->
     <!-- 外层提供阴影扩散空间 -->
-    <Border Padding="10">
-        <!-- 中层承载阴影效果 -->
+    <Border x:Name="RootCard" Padding="10" Opacity="0">
+        <Border.RenderTransform>
+            <TranslateTransform X="24"/>
+        </Border.RenderTransform>
+
+        <!-- 样式 + 触发器（触发动画） -->
+        <Border.Style>
+            <Style TargetType="Border">
+                <Style.Triggers>
+                    <!-- 进入动画：窗口加载完成时触发 -->
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <!-- 透明度动画：从0（完全透明）到1（完全显示），0.25秒 -->
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             From="0" To="1"
+                                             Duration="0:0:0.45" />
+                                <!-- 位移动画：从X=24（向右偏移24像素）到X=0，0.25秒 -->
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                             From="24" To="0"
+                                             Duration="0:0:0.45">
+                                    <!-- 缓动函数：让动画更丝滑（先快后慢） -->
+                                    <DoubleAnimation.EasingFunction>
+                                        <CubicEase EasingMode="EaseOut" />
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+
+                    <!-- 退出动画：VM的IsClosing变为True时触发 -->
+                    <DataTrigger Binding="{Binding IsClosing}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard FillBehavior="HoldEnd">
+                                    <!-- 透明度动画：到0（完全透明），0.28秒 -->
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 To="0"
+                                                 Duration="0:0:0.45" />
+                                    <!-- 位移动画：到X=24（向右偏移24像素），0.28秒 -->
+                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                 To="24"
+                                                 Duration="0:0:0.45">
+                                        <!-- 缓动函数：让动画更丝滑（先慢后快） -->
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseIn" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <!-- 外层边框：加阴影 -->
         <Border CornerRadius="10">
             <Border.Effect>
-                <DropShadowEffect 
-                    BlurRadius="16" 
-                    ShadowDepth="3" 
-                    Direction="270"
-                    Opacity="0.25" 
-                    Color="#000000"/>
+                <DropShadowEffect BlurRadius="16"
+                                  ShadowDepth="3"
+                                  Direction="270"
+                                  Opacity="0.25"
+                                  Color="#000000" />
+                <!-- 阴影颜色（黑色） -->
             </Border.Effect>
-            <!-- 内层裁剪圆角 -->
-            <Border 
-                CornerRadius="8" 
-                ClipToBounds="True" 
-                Background="White">
+
+            <!-- 内层边框：白色背景 + 圆角 -->
+            <Border CornerRadius="8" ClipToBounds="True" Background="White">
                 <StackPanel>
-                    <!-- ① 顶部色带：类型标题 + 关闭按钮 -->
-                    <Border x:Name="HeaderBorder" 
-                            Height="40" 
-                            Padding="14 0 6 0" 
-                            CornerRadius="8 8 0 0">
+                    <Border Height="40"
+                        Padding="14 0 6 0"
+                        CornerRadius="8 8 0 0" 
+                        Background="{Binding HeaderBrush}">
+                        <!-- 绑定VM的标题栏颜色 -->
                         <DockPanel VerticalAlignment="Center">
-                            <TextBlock 
-                                x:Name="TitleText"
-                                DockPanel.Dock="Left"
-                                Foreground="White"
-                                FontSize="15"
-                                FontWeight="Bold"
-                                FontFamily="Microsoft YaHei UI"
-                                VerticalAlignment="Center"/>
-                            <Button 
-                                x:Name="HeaderCloseBtn"
-                                DockPanel.Dock="Right"
-                                Content="✕"
-                                Width="30" Height="30"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Foreground="White"
-                                FontSize="13"
-                                Cursor="Hand"
-                                Padding="0"
-                                HorizontalAlignment="Right"
-                                HorizontalContentAlignment="Center"
-                                VerticalContentAlignment="Center">
+                            <!-- 标题文本：绑定VM的Title（成功/错误/警告等） -->
+                            <TextBlock Text="{Binding Title}"
+                                       DockPanel.Dock="Left"
+                                       Foreground="White" 
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       FontFamily="Microsoft YaHei UI"
+                                       VerticalAlignment="Center" />
+                            <!-- 关闭按钮：绑定VM的CloseCommand -->
+                            <Button DockPanel.Dock="Right"
+                                    Content="✕"  
+                                    Width="30"
+                                    Height="30"
+                                    Background="Transparent"  
+                                    BorderThickness="0"  
+                                    Foreground="White"
+                                    FontSize="13"
+                                    Cursor="Hand"
+                                    Padding="0"
+                                    HorizontalAlignment="Right"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Command="{Binding CloseCommand}">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Style.Triggers>
@@ -70,95 +131,105 @@
                             </Button>
                         </DockPanel>
                     </Border>
-
-                    <!-- ② 内容区：图标 + 消息 + 时间 -->
                     <Border Background="White" Padding="16 14 16 10">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" />
+                                <!-- 第一列：自适应宽度（图标） -->
+                                <ColumnDefinition Width="*" />
+                                <!-- 第二列：占剩余宽度（文字） -->
                             </Grid.ColumnDefinitions>
-                            <materialDesign:PackIcon
-                                x:Name="StatusIcon"
-                                Grid.Column="0"
-                                Width="38" Height="38"
-                                VerticalAlignment="Top"
-                                Margin="0 2 14 0"/>
+
+                            <!-- 图标：绑定VM的IconKind（图标样式）和IconBrush（图标颜色） -->
+                            <materialDesign:PackIcon Grid.Column="0"
+                                                     Width="38"
+                                                     Height="38"
+                                                     VerticalAlignment="Top"
+                                                     Margin="0 2 14 0"
+                                                     Kind="{Binding IconKind}"
+                                                     Foreground="{Binding IconBrush}" />
+
+                            <!-- 文字区域：StackPanel垂直排列 -->
                             <StackPanel Grid.Column="1">
-                                <TextBlock x:Name="MessageText"
+                                <!-- 提示内容：绑定VM的Message，自动换行 -->
+                                <TextBlock Text="{Binding Message}"
                                            Foreground="#333333"
                                            FontSize="13"
                                            FontFamily="Microsoft YaHei UI"
-                                           TextWrapping="Wrap"/>
-                                <TextBlock x:Name="DateTimeText"
+                                           TextWrapping="Wrap" />
+                                <!-- 时间文本：绑定VM的DateTimeText -->
+                                <TextBlock Text="{Binding DateTimeText}"
                                            Foreground="#999999"
                                            FontSize="11"
                                            FontFamily="Microsoft YaHei UI"
-                                           Margin="0 6 0 0"/>
+                                           Margin="0 6 0 0" />
                             </StackPanel>
                         </Grid>
                     </Border>
-
-                    <!-- 分隔线 -->
-                    <Rectangle Height="1" Fill="#EEEEEE"/>
-
-                    <!-- ③ 底栏：确认 / 关闭 按钮 + 圆形进度环 -->
-                    <Border 
-                        Background="White" 
-                        Padding="16 10 12 10" 
-                        CornerRadius="0 0 8 8">
+                    <Rectangle Height="1" Fill="#EEEEEE" />
+                    <Border Background="White" Padding="16 10 12 10" CornerRadius="0 0 8 8">
                         <DockPanel>
-                            <!-- 进度环停靠在右侧 -->
-                            <Canvas DockPanel.Dock="Right"
-                                    Width="28" Height="28"
-                                    VerticalAlignment="Center">
-                                <!-- 灰色背景圆 -->
-                                <Ellipse Width="24" Height="24"
-                                         Canvas.Left="2" Canvas.Top="2"
-                                         Stroke="#E8E8E8" StrokeThickness="3"
-                                         Fill="Transparent"/>
-                                <!-- 橙色倒计时弧线 -->
-                                <Path x:Name="ProgressRing"
-                                      Stroke="#FFA500" StrokeThickness="3"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      RenderTransformOrigin="0.5,0.5">
+                            <!-- 右侧：倒计时圆环进度条 -->
+                            <Canvas DockPanel.Dock="Right" Width="28" Height="28" VerticalAlignment="Center">
+                                <!-- 底层灰色圆环（背景） -->
+                                <Ellipse 
+                                    Width="24"
+                                    Height="24"
+                                    Canvas.Left="2"
+                                    Canvas.Top="2"
+                                    Stroke="#E8E8E8"
+                                    StrokeThickness="3"
+                                    Fill="Transparent" />
+                                <!-- 上层橙色进度圆环（动态变化） -->
+                                <Path 
+                                    Stroke="#FFA500"
+                                    StrokeThickness="3"
+                                    StrokeStartLineCap="Round"  
+                                    StrokeEndLineCap="Round"
+                                    RenderTransformOrigin="0.5,0.5"
+                                    StrokeDashArray="{Binding ProgressUnits, Converter={StaticResource ProgressToDashArrayConverter}}">
+                                    <!-- 圆环路径：圆心(14,14)，半径12 -->
                                     <Path.Data>
-                                        <!-- 圆心在 Canvas 中央 (14,14)，半径 12 -->
-                                        <EllipseGeometry Center="14,14" RadiusX="12" RadiusY="12"/>
+                                        <EllipseGeometry Center="14,14" RadiusX="12" RadiusY="12" />
                                     </Path.Data>
-                                    <!-- 旋转 -90° 使弧线从 12 点钟方向开始 -->
+                                    <!-- 旋转90度：让进度条从顶部开始（默认从右侧） -->
                                     <Path.RenderTransform>
-                                        <RotateTransform Angle="-90"/>
+                                        <RotateTransform Angle="-90" />
                                     </Path.RenderTransform>
                                 </Path>
                             </Canvas>
 
-                            <!-- 按钮组 -->
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Center">
-                                <Button x:Name="ConfirmBtn"
-                                        Content="确认"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Foreground="#1976D2"
-                                        FontSize="13"
-                                        FontWeight="Bold"
-                                        FontFamily="Microsoft YaHei UI"
-                                        Cursor="Hand"
-                                        Padding="0"
-                                        Margin="0 0 30 0"/>
-                                <Button x:Name="CloseBtn"
-                                        Content="关闭"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Foreground="#FF8C00"
-                                        FontSize="13"
-                                        FontWeight="Bold"
-                                        FontFamily="Microsoft YaHei UI"
-                                        Cursor="Hand"
-                                        Padding="0"/>
+                            <!-- 左侧：确认/关闭按钮 -->
+                            <StackPanel 
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center">
+                                <!-- 确认按钮：绑定VM的ConfirmCommand，是否显示绑定ShowConfirmButton -->
+                                <Button 
+                                    Content="确认"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="#1976D2"
+                                    FontSize="13"
+                                    FontWeight="Bold"
+                                    FontFamily="Microsoft YaHei UI"
+                                    Cursor="Hand"
+                                    Padding="0"
+                                    Margin="0 0 30 0"
+                                    Command="{Binding ConfirmCommand}"
+                                    Visibility="{Binding ShowConfirmButton, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                <!-- 关闭按钮：绑定VM的CloseCommand -->
+                                <Button 
+                                    Content="关闭"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="#FF8C00"
+                                    FontSize="13"
+                                    FontWeight="Bold"
+                                    FontFamily="Microsoft YaHei UI"
+                                    Cursor="Hand"
+                                    Padding="0"
+                                    Command="{Binding CloseCommand}" />
                             </StackPanel>
                         </DockPanel>
                     </Border>

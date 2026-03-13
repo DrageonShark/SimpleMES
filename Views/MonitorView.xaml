@@ -163,7 +163,13 @@
                         Margin="10,0,0,0"
                         Content="添加设备"
                         Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding AddDeviceCommand}"/>
+                        Command="{Binding AddDeviceCommand}">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
             </Grid>
         </Border>
 
@@ -187,7 +193,6 @@
                     <TextBlock Text="{Binding FaultCount}" FontSize="26" FontWeight="Bold" Foreground="#991B1B"/>
                 </StackPanel>
             </Border>
-            <!-- 如果你暂时没做 DisabledCount，可先删掉这个卡片 -->
             <Border Background="#F3F4F6" BorderBrush="#D1D5DB" BorderThickness="1" CornerRadius="10" Padding="12">
                 <StackPanel>
                     <TextBlock Text="已停用" Foreground="#374151"/>
@@ -314,23 +319,26 @@
                                             </Button.Resources>
                                         </Button>
 
-                                        <Button Grid.Column="1"
-                                                Content="停用设备"
-                                                Command="{Binding DataContext.ToggleDeviceEnabledCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}">
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
-                                                    <Setter Property="Content" Value="停用设备"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disabled}">
-                                                            <Setter Property="Content" Value="启用设备"/>
-                                                            <Setter Property="Background" Value="#059669"/>
-                                                            <Setter Property="BorderBrush" Value="#059669"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
+                                        <Border Grid.Column="1" BorderThickness="1" 
+                                                CornerRadius="4" BorderBrush="#DC2626">
+                                            <Button BorderThickness="0"
+                                                    Content="停用设备"
+                                                    Command="{Binding DataContext.ToggleDeviceEnabledCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
+                                                        <Setter Property="Content" Value="停用设备"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disabled}">
+                                                                <Setter Property="Content" Value="启用设备"/>
+                                                                <Setter Property="Background" Value="#059669"/>
+                                                                <Setter Property="BorderBrush" Value="#059669"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </Border>
                                     </Grid>
 
                                     <!-- 更新时间 -->
