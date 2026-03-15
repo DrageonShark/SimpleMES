@@ -5,9 +5,16 @@ using SimpleMES.Services.Security;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class MainViewModel : DialogViewModelBase 
+    public partial class MainViewModel : DialogViewModelBase
     {
-        [ObservableProperty] private DialogViewModelBase  _currentView;
+        [ObservableProperty] private DialogViewModelBase _currentView;
+        //侧边栏辅助属性，通知UI刷新内容显示 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(MenuToggleContent))]
+        [NotifyPropertyChangedFor(nameof(MenuToggleToolTip))]
+        private bool _isMenuCollapsed = false;
+        public string MenuToggleContent => IsMenuCollapsed ? "☰" : "❮";
+        public string MenuToggleToolTip => IsMenuCollapsed ? "显示侧边栏" : "隐藏侧边栏";
         private readonly UserSession _session = UserSession.Current;
 
         public UserModel? User;
@@ -15,6 +22,7 @@ namespace SimpleMES.ViewModels
         private MonitorViewModel MonitorView { get; }
         private OrderViewModel OrderView { get; }
         private ReportViewModel ReportView { get; }
+
 
         public MainViewModel(MonitorViewModel monitor, OrderViewModel orderView, ReportViewModel reportView)
         {
@@ -53,6 +61,11 @@ namespace SimpleMES.ViewModels
         private void SingOut()
         {
             _session.SignOut();
+        }
+        [RelayCommand]
+        private void ToggleMenu()
+        {
+            IsMenuCollapsed = !IsMenuCollapsed;
         }
     }
 }

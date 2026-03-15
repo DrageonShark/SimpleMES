@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:state="clr-namespace:SimpleMES.Services.State"
+             xmlns:converters="clr-namespace:SimpleMES.Converters"
              mc:Ignorable="d"
              d:DesignHeight="760"
              d:DesignWidth="1260">
@@ -63,6 +64,40 @@
             <Setter Property="BorderBrush" Value="#DC2626"/>
         </Style>
 
+        <Style x:Key="AlarmRailToggleButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="15"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#C9D3E0"/>
+            <Setter Property="BorderThickness" Value="0 1 2 1"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0 -5 -10 0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F1F5F9"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#94A3B8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E2E8F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- 设备卡片边框（按设备状态变色） -->
         <Style x:Key="DeviceCardStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="14"/>
@@ -74,10 +109,11 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="#1F2937"
-                                      BlurRadius="16"
-                                      ShadowDepth="3"
-                                      Opacity="0.10"/>
+                    <DropShadowEffect 
+                        Color="#1F2937"
+                        BlurRadius="16"
+                        ShadowDepth="3"
+                        Opacity="0.10"/>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
@@ -95,6 +131,9 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <!--侧边栏宽度值辅助改变转换器-->
+        <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter"/>
+
 
     </UserControl.Resources>
 
@@ -205,7 +244,7 @@
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- 左侧：设备卡片 -->
@@ -354,125 +393,154 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-
-            <!-- 右侧：告警面板 -->
-            <Border Grid.Column="1" Margin="10,0,0,0" Padding="5"
-                    Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="12">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <DockPanel Grid.Row="0" Margin="0,0,0,10">
-                        <StackPanel>
-                            <TextBlock Text="系统警告信息" FontSize="16" FontWeight="Bold" Foreground="#111827"/>
-                            <TextBlock Text="仅显示未确认告警" FontSize="12" Foreground="#6B7280"/>
-                        </StackPanel>
-
-                        <Button DockPanel.Dock="Right"
-                                Width="68"
-                                Style="{StaticResource GhostButtonStyle}"
-                                Content="刷新"
-                                Command="{Binding RefreshAlarmsCommand}">
-                            <Button.Resources>
-                                <Style TargetType="Border">
-                                    <Setter Property="CornerRadius" Value="4"></Setter>
-                                </Style>
-                            </Button.Resources>
-                        </Button>
-                    </DockPanel>
-
-                    <ListBox Grid.Row="1"
-                             ItemsSource="{Binding PendingAlarms}"
-                             BorderThickness="0"
-                             Background="Transparent"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             HorizontalContentAlignment="Stretch">
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Focusable" Value="False"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="0"/>
-                                <Setter Property="Margin" Value="0,0,0,8"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ListBoxItem">
-                                            <ContentPresenter/>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="10"
-                    CornerRadius="8"
-                    BorderBrush="#FECACA"
+            <!-- 按钮轨道 + 告警面板-->
+            <Border Grid.Column="1"
+                    Margin="10 0 0 0"
+                    Background="White"
+                    BorderBrush="#E5E7EB"
                     BorderThickness="1"
-                    Background="#FEF2F2">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                    CornerRadius="12">
+                <Grid ClipToBounds="False">
+                    <Grid.ColumnDefinitions>
+                        
+                        <ColumnDefinition 
+                            Width="{Binding IsAlarmPanelCollapsed,
+                            Converter={StaticResource BoolToGridLengthConverter},
+                            ConverterParameter=275}"/>
+                        <ColumnDefinition Width="20"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- 左侧轨道 -->
+                    <Grid Grid.Column="1" Background="#F8FAFC">
+                        <Border HorizontalAlignment="Right" Width="1" Background="#E2E8F0"/>
+                        <Button 
+                                Margin="0,10,0,0"
+                                VerticalAlignment="Top"
+                                Content="{Binding AlarmPanelToggleContent}"
+                                ToolTip="{Binding AlarmPanelToggleText}"
+                                Command="{Binding ToggleAlarmPanelCommand}"
+                                Style="{StaticResource AlarmRailToggleButtonStyle}"/>
+                    </Grid>
+                    <!-- 告警内容区 -->
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Grid.Row="0" Margin="8 8 8 10">
+                            <StackPanel>
+                                <TextBlock Text="系统警告信息" FontSize="16" FontWeight="Bold" Foreground="#111827"/>
+                                <TextBlock Text="仅显示未确认告警" FontSize="12" Foreground="#6B7280"/>
+                            </StackPanel>
 
-                                        <TextBlock Grid.Row="0"
-                               Text="{Binding AlarmMessage}"
-                               FontSize="13"
-                               Foreground="#7F1D1D"
-                               TextWrapping="Wrap"/>
+                            <Button DockPanel.Dock="Right"
+                                    Margin="80 0 0 0 "
+                                    Width="68"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="刷新"
+                                    Command="{Binding RefreshAlarmsCommand}">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+                        </DockPanel>
 
-                                        <!-- 底部信息 + 按钮，使用 Grid 防止时间与按钮重叠 -->
-                                        <Grid Grid.Row="1" Margin="0,8,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                        <ListBox Grid.Row="1"
+                                 Margin="5 5 5 0"
+                                 ItemsSource="{Binding PendingAlarms}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 HorizontalContentAlignment="Stretch">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0,0,0,8"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
 
-                                            <TextBlock Grid.Column="0"
-                                   Text="{Binding DeviceId, StringFormat=设备 #{0}}"
-                                   FontSize="11"
-                                   Foreground="#991B1B"/>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="10"
+                                            CornerRadius="8"
+                                            BorderBrush="#FECACA"
+                                            BorderThickness="1"
+                                            Background="#FEF2F2">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-                                            <TextBlock Grid.Column="1"
-                                   Margin="10,0,10,0"
-                                   Text="{Binding AlarmTime, StringFormat={}{0:MM-dd HH:mm:ss}}"
-                                   FontSize="11"
-                                   Foreground="#B91C1C"
-                                   HorizontalAlignment="Right"
-                                   TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Row="0"
+                                                       Text="{Binding AlarmMessage}"
+                                                       FontSize="13"
+                                                       Foreground="#7F1D1D"
+                                                       TextWrapping="Wrap"/>
 
-                                            <Button Grid.Column="2"
-                                Content="确认"
-                                Width="58"
-                                Height="26"
-                                Style="{StaticResource GhostButtonStyle}"
-                                Command="{Binding DataContext.AckAlarmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding}">
-                                                <Button.Resources>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="CornerRadius" Value="4"/>
-                                                    </Style>
-                                                </Button.Resources>
-                                            </Button>
+                                            <!-- 底部信息 + 按钮，使用 Grid 防止时间与按钮重叠 -->
+                                            <Grid Grid.Row="1" Margin="0,8,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding DeviceId, StringFormat=设备 #{0}}"
+                                                           FontSize="11"
+                                                           Foreground="#991B1B"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Margin="10,0,10,0"
+                                                           Text="{Binding AlarmTime, StringFormat={}{0:MM-dd HH:mm:ss}}"
+                                                           FontSize="11"
+                                                           Foreground="#B91C1C"
+                                                           HorizontalAlignment="Right"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Grid.Column="2"
+                                                        Content="确认"
+                                                        Width="58"
+                                                        Height="26"
+                                                        VerticalContentAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Style="{StaticResource GhostButtonStyle}"
+                                                        Command="{Binding DataContext.AckAlarmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="4"/>
+                                                        </Style>
+                                                    </Button.Resources>
+                                                </Button>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                    </Grid>
 
                 </Grid>
             </Border>

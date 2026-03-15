@@ -6,8 +6,11 @@
         xmlns:local="clr-namespace:SimpleMES"
         xmlns:vm="clr-namespace:SimpleMES.ViewModels"
         xmlns:views="clr-namespace:SimpleMES.Views"
+        xmlns:converters="clr-namespace:SimpleMES.Converters"
         mc:Ignorable="d"
-        Title="简单MES系统" Height="800" Width="1400"
+        Title="简单MES系统" 
+        Height="800" 
+        Width="1250"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:MonitorViewModel}">
@@ -19,31 +22,114 @@
         <DataTemplate DataType="{x:Type vm:ReportViewModel}">
             <views:ReportView />
         </DataTemplate>
+        <!--侧边栏宽度值辅助改变转换器-->
+        <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter"/>
+
+        <!--导航栏按钮-->
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,6,0,0"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" 
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4">
+                            <ContentPresenter Margin="{TemplateBinding Margin}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" 
+                                        Property="Background" 
+                                        Value="#1D4F80"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd"
+                                        Property="Background"
+                                        Value="#173F67"></Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--侧边栏按钮-->
+        <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#1F2D3D"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D0D7E2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
     </Window.Resources>
     <Grid Background="#F0F2F5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="LeftColumn" Width="200"/>
+            <ColumnDefinition Width="{Binding IsMenuCollapsed,
+                Converter={StaticResource BoolToGridLengthConverter},
+                ConverterParameter=200}"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Border Grid.Column="0" Background="#2C3E50">
-            <Grid>
-                <Button x:Name="ToggleMenuButton" Content="⏴" Width="24" Height="24" Margin="5" HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent" Foreground="White" BorderBrush="White" Click="ToggleMenu"/>
-                <StackPanel Margin="10,40,0,10">
-                    <TextBlock Text="Simple MES" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,20,0,40" HorizontalAlignment="Center"/>
-                    <Button Content="📊 设备监控" Command="{Binding ShowMonitorCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
-                    <Button Content="📝 生产订单" Command="{Binding ShowOrderCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
-                    <Button Content="📈 数据报表" Command="{Binding ShowReportCommand}" Height="40" Margin="0,5" Background="Transparent" Foreground="White" BorderThickness="0" HorizontalContentAlignment="Left" Padding="20,0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-        <Border Grid.Column="1" Background="White" Margin="10" CornerRadius="10">
+        <!-- 侧边栏 -->
+        <Border Grid.Column="0" Background="#12304E" 
+                CornerRadius="0 8 8 0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <!--<TextBlock Grid.Row="0" Text="{Binding PageTitle}" Foreground="Aqua" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>-->
-                <ContentControl Grid.Row="1" Content="{Binding CurrentView}" Margin="5"/>
+                <StackPanel Grid.Row="0" Margin="16 18 16 14">
+                    <TextBlock Text="Simple MES" FontSize="24" FontWeight="Bold" 
+                               Foreground="White"/>
+                    <TextBlock Text="设备管理中心" FontSize="12" Foreground="#BBD1E6" 
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Margin="10 8 10 10">
+                    <Button Style="{StaticResource NavButtonStyle}" 
+                            Command="{Binding ShowMonitorCommand}" Content="设备监控"/>
+                    <Button Style="{StaticResource NavButtonStyle}" 
+                            Command="{Binding ShowOrderCommand}" Content="生产订单"/>
+                    <Button Style="{StaticResource NavButtonStyle}" 
+                            Command="{Binding ShowReportCommand}" Content="数据报表"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <!-- 右侧主区 -->
+        <Border Grid.Column="1" Background="White" Margin="12" CornerRadius="12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="#F7FAFD" BorderBrush="#E8EEF5"
+                        BorderThickness="0 0 0 1" 
+                        CornerRadius="12 12 0 0">
+                    <DockPanel Margin="12 0">
+                        <Button
+                            
+                            DockPanel.Dock="Left"
+                                Style="{StaticResource SidebarToggleButtonStyle}"
+                                Content="{Binding MenuToggleContent }"
+                                ToolTip="{Binding MenuToggleToolTip}"
+                                Command="{Binding ToggleMenuCommand}"/>
+                        <TextBlock Text="{Binding PageTitle}"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,0,0"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2D3D"/>
+                    </DockPanel>
+                </Border>
+                <ContentControl Grid.Row="1" Content="{Binding CurrentView}" Margin="8"/>
             </Grid>
         </Border>
     </Grid>

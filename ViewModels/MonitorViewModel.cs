@@ -46,6 +46,15 @@ namespace SimpleMES.ViewModels
         [ObservableProperty] private int _disconnectedCount;
         [ObservableProperty] private int _faultCount;
         [ObservableProperty] private int _disabledCount;
+
+        //警告页面的侧边栏按钮触发通知UI和提示文字改变
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(AlarmPanelToggleText))]
+        [NotifyPropertyChangedFor(nameof(AlarmPanelToggleContent))]
+        private bool _isAlarmPanelCollapsed = false;
+
+        public string AlarmPanelToggleContent => IsAlarmPanelCollapsed ? "<" : ">";
+        public string AlarmPanelToggleText => IsAlarmPanelCollapsed ? "展开告警侧栏" : "收起告警侧栏";
         // 界面绑定的设备列表
         public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
         public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
@@ -394,6 +403,14 @@ namespace SimpleMES.ViewModels
             {
                 _toast.Error($"确认告警失败：{ex.Message}", null, 3);
             }
+        }
+        /// <summary>
+        /// 警告板块侧边栏按钮
+        /// </summary>
+        [RelayCommand]
+        private void ToggleAlarmPanel()
+        {
+            IsAlarmPanelCollapsed = !IsAlarmPanelCollapsed;
         }
     }
 }
