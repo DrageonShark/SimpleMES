@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using SimpleMES.Models;
 
 namespace SimpleMES.Services.Security
 {
-    public sealed class UserSession
+    public sealed partial class UserSession : ObservableObject
     {
         private static readonly Lazy<UserSession> Lazy = new Lazy<UserSession>(() => new UserSession());
         public static UserSession Current => Lazy.Value;
 
-        private UserSession() {}
-        public UserModel? CurrentUser { get; private set; }
+        private UserSession() { }
+        [ObservableProperty]
+        private UserModel? _currentUser;
         public void SignIn(UserModel user)
         {
             // 仅保留必要信息，避免在内存中保存密码相关字段

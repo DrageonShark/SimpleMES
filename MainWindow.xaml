@@ -1,135 +1,320 @@
-﻿<Window x:Class="SimpleMES.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SimpleMES"
-        xmlns:vm="clr-namespace:SimpleMES.ViewModels"
-        xmlns:views="clr-namespace:SimpleMES.Views"
-        xmlns:converters="clr-namespace:SimpleMES.Converters"
-        mc:Ignorable="d"
-        Title="简单MES系统" 
-        Height="800" 
-        Width="1250"
-        WindowStartupLocation="CenterScreen">
+﻿<Window
+    x:Class="SimpleMES.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:SimpleMES.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:SimpleMES"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:SimpleMES.Views"
+    xmlns:vm="clr-namespace:SimpleMES.ViewModels"
+    Title="简单MES系统"
+    Width="1250"
+    Height="800"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:MonitorViewModel}">
             <views:MonitorView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:OrderViewModel}">
-            <views:OrderView/>
+            <views:OrderView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ReportViewModel}">
             <views:ReportView />
         </DataTemplate>
-        <!--侧边栏宽度值辅助改变转换器-->
-        <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter"/>
-
-        <!--导航栏按钮-->
+        <!--  侧边栏宽度值辅助改变转换器  -->
+        <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
+        <converters:UserRoleConverter x:Key="UserRoleConverter" />
+        <!--  导航栏按钮  -->
         <Style x:Key="NavButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="42"/>
-            <Setter Property="Margin" Value="0,6,0,0"/>
-            <Setter Property="Padding" Value="14,0"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="FontSize" Value="15" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" 
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="4">
-                            <ContentPresenter Margin="{TemplateBinding Margin}"/>
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="4">
+                            <ContentPresenter Margin="{TemplateBinding Margin}" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" 
-                                        Property="Background" 
-                                        Value="#1D4F80"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#1D4F80" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd"
-                                        Property="Background"
-                                        Value="#173F67"></Setter>
+                                <Setter TargetName="Bd" Property="Background" Value="#173F67" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        <!--侧边栏按钮-->
+        <!--  侧边栏按钮  -->
         <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="30"/>
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="#1F2D3D"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D0D7E2"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="#1F2D3D" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#D0D7E2" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style x:Key="SessionTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#1F2D3D" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Width" Value="30" />
+        </Style>
+        <!--  设置菜单按钮  -->
+        <Style x:Key="SettingsToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="#1F2D3D" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#EEF3F8" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E4EDF7" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--  设置菜单子按钮  -->
+        <Style x:Key="SettingsMenuItemButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F3F7FB" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#EAF1F8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
     <Grid Background="#F0F2F5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{Binding IsMenuCollapsed,
-                Converter={StaticResource BoolToGridLengthConverter},
-                ConverterParameter=200}"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="{Binding IsMenuCollapsed, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=200}" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <!-- 侧边栏 -->
-        <Border Grid.Column="0" Background="#12304E" 
-                CornerRadius="0 8 8 0">
+        <!--  侧边栏  -->
+        <Border
+            Grid.Column="0"
+            Background="#12304E"
+            CornerRadius="0 8 8 0">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Margin="16 18 16 14">
-                    <TextBlock Text="Simple MES" FontSize="24" FontWeight="Bold" 
-                               Foreground="White"/>
-                    <TextBlock Text="设备管理中心" FontSize="12" Foreground="#BBD1E6" 
-                               Margin="0,4,0,0"/>
+                <StackPanel Grid.Row="0" Margin="16,18,16,14">
+                    <TextBlock
+                        FontSize="24"
+                        FontWeight="Bold"
+                        Foreground="White"
+                        Text="Simple MES" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="#BBD1E6"
+                        Text="设备管理中心" />
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Margin="10 8 10 10">
-                    <Button Style="{StaticResource NavButtonStyle}" 
-                            Command="{Binding ShowMonitorCommand}" Content="设备监控"/>
-                    <Button Style="{StaticResource NavButtonStyle}" 
-                            Command="{Binding ShowOrderCommand}" Content="生产订单"/>
-                    <Button Style="{StaticResource NavButtonStyle}" 
-                            Command="{Binding ShowReportCommand}" Content="数据报表"/>
+                <StackPanel Grid.Row="1" Margin="10,8,10,10">
+                    <Button
+                        Command="{Binding ShowMonitorCommand}"
+                        Content="设备监控"
+                        Style="{StaticResource NavButtonStyle}" />
+                    <Button
+                        Command="{Binding ShowOrderCommand}"
+                        Content="生产订单"
+                        Style="{StaticResource NavButtonStyle}" />
+                    <Button
+                        Command="{Binding ShowReportCommand}"
+                        Content="数据报表"
+                        Style="{StaticResource NavButtonStyle}" />
                 </StackPanel>
             </Grid>
         </Border>
-        <!-- 右侧主区 -->
-        <Border Grid.Column="1" Background="White" Margin="12" CornerRadius="12">
+        <!--  右侧主区  -->
+        <Border
+            Grid.Column="1"
+            Margin="12"
+            Background="White"
+            CornerRadius="12">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Border Grid.Row="0" Background="#F7FAFD" BorderBrush="#E8EEF5"
-                        BorderThickness="0 0 0 1" 
-                        CornerRadius="12 12 0 0">
-                    <DockPanel Margin="12 0">
-                        <Button
-                            
-                            DockPanel.Dock="Left"
+                <Border
+                    Grid.Row="0"
+                    Background="#F7FAFD"
+                    BorderBrush="#E8EEF5"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="12 12 0 0">
+                    <Grid Margin="12,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <Button
+                                Command="{Binding ToggleMenuCommand}"
+                                Content="{Binding MenuToggleContent}"
                                 Style="{StaticResource SidebarToggleButtonStyle}"
-                                Content="{Binding MenuToggleContent }"
-                                ToolTip="{Binding MenuToggleToolTip}"
-                                Command="{Binding ToggleMenuCommand}"/>
-                        <TextBlock Text="{Binding PageTitle}"
-                                   VerticalAlignment="Center"
-                                   Margin="12,0,0,0"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="#1F2D3D"/>
-                    </DockPanel>
+                                ToolTip="{Binding MenuToggleToolTip}" />
+                            <TextBlock
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="18"
+                                FontWeight="SemiBold"
+                                Foreground="#1F2D3D"
+                                Text="{Binding PageTitle}" />
+                        </StackPanel>
+
+                        <Grid Grid.Column="2" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Width="Auto"
+                                Margin="0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource SessionTextBlockStyle}"
+                                Text="{Binding Session.CurrentUser.UserName}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Width="Auto"
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource SessionTextBlockStyle}"
+                                Text="{Binding Session.CurrentUser.Role, StringFormat='{}{0}祝你有个美好的一天', Converter={StaticResource UserRoleConverter}}" />
+
+                            <Border
+                                Grid.Column="2"
+                                Width="1"
+                                Height="20"
+                                Margin="0,0,10,0"
+                                Background="#C9CED6" />
+
+                            <ToggleButton
+                                x:Name="SettingsButton"
+                                Grid.Column="3"
+                                IsChecked="{Binding IsSettingsMenuOpen, Mode=TwoWay}"
+                                Style="{StaticResource SettingsToggleButtonStyle}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="14"
+                                        Text="&#xE713;" />
+                                    <TextBlock
+                                        Margin="4,0,0,0"
+                                        FontSize="15"
+                                        Text="设置" />
+                                    <TextBlock
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="10"
+                                        Text="&#xE70D;" />
+                                </StackPanel>
+                            </ToggleButton>
+
+                            <Popup
+                                AllowsTransparency="True"
+                                IsOpen="{Binding IsSettingsMenuOpen, Mode=TwoWay}"
+                                Placement="Bottom"
+                                PlacementTarget="{Binding ElementName=SettingsButton}"
+                                StaysOpen="False"
+                                VerticalOffset="6">
+                                <Border
+                                    Width="140"
+                                    Background="White"
+                                    BorderBrush="#D4DCE6"
+                                    BorderThickness="1"
+                                    SnapsToDevicePixels="True">
+                                    <StackPanel>
+                                        <Button
+                                            Command="{Binding OpenSoftwareVersionCommand}"
+                                            Content="软件版本"
+                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                        <Separator Margin="8,2" />
+                                        <Button
+                                            Command="{Binding OpenLogRecordCommand}"
+                                            Content="日志记录"
+                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                        <Separator Margin="8,2" />
+                                        <Button
+                                            Command="{Binding OpenSystemConfigCommand}"
+                                            Content="系统配置"
+                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                        <Separator Margin="8,2" />
+                                        <Button
+                                            Command="{Binding SignOutCurrentUserCommand}"
+                                            Content="退出当前账号"
+                                            Foreground="#C42B1C"
+                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Grid>
                 </Border>
-                <ContentControl Grid.Row="1" Content="{Binding CurrentView}" Margin="8"/>
+                <ContentControl
+                    Grid.Row="1"
+                    Margin="8"
+                    Content="{Binding CurrentView}" />
             </Grid>
         </Border>
     </Grid>

@@ -7,6 +7,7 @@ namespace SimpleMES.ViewModels
 {
     public partial class MainViewModel : DialogViewModelBase
     {
+        public event Action? SignOutRequested;
         [ObservableProperty] private DialogViewModelBase _currentView;
         //侧边栏辅助属性，通知UI刷新内容显示 
         [ObservableProperty]
@@ -15,7 +16,8 @@ namespace SimpleMES.ViewModels
         private bool _isMenuCollapsed = false;
         public string MenuToggleContent => IsMenuCollapsed ? "☰" : "❮";
         public string MenuToggleToolTip => IsMenuCollapsed ? "显示侧边栏" : "隐藏侧边栏";
-        private readonly UserSession _session = UserSession.Current;
+        [ObservableProperty] private bool _isSettingsMenuOpen;
+        [ObservableProperty] private UserSession _session = UserSession.Current;
 
         public UserModel? User;
         // 定义页面对象（缓存起来，不需要每次点击都 new）
@@ -66,6 +68,34 @@ namespace SimpleMES.ViewModels
         private void ToggleMenu()
         {
             IsMenuCollapsed = !IsMenuCollapsed;
+        }
+        [RelayCommand]
+        private void OpenSoftwareVersion()
+        {
+            IsSettingsMenuOpen = false;
+            PageTitle = "软件版本";
+        }
+
+        [RelayCommand]
+        private void OpenLogRecord()
+        {
+            IsSettingsMenuOpen = false;
+            PageTitle = "日志记录";
+        }
+
+        [RelayCommand]
+        private void OpenSystemConfig()
+        {
+            IsSettingsMenuOpen = false;
+            PageTitle = "系统配置";
+        }
+
+        [RelayCommand]
+        private void SignOutCurrentUser()
+        {
+            IsSettingsMenuOpen = false;
+            Session.SignOut();
+            SignOutRequested?.Invoke();
         }
     }
 }
