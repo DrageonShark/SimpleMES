@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace SimpleMES.Views
+namespace SimpleMES.Views.Controls
 {
     /// <summary>
     /// OrderShellView.xaml 的交互逻辑
@@ -9,7 +9,7 @@ namespace SimpleMES.Views
     {
         public OrderShellView()
         {
-
+            InitializeComponent();
         }
     }
 }
