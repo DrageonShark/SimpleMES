@@ -1,19 +1,5 @@
-﻿using SimpleMES.Models;
-using SimpleMES.Services.DAL;
-
-namespace SimpleMES.Services.State
+﻿namespace SimpleMES.Services.Orders
 {
-    public interface IOrderState
-    {
-        string Name { get; }
-
-        Task<IOrderState> HandleAsync(
-            OrderModel order,
-            OrderPollResult result,
-            IDataRepository repository,
-            CancellationToken token);
-    }
-
     /// <summary>
     /// 订单状态枚举
     /// </summary>
@@ -38,7 +24,11 @@ namespace SimpleMES.Services.State
         /// <summary>
         /// 废弃
         /// </summary>
-        Scrapped
+        Scrapped,
+        /// <summary>
+        /// 其他状态
+        /// </summary>
+        Other
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using SimpleMES.Models;
+﻿using Serilog;
+using SimpleMES.Models;
 
 namespace SimpleMES.Services.Orders
 {
@@ -8,19 +9,19 @@ namespace SimpleMES.Services.Orders
         {
             if (order is null) return false;
 
-            var status = (order.OrderStatus ?? string.Empty).Trim();
+            var status = order.OrderStatus;
 
             return action switch
             {
                 OrderWorkflowAction.Start =>
-                    status.Equals("Pending", StringComparison.OrdinalIgnoreCase) ||
-                    status.Equals("Paused", StringComparison.OrdinalIgnoreCase),
+                    status.Equals(nameof(OrderState.Pending), StringComparison.OrdinalIgnoreCase)
+                    || status.Equals(nameof(OrderState.Paused), StringComparison.OrdinalIgnoreCase),
 
                 OrderWorkflowAction.Pause =>
-                    status.Equals("Producing", StringComparison.OrdinalIgnoreCase),
+                    status.Equals(nameof(OrderState.Producing), StringComparison.OrdinalIgnoreCase),
 
                 OrderWorkflowAction.Complete =>
-                    status.Equals("Producing", StringComparison.OrdinalIgnoreCase),
+                    order.PlanQty == order.CompletedQty,
 
                 _ => false
             };
@@ -30,11 +31,18 @@ namespace SimpleMES.Services.Orders
         {
             if (!CanTransit(order, action))
             {
-                throw new InvalidOperationException($"订单 {order.OrderNo} 当前状态不允许执行 {action}");
+                Log.Error("订单 {order.OrderNo} 当前状态不允许执行 {action}", order.OrderNo, action);
             }
 
             var at = now ?? DateTime.Now;
 
+            var nextState = action switch
+            {
+                OrderWorkflowAction.Start => OrderState.Producing,
+                OrderWorkflowAction.Pause => OrderState.Paused,
+                OrderWorkflowAction.Complete => OrderState.Completed,
+                _ => throw new InvalidOperationException($"不支持的流转动作: {action}")
+            };
             return new OrderModel
             {
                 OrderNo = order.OrderNo,
@@ -43,15 +51,13 @@ namespace SimpleMES.Services.Orders
                 CompletedQty = order.CompletedQty,
                 CreateTime = order.CreateTime,
                 LastOperationTime = at,
-                StartTime = action == OrderWorkflowAction.Start ? order.StartTime ?? at : order.StartTime,
-                EndTime = action == OrderWorkflowAction.Complete ? at : null,
-                OrderStatus = action switch
-                {
-                    OrderWorkflowAction.Start => "Producing",
-                    OrderWorkflowAction.Pause => "Paused",
-                    OrderWorkflowAction.Complete => "Completed",
-                    _ => order.OrderStatus
-                }
+                StartTime = action == OrderWorkflowAction.Start
+                    ? order.StartTime ?? at
+                    : order.StartTime,
+                EndTime = action == OrderWorkflowAction.Complete
+                    ? at
+                    : null,
+                OrderStatus = nextState.ToCode()
             };
         }
     }

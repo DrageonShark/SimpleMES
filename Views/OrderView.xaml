@@ -1,181 +1,181 @@
 ﻿<UserControl
     x:Class="SimpleMES.Views.OrderView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="500"
-    d:DesignWidth="900"
-    Background="White"
-    mc:Ignorable="d">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </UserControl.Resources>
+
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2.2*" />
+            <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
 
         <Border
             Grid.Column="0"
-            Margin="0,0,20,0"
-            Padding="20"
-            Background="#F9FAFB"
-            CornerRadius="8">
-            <StackPanel>
-                <TextBlock
-                    Margin="0,0,0,20"
-                    FontSize="18"
-                    FontWeight="Bold"
-                    Foreground="#333"
-                    Text="➕ 新建生产工单" />
-
-                <TextBlock
-                    Margin="0,10,0,5"
-                    Foreground="#666"
-                    Text="订单编号" />
-                <TextBox
-                    Height="35"
-                    Padding="5"
-                    VerticalContentAlignment="Center"
-                    Text="{Binding NewOrderNo}" />
-
-                <TextBlock
-                    Margin="0,15,0,5"
-                    Foreground="#666"
-                    Text="产品名" />
-                <ComboBox
-                    Height="35"
-                    Padding="5"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="ProductName"
-                    ItemsSource="{Binding Products}"
-                    SelectedValue="{Binding NewProductCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    SelectedValuePath="ProductCode" />
-                <TextBlock
-                    Margin="0,15,0,5"
-                    Foreground="#666"
-                    Text="计划数量" />
-                <TextBox
-                    Height="35"
-                    Padding="5"
-                    VerticalContentAlignment="Center"
-                    Text="{Binding NewPlanQty}" />
+            Padding="16"
+            Background="White"
+            BorderBrush="#E5E7EB"
+            BorderThickness="1"
+            CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
                 <Button
-                    Height="40"
-                    Margin="0,30,0,0"
-                    Background="#1976D2"
-                    BorderThickness="0"
-                    Command="{Binding CreateOrderCommand}"
-                    Content="立即下达"
-                    Cursor="Hand"
-                    FontWeight="Bold"
-                    Foreground="White">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="4" />
-                        </Style>
-                    </Button.Resources>
-                </Button>
-            </StackPanel>
+                    Grid.Row="0"
+                    Width="75"
+                    Margin="0,0,0,12"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Command="{Binding LoadOrdersCommand}"
+                    Content="刷新" />
+
+                <DataGrid
+                    Grid.Row="1"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding Orders}"
+                    RowHeaderWidth="0"
+                    SelectedItem="{Binding SelectedOrder, Mode=TwoWay}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Width="120"
+                            Binding="{Binding OrderNo}"
+                            Header="工单号" />
+                        <DataGridTextColumn
+                            Width="100"
+                            Binding="{Binding ProductCode}"
+                            Header="产品" />
+                        <DataGridTextColumn
+                            Width="80"
+                            Binding="{Binding PlanQty}"
+                            Header="计划数" />
+                        <DataGridTextColumn
+                            Width="80"
+                            Binding="{Binding CompletedQty}"
+                            Header="已完成" />
+                        <DataGridTextColumn
+                            Width="90"
+                            Binding="{Binding OrderStatus}"
+                            Header="状态" />
+                        <DataGridTextColumn
+                            Width="*"
+                            Binding="{Binding CreateTime, StringFormat='yyyy-MM-dd HH:mm'}"
+                            Header="创建时间" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
         </Border>
 
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <Border
+            Grid.Column="1"
+            Margin="16,0,0,0"
+            Padding="20"
+            Background="#F9FAFB"
+            BorderBrush="#E5E7EB"
+            BorderThickness="1"
+            CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <TextBlock
-                Margin="0,0,0,15"
-                FontSize="18"
-                FontWeight="Bold"
-                Text="📋 订单列表" />
-            <Button
-                Width="100"
-                Margin="0,0,0,10"
-                HorizontalAlignment="Right"
-                Background="#2563EB"
-                BorderBrush="#2563EB"
-                Command="{Binding LoadOrdersCommand}"
-                Content="刷新数据"
-                Foreground="White" />
+                <StackPanel>
+                    <TextBlock
+                        FontSize="18"
+                        FontWeight="Bold"
+                        Text="调度面板" />
+                    <TextBlock
+                        Margin="0,6,0,0"
+                        Foreground="#6B7280"
+                        Text="基于当前选中的订单执行状态流转" />
+                </StackPanel>
 
-            <DataGrid
-                Grid.Row="1"
-                AutoGenerateColumns="False"
-                Background="White"
-                BorderBrush="#EEE"
-                BorderThickness="1"
-                CanUserAddRows="False"
-                GridLinesVisibility="Horizontal"
-                HeadersVisibility="Column"
-                IsReadOnly="True"
-                ItemsSource="{Binding Orders}"
-                RowHeaderWidth="0">
+                <StackPanel Grid.Row="1" Margin="0,20,0,0">
+                    <Border
+                        Padding="12"
+                        Background="White"
+                        BorderBrush="#E5E7EB"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                        <StackPanel>
+                            <TextBlock Foreground="#6B7280" Text="当前订单" />
+                            <TextBlock
+                                Margin="0,6,0,0"
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Text="{Binding SelectedOrder.OrderNo, TargetNullValue=未选择订单}" />
 
-                <DataGrid.ColumnHeaderStyle>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#F5F5F5" />
-                        <Setter Property="Padding" Value="10" />
-                        <Setter Property="FontWeight" Value="Bold" />
-                        <Setter Property="Foreground" Value="#555" />
-                        <Setter Property="HorizontalContentAlignment" Value="Left" />
-                    </Style>
-                </DataGrid.ColumnHeaderStyle>
+                            <TextBlock
+                                Margin="0,14,0,0"
+                                Foreground="#6B7280"
+                                Text="状态" />
+                            <TextBlock Text="{Binding SelectedOrder.OrderStatus, TargetNullValue=-}" />
 
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Setter Property="Padding" Value="0,8" />
-                    </Style>
-                </DataGrid.RowStyle>
+                            <TextBlock
+                                Margin="0,14,0,0"
+                                Foreground="#6B7280"
+                                Text="产品" />
+                            <TextBlock Text="{Binding SelectedOrder.ProductCode, TargetNullValue=-}" />
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn
-                        Width="120"
-                        Binding="{Binding OrderNo}"
-                        Header="工单号" />
-                    <DataGridTextColumn
-                        Width="100"
-                        Binding="{Binding ProductCode}"
-                        Header="产品" />
-                    <DataGridTextColumn
-                        Width="70"
-                        Binding="{Binding PlanQty}"
-                        Header="计划数" />
-                    <DataGridTextColumn
-                        Width="70"
-                        Binding="{Binding CompletedQty}"
-                        Header="已完成" />
-                    <DataGridTextColumn
-                        Width="70"
-                        Binding="{Binding OrderStatus}"
-                        Header="状态" />
-                    <DataGridTextColumn
-                        Width="*"
-                        Binding="{Binding CreateTime, StringFormat='yyyy-MM-dd HH:mm'}"
-                        Header="创建时间" />
-                    <DataGridTemplateColumn Width="180" Header="操作">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button
-                                        Width="60"
-                                        Margin="0,0,6,0"
-                                        Command="{Binding DataContext.StartOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}"
-                                        Content="执行" />
-                                    <Button
-                                        Width="60"
-                                        Command="{Binding DataContext.PauseOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}"
-                                        Content="暂停" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                            <TextBlock
+                                Margin="0,14,0,0"
+                                Foreground="#6B7280"
+                                Text="计划数 / 完成数" />
+                            <TextBlock>
+                                <Run Text="{Binding SelectedOrder.PlanQty, TargetNullValue=0}" />
+                                <Run Text=" / " />
+                                <Run Text="{Binding SelectedOrder.CompletedQty, TargetNullValue=0}" />
+                            </TextBlock>
 
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
+                            <TextBlock
+                                Margin="0,14,0,0"
+                                Foreground="#6B7280"
+                                Text="最后操作时间" />
+                            <TextBlock Text="{Binding SelectedOrder.LastOperationTime, StringFormat='yyyy-MM-dd HH:mm', TargetNullValue=-}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Button
+                        Height="38"
+                        Margin="0,20,0,8"
+                        Command="{Binding StartSelectedOrderCommand}"
+                        Content="执行 / 恢复"
+                        Visibility="{Binding ShowStartButton, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                    <Button
+                        Height="38"
+                        Margin="0,0,0,8"
+                        Command="{Binding PauseSelectedOrderCommand}"
+                        Content="暂停"
+                        Visibility="{Binding ShowPauseButton, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                    <Button
+                        Height="38"
+                        Command="{Binding CompleteSelectedOrderCommand}"
+                        Content="完工"
+                        Visibility="{Binding ShowCompleteButton, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </StackPanel>
+
+                <Border
+                    Grid.Row="2"
+                    Margin="0,16,0,0"
+                    Padding="12"
+                    Background="#EFF6FF"
+                    CornerRadius="8">
+                    <TextBlock
+                        Foreground="#1D4ED8"
+                        Text="状态流转：Pending → Producing → Paused → Producing → Completed"
+                        TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

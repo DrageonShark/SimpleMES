@@ -3,6 +3,7 @@ using SimpleMES.Core;
 using SimpleMES.Helpers.Log;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.Observer;
+using SimpleMES.Services.Orders;
 using SimpleMES.Services.Toast;
 using SimpleMES.ViewModels;
 using SimpleMES.ViewModels.OrderViewModels;
@@ -52,7 +53,9 @@ namespace MESDemo
             var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier, deviceClientFactory);// 注入 Service
             var orderBoardVM = new OrderBoardViewModel(dbService, toast);
             var orderManagementVM = new OrderManagementHomeViewModel();
-            var orderDispatchVM = new OrderViewModel(dbService, toast);
+            var orderWorkflowService = new OrderWorkflowService();
+            var orderDispatchVM = new OrderViewModel(repo, toast, orderWorkflowService);
+
             var orderShellVM = new OrderShellViewModel(orderBoardVM, orderManagementVM, orderDispatchVM);
 
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);

@@ -1,7 +1,9 @@
 ﻿using SimpleMES.Models;
 using SimpleMES.Services.DAL;
+using SimpleMES.Services.Orders;
+using SimpleMES.Services.State;
 
-namespace SimpleMES.Services.State
+namespace SimpleMES.Services.Orders.StateMachine
 {
     public class PausedState : IOrderState
     {

@@ -1,4 +1,4 @@
-﻿namespace SimpleMES.Services.State
+﻿namespace SimpleMES.Services.Orders
 {
     public record class OrderPollResult
     {
