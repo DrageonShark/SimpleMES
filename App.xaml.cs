@@ -8,8 +8,6 @@ using SimpleMES.ViewModels;
 using SimpleMES.ViewModels.OrderViewModels;
 using SimpleMES.Views;
 using System.Windows;
-using OrderBoardViewModel = SimpleMES.ViewModels.OrderViewModels.OrderBoardViewModel;
-using OrderShellViewModel = SimpleMES.ViewModels.OrderViewModels.OrderShellViewModel;
 
 namespace MESDemo
 {
@@ -56,6 +54,7 @@ namespace MESDemo
             var orderManagementVM = new OrderManagementHomeViewModel();
             var orderDispatchVM = new OrderViewModel(dbService, toast);
             var orderShellVM = new OrderShellViewModel(orderBoardVM, orderManagementVM, orderDispatchVM);
+
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 
             var mainViewModel = new MainViewModel(monitorVM, orderShellVM, reportVM);     // 注入 MonitorVM

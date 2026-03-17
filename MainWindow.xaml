@@ -166,37 +166,18 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="WindowToggleButtonStyle" TargetType="ToggleButton">
-            <Setter Property="Height" Value="42" />
-            <Setter Property="Margin" Value="0,6,0,0" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Border
-                            x:Name="Bd"
-                            Background="{TemplateBinding Background}"
-                            CornerRadius="4">
-                            <ContentPresenter Margin="{TemplateBinding Margin}" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1D4F80" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#173F67" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <Style
+            x:Key="SubNavButtonStyle"
+            BasedOn="{StaticResource NavButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+            <Setter Property="Padding" Value="28,0,14,0" />
+            <Setter Property="FontSize" Value="14" />
         </Style>
+
     </Window.Resources>
     <Grid Background="#F0F2F5">
         <Grid.ColumnDefinitions>
@@ -226,63 +207,56 @@
                         Text="设备管理中心" />
                 </StackPanel>
 
-                <Grid Grid.Row="1" Margin="10,8,10,10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <StackPanel Grid.Row="1" Margin="10,8,10,10">
                     <Button
-                        Grid.Row="0"
                         Command="{Binding ShowMonitorCommand}"
                         Content="设备监控"
                         Style="{StaticResource NavButtonStyle}" />
+
                     <ToggleButton
                         x:Name="OrderWindowButton"
-                        Grid.Row="0"
                         IsChecked="{Binding IsOrderWindowMenuOpen, Mode=TwoWay}"
                         Style="{StaticResource WindowToggleButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock
                                 VerticalAlignment="Center"
-                                FontSize="20"
+                                FontSize="16"
                                 Text="生产订单" />
                             <TextBlock
-                                Margin="4,0,0,0"
+                                Margin="8,0,0,0"
                                 VerticalAlignment="Center"
                                 FontFamily="Segoe MDL2 Assets"
                                 FontSize="10"
                                 Text="&#xE70D;" />
                         </StackPanel>
                     </ToggleButton>
-                    <Popup
-                        AllowsTransparency="True"
-                        IsOpen="{Binding IsOrderWindowMenuOpen, Mode=TwoWay}"
-                        Placement="Bottom"
-                        PlacementTarget="{Binding ElementName=OrderWindowButton}"
-                        StaysOpen="True"
-                        VerticalOffset="5">
+
+                    <Border
+                        Margin="0,4,0,0"
+                        Padding="0,0,0,4"
+                        Visibility="{Binding IsOrderWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <Button
                                 Command="{Binding ShowOrderBoardCommand}"
                                 Content="订单看板"
-                                Style="NavButtonStyle" />
+                                Style="{StaticResource SubNavButtonStyle}" />
                             <Button
                                 Command="{Binding ShowManagementCommand}"
-                                Content="订单管理"
-                                Style="NavButtonStyle" />
+                                Content="订单维护"
+                                Style="{StaticResource SubNavButtonStyle}" />
                             <Button
                                 Command="{Binding ShowOrderDispatchCommand}"
                                 Content="订单调度"
-                                Style="NavButtonStyle" />
+                                Style="{StaticResource SubNavButtonStyle}" />
                         </StackPanel>
-                    </Popup>
+                    </Border>
+
                     <Button
-                        Grid.Row="2"
                         Command="{Binding ShowReportCommand}"
                         Content="数据报表"
                         Style="{StaticResource NavButtonStyle}" />
-                </Grid>
+                </StackPanel>
+
             </Grid>
         </Border>
         <!--  右侧主区  -->

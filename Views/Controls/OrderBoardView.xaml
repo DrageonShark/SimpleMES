@@ -1,59 +1,12 @@
-﻿<UserControl
-    x:Class="SimpleMES.Views.OrderBoardView"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="White">
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <DockPanel Margin="0,0,0,10">
-            <TextBlock
-                FontSize="20"
-                FontWeight="Bold"
-                Text="订单看板" />
-            <Button
-                Width="100"
-                Command="{Binding LoadOrdersCommand}"
-                Content="刷新"
-                DockPanel.Dock="Right" />
-        </DockPanel>
-
-        <DataGrid
-            Grid.Row="1"
-            AutoGenerateColumns="False"
-            CanUserAddRows="False"
-            IsReadOnly="True"
-            ItemsSource="{Binding Orders}"
-            SelectedItem="{Binding SelectedOrder, Mode=TwoWay}">
-            <DataGrid.Columns>
-                <DataGridTextColumn
-                    Width="140"
-                    Binding="{Binding OrderNo}"
-                    Header="工单号" />
-                <DataGridTextColumn
-                    Width="120"
-                    Binding="{Binding ProductCode}"
-                    Header="产品" />
-                <DataGridTextColumn
-                    Width="90"
-                    Binding="{Binding PlanQty}"
-                    Header="计划数" />
-                <DataGridTextColumn
-                    Width="90"
-                    Binding="{Binding CompletedQty}"
-                    Header="已完成" />
-                <DataGridTextColumn
-                    Width="100"
-                    Binding="{Binding OrderStatus}"
-                    Header="状态" />
-                <DataGridTextColumn
-                    Width="*"
-                    Binding="{Binding CreateTime, StringFormat=yyyy-MM-dd HH:mm}"
-                    Header="创建时间" />
-            </DataGrid.Columns>
-        </DataGrid>
+﻿<UserControl x:Class="SimpleMES.Views.Controls.OrderBoardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SimpleMES.Views.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+            
     </Grid>
 </UserControl>

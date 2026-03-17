@@ -57,13 +57,15 @@ namespace SimpleMES.Services.DAL
                 throw new ArgumentNullException(nameof(order));
             }
             const string sql = @"UPDATE T_ProductionOrders
-                                 SET ProductCode = @ProductCode,
-                                 PlanQty = @PlanQty,
-                                 CompletedQty = @CompletedQty,
-                                 OrderStatus = @OrderStatus,
-                                 StartTime = @StartTime,
-                                 EndTime = @EndTime
-                                 WHERE OrderNo = @OrderNo;";
+                     SET ProductCode = @ProductCode,
+                         PlanQty = @PlanQty,
+                         CompletedQty = @CompletedQty,
+                         OrderStatus = @OrderStatus,
+                         StartTime = @StartTime,
+                         EndTime = @EndTime,
+                         LastOperationTime = @LastOperationTime
+                     WHERE OrderNo = @OrderNo;";
+
             return await _db.ExecuteAsync(sql, order);
         }
 

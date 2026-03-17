@@ -1,9 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SimpleMES.Services.Security;
-using SimpleMES.ViewModels.OrderViewModels;
 using System.ComponentModel;
-using static SimpleMES.ViewModels.OrderViewModels.OrderShellViewModel;
 
 namespace SimpleMES.ViewModels
 {
@@ -94,27 +92,6 @@ namespace SimpleMES.ViewModels
             OrderView.NavigateTo(OrderModulePage.Dispatch);
             PageTitle = OrderView.PageTitle;
             IsOrderWindowMenuOpen = true;
-        }
-
-        [RelayCommand]
-        private void ShowOrderBoard()
-        {
-            IsOrderWindowMenuOpen = false;
-            PageTitle = "订单看板";
-            CurrentView = null;
-        }
-        [RelayCommand]
-        private void ShowManagement()
-        {
-            IsOrderWindowMenuOpen = false;
-            PageTitle = "订单管理";
-            CurrentView = null;
-        }
-        [RelayCommand]
-        private void ShowOrderDispatch()
-        {
-            PageTitle = "订单调度";
-            CurrentView = null;
         }
 
         [RelayCommand]
