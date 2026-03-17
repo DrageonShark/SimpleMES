@@ -7,11 +7,9 @@ namespace SimpleMES
     /// </summary>
     public partial class MainWindow : Window
     {
-        private bool _isMenuCollapsed = false;
         public MainWindow()
         {
             InitializeComponent();
-
         }
     }
 }

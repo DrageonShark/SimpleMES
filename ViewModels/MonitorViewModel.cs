@@ -7,10 +7,12 @@ using SimpleMES.Models.Dto;
 using SimpleMES.Services.DAL;
 using SimpleMES.Services.Dialog;
 using SimpleMES.Services.Observer;
+using SimpleMES.Services.Security;
 using SimpleMES.Services.State;
 using SimpleMES.Services.Toast;
 using SimpleMES.Services.UI;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
@@ -26,6 +28,7 @@ namespace SimpleMES.ViewModels
         private readonly IDeviceDialogService _deviceDialogService;
         private readonly IUiDispatcher _uiDispatcher;
         private bool _disposed;
+        private readonly UserSession _session = UserSession.Current;
 
 
         //编辑页面属性绑定
@@ -60,6 +63,12 @@ namespace SimpleMES.ViewModels
         public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
         // 右侧告警面板数据源
         public ObservableCollection<AlarmRecordModel> PendingAlarms { get; } = new();
+        //权限属性
+        public bool CanAddDevicePermission => PermissionMatrix.HasPermission(_session.CurrentUser, UserPermission.AddDevice);
+        public bool CanEditDevicePermission => PermissionMatrix.HasPermission(_session.CurrentUser, UserPermission.EditDevice);
+        public bool CanToggleDevicePermission => PermissionMatrix.HasPermission(_session.CurrentUser, UserPermission.ToggleDevice);
+        public bool CanAckAlarmPermission => PermissionMatrix.HasPermission(_session.CurrentUser, UserPermission.AckAlarm);
+
         public MonitorViewModel(
             IDeviceStatusNotifier notifier, IDataRepository repository,
             IToastService toast, IDeviceConfigNotifier configNotifier,
@@ -77,6 +86,7 @@ namespace SimpleMES.ViewModels
 
             _statusNotifier.DeviceStatusChanged += OnDeviceStatusChanged;
             _ = RefreshAlarms();
+            _session.PropertyChanged += OnSessionPropertyChanged;
         }
         //设备面板数据源处理
         public void OnDeviceStatusChanged(object? sender, DeviceStatusChangedEventArgs e)
@@ -118,7 +128,7 @@ namespace SimpleMES.ViewModels
             });
         }
         //设备配置修改逻辑
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanEditDeviceConfig))]
         private async Task EditDeviceConfig(DeviceDto? device)
         {
             if (device is null) return;
@@ -193,7 +203,7 @@ namespace SimpleMES.ViewModels
         }
 
         //设备添加逻辑
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanAddDevice))]
         private async Task AddDevice()
         {
             Log.Information("添加新设备");
@@ -249,6 +259,7 @@ namespace SimpleMES.ViewModels
         {
             if (_disposed) return;
             _statusNotifier.DeviceStatusChanged -= OnDeviceStatusChanged;
+            _session.PropertyChanged -= OnSessionPropertyChanged;
             _disposed = true;
             GC.SuppressFinalize(this);
         }
@@ -291,6 +302,7 @@ namespace SimpleMES.ViewModels
             DisabledCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Disabled);
         }
         //UI界面设备停用和启用逻辑
+        [RelayCommand(CanExecute = nameof(CanToggleDeviceEnabled))]
         private async Task ToggleDeviceEnabled(DeviceDto? device)
         {
             if (device is null) return;
@@ -387,7 +399,7 @@ namespace SimpleMES.ViewModels
             }
         }
         //确认警告
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanAckAlarmEnabled))]
         private async Task AckAlarm(AlarmRecordModel? alarm)
         {
             if (alarm is null) return;
@@ -411,6 +423,28 @@ namespace SimpleMES.ViewModels
         private void ToggleAlarmPanel()
         {
             IsAlarmPanelCollapsed = !IsAlarmPanelCollapsed;
+        }
+        //根据当前用户权限判断操作是否可用
+        private bool CanAddDevice() => CanAddDevicePermission;
+        private bool CanEditDeviceConfig(DeviceDto? device) => CanEditDevicePermission && device is not null;
+        private bool CanToggleDeviceEnabled(DeviceDto? device) => CanToggleDevicePermission && device is not null;
+        private bool CanAckAlarmEnabled(AlarmRecordModel? alarm) => CanAckAlarmPermission && alarm is not null;
+        /// <summary>
+        /// 用户切换时自动刷新权限
+        /// </summary>
+        private void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(UserSession.CurrentUser)) return;
+
+            OnPropertyChanged(nameof(CanAddDevicePermission));
+            OnPropertyChanged(nameof(CanEditDevicePermission));
+            OnPropertyChanged(nameof(CanToggleDevicePermission));
+            OnPropertyChanged(nameof(CanAckAlarmPermission));
+
+            AddDeviceCommand.NotifyCanExecuteChanged();
+            EditDeviceConfigCommand.NotifyCanExecuteChanged();
+            ToggleDeviceEnabledCommand.NotifyCanExecuteChanged();
+            AckAlarmCommand.NotifyCanExecuteChanged();
         }
     }
 }

@@ -83,6 +83,24 @@
                     <DataGridTextColumn Header="已完成" Binding="{Binding CompletedQty}" Width="70"/>
                     <DataGridTextColumn Header="状态" Binding="{Binding OrderStatus}" Width="70"/>
                     <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime, StringFormat='yyyy-MM-dd HH:mm'}" Width="*"/>
+                    <DataGridTemplateColumn Header="操作" Width="180">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="执行"
+                                            Width="60"
+                                            Margin="0,0,6,0"
+                                            Command="{Binding DataContext.StartOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <Button Content="暂停"
+                                            Width="60"
+                                            Command="{Binding DataContext.PauseOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
