@@ -5,8 +5,11 @@ using SimpleMES.Services.DAL;
 using SimpleMES.Services.Observer;
 using SimpleMES.Services.Toast;
 using SimpleMES.ViewModels;
+using SimpleMES.ViewModels.OrderViewModels;
 using SimpleMES.Views;
 using System.Windows;
+using OrderBoardViewModel = SimpleMES.ViewModels.OrderViewModels.OrderBoardViewModel;
+using OrderShellViewModel = SimpleMES.ViewModels.OrderViewModels.OrderShellViewModel;
 
 namespace MESDemo
 {
@@ -50,7 +53,9 @@ namespace MESDemo
             //4.创建主界面 ViewModel
             var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier, deviceClientFactory);// 注入 Service
             var orderBoardVM = new OrderBoardViewModel(dbService, toast);
-            var orderShellVM = new OrderShellViewModel(orderBoardVM);
+            var orderManagementVM = new OrderManagementHomeViewModel();
+            var orderDispatchVM = new OrderViewModel(dbService, toast);
+            var orderShellVM = new OrderShellViewModel(orderBoardVM, orderManagementVM, orderDispatchVM);
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 
             var mainViewModel = new MainViewModel(monitorVM, orderShellVM, reportVM);     // 注入 MonitorVM
