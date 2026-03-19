@@ -15,7 +15,8 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         private const string DisabledFilter = "停用";
         private const int AttentionLimit = 5;
         private const int SpotlightLimit = 3;
-        private const int RecentLimit = 6;
+        private const int BoardRecentLimit = 6;
+        private const int EventHistoryLimit = 120;
 
         [ObservableProperty]
         private string _searchKeyword = string.Empty;
@@ -49,7 +50,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
         public ObservableCollection<AlarmRecordModel> PendingAlarms { get; } = new();
         public ObservableCollection<DeviceDto> AttentionDevices { get; } = new();
-        public ObservableCollection<DeviceDto> RecentDevices { get; } = new();
+        public ObservableCollection<DeviceEventDto> RecentEvents { get; } = new();
 
         public IReadOnlyList<string> StateFilterOptions { get; }
 
@@ -63,8 +64,9 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public bool HasActiveFilters => !string.IsNullOrWhiteSpace(SearchKeyword) || StateFilter != AllFilter;
         public bool HasPendingAlarms => PendingAlarms.Count > 0;
         public bool HasAttentionDevices => AttentionDevices.Count > 0;
-        public bool HasRecentDevices => RecentDevices.Count > 0;
+        public bool HasRecentEvents => RecentEvents.Count > 0;
         public IReadOnlyList<DeviceDto> SpotlightDevices => AttentionDevices.Take(SpotlightLimit).ToList();
+        public IReadOnlyList<DeviceEventDto> BoardRecentEvents => RecentEvents.Take(BoardRecentLimit).ToList();
         public bool HasSpotlightOverflow => AttentionDevices.Count > SpotlightLimit;
         public int SpotlightOverflowCount => Math.Max(0, AttentionDevices.Count - SpotlightLimit);
 
@@ -114,10 +116,10 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 ? $"另有 {SpotlightOverflowCount} 台异常设备待跟进"
                 : "当前重点设备已全部展开";
 
-        public string RecentDeviceSummary =>
-            HasRecentDevices
-                ? "按照最近通信时间或更新时间展示设备动态"
-                : "暂无可展示的实时刷新记录";
+        public string RecentEventSummary =>
+            HasRecentEvents
+                ? "按照真实设备事件流展示最近状态变化"
+                : "暂无可展示的设备事件";
 
         partial void OnSearchKeywordChanged(string value)
         {
@@ -174,6 +176,14 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             }
 
             RefreshDeviceFilter();
+        }
+
+        public void ApplyRecentEvents(IEnumerable<DeviceEventDto> recentEvents)
+        {
+            SyncCollection(RecentEvents, recentEvents.OrderByDescending(item => item.OccurredAt).ThenByDescending(item => item.EventId).Take(EventHistoryLimit));
+            OnPropertyChanged(nameof(HasRecentEvents));
+            OnPropertyChanged(nameof(BoardRecentEvents));
+            OnPropertyChanged(nameof(RecentEventSummary));
         }
 
         public void RefreshDeviceFilter()
@@ -253,12 +263,6 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 .ThenBy(device => device.DeviceId)
                 .Take(AttentionLimit);
             SyncCollection(AttentionDevices, attentionDevices);
-
-            var recentDevices = ListDeviceDto
-                .OrderByDescending(device => device.LastHeartbeatTime ?? device.LastUpdateTime)
-                .ThenBy(device => device.DeviceId)
-                .Take(RecentLimit);
-            SyncCollection(RecentDevices, recentDevices);
         }
 
         private void RaiseDeviceStateChanged()
@@ -271,7 +275,8 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             OnPropertyChanged(nameof(HasFilteredDevices));
             OnPropertyChanged(nameof(HasActiveFilters));
             OnPropertyChanged(nameof(HasAttentionDevices));
-            OnPropertyChanged(nameof(HasRecentDevices));
+            OnPropertyChanged(nameof(HasRecentEvents));
+            OnPropertyChanged(nameof(BoardRecentEvents));
             OnPropertyChanged(nameof(SpotlightDevices));
             OnPropertyChanged(nameof(HasSpotlightOverflow));
             OnPropertyChanged(nameof(SpotlightOverflowCount));
@@ -282,7 +287,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             OnPropertyChanged(nameof(BoardDescription));
             OnPropertyChanged(nameof(AttentionSummary));
             OnPropertyChanged(nameof(SpotlightOverflowSummary));
-            OnPropertyChanged(nameof(RecentDeviceSummary));
+            OnPropertyChanged(nameof(RecentEventSummary));
         }
 
         private void RaiseAlarmStateChanged()

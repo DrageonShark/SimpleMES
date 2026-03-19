@@ -66,13 +66,41 @@ namespace SimpleMES.Services.DAL
         /// </summary>
         Task<int> InsertAlarmRecordAsync(AlarmRecordModel alarmRecord);
         /// <summary>
+        /// 写入设备事件
+        /// </summary>
+        Task<long> InsertDeviceEventAsync(DeviceEventModel deviceEvent);
+        /// <summary>
+        /// 获取最近设备事件
+        /// </summary>
+        Task<IEnumerable<Models.Dto.DeviceEventDto>> GetRecentDeviceEventsAsync(int top = 20);
+        /// <summary>
+        /// 按条件分页查询设备事件
+        /// </summary>
+        Task<Models.Dto.DeviceEventQueryResult> GetDeviceEventsPageAsync(Models.Dto.DeviceEventQueryCriteria criteria);
+        /// <summary>
         ///  获取最新未确认的20条报警记录
         /// </summary>
         Task<IEnumerable<AlarmRecordModel>> GetUnAckAlarmsAsync(int top = 20);
         /// <summary>
         ///  确认ID为alarmId的报警记录
         /// </summary>
-        Task<int> AckAlarmAsync(int alarmId);
+        Task<int> AckAlarmAsync(int alarmId, int? ackUserId = null, DateTime? ackTime = null);
+        /// <summary>
+        /// 标记报警已恢复
+        /// </summary>
+        Task<int> MarkAlarmRecoveredAsync(int alarmId, DateTime recoveredAt);
+        /// <summary>
+        /// 标记关联报警的设备事件已恢复
+        /// </summary>
+        Task<int> ResolveDeviceEventsByAlarmAsync(int alarmId, DateTime resolvedAt);
+        /// <summary>
+        /// 确认单条设备事件
+        /// </summary>
+        Task<int> ConfirmDeviceEventAsync(long eventId, int confirmedByUserId, DateTime confirmedAt, string? resolutionNote);
+        /// <summary>
+        /// 确认某条报警关联的设备事件
+        /// </summary>
+        Task<int> ConfirmDeviceEventsByAlarmAsync(int alarmId, int confirmedByUserId, DateTime confirmedAt, string? resolutionNote);
         /// <summary>
         /// 获取所有产品信息
         /// </summary>

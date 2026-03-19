@@ -1,5 +1,7 @@
 ﻿using SimpleMES.Models;
 
+using SimpleMES.Models.Dto;
+
 namespace SimpleMES.Services.DAL
 {
     /// <summary>
@@ -331,8 +333,206 @@ namespace SimpleMES.Services.DAL
                                      @AckUserId,
                                      @AckTime,
                                      @RecoverTime
-                                 );";
-            return await _db.ExecuteAsync(sql, alarmRecord);
+                                 );
+
+                                 SELECT CAST(SCOPE_IDENTITY() AS int);";
+            return await _db.ExecuteScalarAsync<int>(sql, alarmRecord);
+        }
+
+        public async Task<long> InsertDeviceEventAsync(DeviceEventModel deviceEvent)
+        {
+            if (deviceEvent == null)
+            {
+                throw new ArgumentNullException(nameof(deviceEvent));
+            }
+
+            const string sql = @"INSERT INTO T_DeviceEvent
+                                 (
+                                     DeviceId,
+                                     EventType,
+                                     EventLevel,
+                                     EventMessage,
+                                     SnapshotState,
+                                     OccurredAt,
+                                     RelatedAlarmId,
+                                     IsResolved,
+                                     ResolvedAt,
+                                     ConfirmedByUserId,
+                                     ConfirmedAt,
+                                     ResolutionNote
+                                 )
+                                 VALUES
+                                 (
+                                     @DeviceId,
+                                     @EventType,
+                                     COALESCE(NULLIF(@EventLevel, ''), 'Info'),
+                                     @EventMessage,
+                                     @SnapshotState,
+                                     @OccurredAt,
+                                     @RelatedAlarmId,
+                                     @IsResolved,
+                                     @ResolvedAt,
+                                     @ConfirmedByUserId,
+                                     @ConfirmedAt,
+                                     @ResolutionNote
+                                 );
+
+                                 SELECT CAST(SCOPE_IDENTITY() AS bigint);";
+            return await _db.ExecuteScalarAsync<long>(sql, deviceEvent);
+        }
+
+        public async Task<IEnumerable<DeviceEventDto>> GetRecentDeviceEventsAsync(int top = 20)
+        {
+            const string sql = @"SELECT TOP (@Top)
+                                     e.EventId,
+                                     e.DeviceId,
+                                     m.DeviceName,
+                                     m.DeviceCode,
+                                     m.WorkshopName,
+                                     m.LineName,
+                                     m.StationName,
+                                     e.EventType,
+                                     e.EventLevel,
+                                     e.EventMessage,
+                                     e.SnapshotState,
+                                     e.OccurredAt,
+                                     e.RelatedAlarmId,
+                                     a.AlarmCode AS RelatedAlarmCode,
+                                     a.AlarmLevel AS RelatedAlarmLevel,
+                                     a.AlarmMessage AS RelatedAlarmMessage,
+                                     a.AlarmTime AS RelatedAlarmTime,
+                                     a.IsAck AS RelatedAlarmIsAck,
+                                     a.AckTime AS RelatedAlarmAckTime,
+                                     a.RecoverTime AS RelatedAlarmRecoverTime,
+                                     e.IsResolved,
+                                     e.ResolvedAt,
+                                     e.ConfirmedByUserId,
+                                     u.UserName AS ConfirmedByUserName,
+                                     e.ConfirmedAt,
+                                     e.ResolutionNote
+                                 FROM T_DeviceEvent e
+                                 INNER JOIN T_DeviceMaster m ON m.DeviceId = e.DeviceId
+                                 LEFT JOIN T_AlarmRecord a ON a.AlarmId = e.RelatedAlarmId
+                                 LEFT JOIN T_User u ON u.UserId = e.ConfirmedByUserId
+                                 ORDER BY e.OccurredAt DESC, e.EventId DESC;";
+            return await _db.QueryAsync<DeviceEventDto>(sql, new { Top = top });
+        }
+
+        public async Task<DeviceEventQueryResult> GetDeviceEventsPageAsync(DeviceEventQueryCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                throw new ArgumentNullException(nameof(criteria));
+            }
+
+            var normalizedKeyword = string.IsNullOrWhiteSpace(criteria.Keyword) ? null : criteria.Keyword.Trim();
+            var normalizedLevel = string.IsNullOrWhiteSpace(criteria.EventLevel) ? null : criteria.EventLevel.Trim();
+            var normalizedStatus = string.IsNullOrWhiteSpace(criteria.ProcessingStatus) ? null : criteria.ProcessingStatus.Trim();
+            var normalizedType = string.IsNullOrWhiteSpace(criteria.EventType) ? null : criteria.EventType.Trim();
+            var skip = Math.Max(0, criteria.Skip);
+            var take = Math.Clamp(criteria.Take, 1, 200);
+
+            const string sql = @"SELECT
+                                     e.EventId,
+                                     e.DeviceId,
+                                     m.DeviceName,
+                                     m.DeviceCode,
+                                     m.WorkshopName,
+                                     m.LineName,
+                                     m.StationName,
+                                     e.EventType,
+                                     e.EventLevel,
+                                     e.EventMessage,
+                                     e.SnapshotState,
+                                     e.OccurredAt,
+                                     e.RelatedAlarmId,
+                                     a.AlarmCode AS RelatedAlarmCode,
+                                     a.AlarmLevel AS RelatedAlarmLevel,
+                                     a.AlarmMessage AS RelatedAlarmMessage,
+                                     a.AlarmTime AS RelatedAlarmTime,
+                                     a.IsAck AS RelatedAlarmIsAck,
+                                     a.AckTime AS RelatedAlarmAckTime,
+                                     a.RecoverTime AS RelatedAlarmRecoverTime,
+                                     e.IsResolved,
+                                     e.ResolvedAt,
+                                     e.ConfirmedByUserId,
+                                     u.UserName AS ConfirmedByUserName,
+                                     e.ConfirmedAt,
+                                     e.ResolutionNote
+                                 INTO #Filtered
+                                 FROM T_DeviceEvent e
+                                 INNER JOIN T_DeviceMaster m ON m.DeviceId = e.DeviceId
+                                 LEFT JOIN T_AlarmRecord a ON a.AlarmId = e.RelatedAlarmId
+                                 LEFT JOIN T_User u ON u.UserId = e.ConfirmedByUserId
+                                 WHERE (@Keyword IS NULL
+                                        OR e.EventMessage LIKE '%' + @Keyword + '%'
+                                        OR m.DeviceName LIKE '%' + @Keyword + '%'
+                                        OR m.DeviceCode LIKE '%' + @Keyword + '%'
+                                        OR m.WorkshopName LIKE '%' + @Keyword + '%'
+                                        OR m.LineName LIKE '%' + @Keyword + '%'
+                                        OR m.StationName LIKE '%' + @Keyword + '%'
+                                        OR a.AlarmMessage LIKE '%' + @Keyword + '%')
+                                   AND (
+                                       @EventLevel IS NULL
+                                       OR (@EventLevel = 'Critical' AND e.EventLevel = 'Critical')
+                                       OR (@EventLevel = 'Warning' AND e.EventLevel = 'Warning')
+                                       OR (@EventLevel = 'Info' AND ISNULL(e.EventLevel, 'Info') NOT IN ('Critical', 'Warning'))
+                                   )
+                                   AND (@DeviceId IS NULL OR e.DeviceId = @DeviceId)
+                                   AND (@EventType IS NULL OR e.EventType = @EventType)
+                                   AND (@OccurredFrom IS NULL OR e.OccurredAt >= @OccurredFrom)
+                                   AND (
+                                       @ProcessingStatus IS NULL
+                                       OR (
+                                           @ProcessingStatus = 'Pending'
+                                           AND (e.RelatedAlarmId IS NOT NULL OR e.EventType = 'FaultRaised')
+                                           AND e.ConfirmedAt IS NULL
+                                           AND e.IsResolved = 0
+                                       )
+                                       OR (
+                                           @ProcessingStatus = 'AwaitingConfirmation'
+                                           AND (e.RelatedAlarmId IS NOT NULL OR e.EventType = 'FaultRaised')
+                                           AND e.ConfirmedAt IS NULL
+                                           AND e.IsResolved = 1
+                                       )
+                                       OR (
+                                           @ProcessingStatus = 'Confirmed'
+                                           AND e.ConfirmedAt IS NOT NULL
+                                       )
+                                       OR (
+                                           @ProcessingStatus = 'Recorded'
+                                           AND e.ConfirmedAt IS NULL
+                                           AND e.RelatedAlarmId IS NULL
+                                           AND e.EventType <> 'FaultRaised'
+                                       )
+                                   );
+
+                                 SELECT COUNT(1) AS TotalCount FROM #Filtered;
+
+                                 SELECT *
+                                 FROM #Filtered
+                                 ORDER BY OccurredAt DESC, EventId DESC
+                                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY;
+
+                                 DROP TABLE #Filtered;";
+
+            var (countRows, items) = await _db.QueryMultipleAsync<CountRow, DeviceEventDto>(sql, new
+            {
+                Keyword = normalizedKeyword,
+                EventLevel = normalizedLevel,
+                ProcessingStatus = normalizedStatus,
+                DeviceId = criteria.DeviceId,
+                EventType = normalizedType,
+                OccurredFrom = criteria.OccurredFrom,
+                Skip = skip,
+                Take = take
+            });
+
+            return new DeviceEventQueryResult
+            {
+                TotalCount = countRows.FirstOrDefault()?.TotalCount ?? 0,
+                Items = items.ToList().AsReadOnly()
+            };
         }
 
         public async Task<IEnumerable<AlarmRecordModel>> GetUnAckAlarmsAsync(int top = 20)
@@ -344,13 +544,73 @@ namespace SimpleMES.Services.DAL
             return await _db.QueryAsync<AlarmRecordModel>(sql, new { Top = top });
         }
 
-        public async Task<int> AckAlarmAsync(int alarmId)
+        public async Task<int> AckAlarmAsync(int alarmId, int? ackUserId = null, DateTime? ackTime = null)
         {
             const string sql = @"UPDATE T_AlarmRecord
                                  SET IsAck = 1,
-                                     AckTime = COALESCE(AckTime, GETDATE())
+                                     AckUserId = COALESCE(@AckUserId, AckUserId),
+                                     AckTime = COALESCE(@AckTime, AckTime, GETDATE())
                                  WHERE AlarmId = @AlarmId;";
-            return await _db.ExecuteAsync(sql, new { AlarmId = alarmId });
+            return await _db.ExecuteAsync(sql, new { AlarmId = alarmId, AckUserId = ackUserId, AckTime = ackTime });
+        }
+
+        public async Task<int> MarkAlarmRecoveredAsync(int alarmId, DateTime recoveredAt)
+        {
+            const string sql = @"UPDATE T_AlarmRecord
+                                 SET RecoverTime = COALESCE(RecoverTime, @RecoveredAt)
+                                 WHERE AlarmId = @AlarmId;";
+            return await _db.ExecuteAsync(sql, new { AlarmId = alarmId, RecoveredAt = recoveredAt });
+        }
+
+        public async Task<int> ResolveDeviceEventsByAlarmAsync(int alarmId, DateTime resolvedAt)
+        {
+            const string sql = @"UPDATE T_DeviceEvent
+                                 SET IsResolved = 1,
+                                     ResolvedAt = COALESCE(ResolvedAt, @ResolvedAt)
+                                 WHERE RelatedAlarmId = @AlarmId
+                                   AND IsResolved = 0;";
+            return await _db.ExecuteAsync(sql, new { AlarmId = alarmId, ResolvedAt = resolvedAt });
+        }
+
+        public async Task<int> ConfirmDeviceEventAsync(long eventId, int confirmedByUserId, DateTime confirmedAt, string? resolutionNote)
+        {
+            const string sql = @"UPDATE T_DeviceEvent
+                                 SET ConfirmedByUserId = COALESCE(@ConfirmedByUserId, ConfirmedByUserId),
+                                     ConfirmedAt = COALESCE(ConfirmedAt, @ConfirmedAt),
+                                     ResolutionNote = CASE
+                                                          WHEN NULLIF(@ResolutionNote, '') IS NULL
+                                                              THEN ResolutionNote
+                                                          ELSE @ResolutionNote
+                                                      END
+                                 WHERE EventId = @EventId;";
+            return await _db.ExecuteAsync(sql, new
+            {
+                EventId = eventId,
+                ConfirmedByUserId = confirmedByUserId,
+                ConfirmedAt = confirmedAt,
+                ResolutionNote = resolutionNote
+            });
+        }
+
+        public async Task<int> ConfirmDeviceEventsByAlarmAsync(int alarmId, int confirmedByUserId, DateTime confirmedAt, string? resolutionNote)
+        {
+            const string sql = @"UPDATE T_DeviceEvent
+                                 SET ConfirmedByUserId = COALESCE(@ConfirmedByUserId, ConfirmedByUserId),
+                                     ConfirmedAt = COALESCE(ConfirmedAt, @ConfirmedAt),
+                                     ResolutionNote = CASE
+                                                          WHEN NULLIF(@ResolutionNote, '') IS NULL
+                                                              THEN ResolutionNote
+                                                          ELSE @ResolutionNote
+                                                      END
+                                 WHERE RelatedAlarmId = @AlarmId
+                                   AND ConfirmedAt IS NULL;";
+            return await _db.ExecuteAsync(sql, new
+            {
+                AlarmId = alarmId,
+                ConfirmedByUserId = confirmedByUserId,
+                ConfirmedAt = confirmedAt,
+                ResolutionNote = resolutionNote
+            });
         }
 
 
@@ -437,6 +697,11 @@ namespace SimpleMES.Services.DAL
             public DateTime? RuntimeLastStateChangeTime { get; set; }
             public string? RuntimeCurrentOrderNo { get; set; }
             public DateTime RuntimeUpdatedAt { get; set; }
+        }
+
+        private sealed class CountRow
+        {
+            public int TotalCount { get; set; }
         }
     }
 }

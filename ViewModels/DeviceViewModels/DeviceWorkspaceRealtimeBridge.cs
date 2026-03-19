@@ -27,6 +27,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             _uiDispatcher.Invoke(() =>
             {
                 _workspaceState.ApplyLatestDeviceSnapshot(e.LatestDevices);
+                _workspaceState.ApplyRecentEvents(e.RecentEvents);
             });
         }
 

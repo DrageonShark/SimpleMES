@@ -23,7 +23,20 @@ namespace SimpleMES.Services.State
             Log.Information("设备状态变化，设备名：{DeviceName}，设备ID：{DeviceId}， 状态：未连接 -> 连接", device.DeviceName, device.DeviceId);
             device.Runtime.DeviceState = nameof(DeviceState.Running);
             device.Runtime.LastUpdateTime = result.OccurredAt;
+            device.Runtime.LastHeartbeatTime = result.OccurredAt;
+            device.Runtime.LastStateChangeTime = result.OccurredAt;
             await repository.UpdateDeviceStateAsync(device.DeviceId, device.Runtime.DeviceState, result.OccurredAt);
+            await repository.InsertDeviceEventAsync(new DeviceEventModel
+            {
+                DeviceId = device.DeviceId,
+                EventType = "CommunicationRestored",
+                EventLevel = "Info",
+                EventMessage = "设备恢复通信并重新上线",
+                SnapshotState = nameof(DeviceState.Running),
+                OccurredAt = result.OccurredAt,
+                IsResolved = true,
+                ResolvedAt = result.OccurredAt
+            });
             // 成功读到数据 -> 迁移到 Running
             return new RunningState();
         }

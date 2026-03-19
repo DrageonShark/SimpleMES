@@ -49,5 +49,16 @@ namespace SimpleMES.Services.DAL
                 return await conn.ExecuteScalarAsync<T>(sql, param);
             }
         }
+
+        public async Task<(IEnumerable<TFirst> First, IEnumerable<TSecond> Second)> QueryMultipleAsync<TFirst, TSecond>(string sql, object param = null)
+        {
+            using (var conn = CreateConnection())
+            using (var multi = await conn.QueryMultipleAsync(sql, param))
+            {
+                var first = (await multi.ReadAsync<TFirst>()).ToList();
+                var second = (await multi.ReadAsync<TSecond>()).ToList();
+                return (first, second);
+            }
+        }
     }
 }

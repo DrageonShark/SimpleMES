@@ -215,18 +215,22 @@ BEGIN
     CREATE TABLE dbo.T_DeviceEvent
     (
         EventId bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_T_DeviceEvent PRIMARY KEY,
-        DeviceId int NOT NULL,
+        DeviceId int NOT NULL,                -- 设备ID
         EventType nvarchar(30) NOT NULL,      -- 事件类型
         EventLevel nvarchar(20) NOT NULL CONSTRAINT DF_T_DeviceEvent_EventLevel DEFAULT (N'Info'), -- 事件等级
         EventMessage nvarchar(200) NOT NULL,  -- 事件内容描述
         SnapshotState nvarchar(20) NULL,      -- 事件发生时的设备状态快照
         OccurredAt datetime NOT NULL CONSTRAINT DF_T_DeviceEvent_OccurredAt DEFAULT (GETDATE()), -- 发生时间
         RelatedAlarmId int NULL,              -- 关联的报警ID (如果有)
-        IsResolved bit NOT NULL CONSTRAINT DF_T_DeviceEvent_IsResolved DEFAULT (0), -- 是否已解决
-        ResolvedAt datetime NULL,             -- 解决时间
-        CreatedAt datetime2(0) NOT NULL CONSTRAINT DF_T_DeviceEvent_CreatedAt DEFAULT (SYSDATETIME()),
+        IsResolved bit NOT NULL CONSTRAINT DF_T_DeviceEvent_IsResolved DEFAULT (0), -- 系统是否已恢复/解除
+        ResolvedAt datetime NULL,             -- 系统恢复时间
+        ConfirmedByUserId int NULL,           -- 人工确认人ID
+        ConfirmedAt datetime NULL,            -- 人工确认时间
+        ResolutionNote nvarchar(500) NULL,    -- 人工处理说明 / 原因备注
+        CreatedAt datetime2(0) NOT NULL CONSTRAINT DF_T_DeviceEvent_CreatedAt DEFAULT (SYSDATETIME()), -- 创建时间
         CONSTRAINT FK_T_DeviceEvent_Device FOREIGN KEY (DeviceId) REFERENCES dbo.T_DeviceMaster(DeviceId),
-        CONSTRAINT FK_T_DeviceEvent_Alarm FOREIGN KEY (RelatedAlarmId) REFERENCES dbo.T_AlarmRecord(AlarmId)
+        CONSTRAINT FK_T_DeviceEvent_Alarm FOREIGN KEY (RelatedAlarmId) REFERENCES dbo.T_AlarmRecord(AlarmId),
+        CONSTRAINT FK_T_DeviceEvent_ConfirmedUser FOREIGN KEY (ConfirmedByUserId) REFERENCES dbo.T_User(UserId)
     );
 END
 GO

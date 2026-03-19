@@ -15,6 +15,9 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         Task EditDeviceConfigAsync(DeviceDto? device);
         Task ToggleDeviceEnabledAsync(DeviceDto? device);
         Task RefreshAlarmsAsync();
+        Task RefreshRecentEventsAsync(int top = 120);
+        Task<DeviceEventQueryResult> QueryDeviceEventsAsync(DeviceEventQueryCriteria criteria);
         Task AckAlarmAsync(AlarmRecordModel? alarm);
+        Task ConfirmDeviceEventAsync(DeviceEventDto? deviceEvent, string? resolutionNote);
     }
 }

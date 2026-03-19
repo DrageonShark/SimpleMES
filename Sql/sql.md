@@ -1,81 +1,35 @@
-# SimpleMES schema notes
+# SimpleMES 数据库说明
 
-The executable bootstrap script is [SQLQuery1.sql](./SQLQuery1.sql). This note explains the device-side schema changes that support a better board design.
+当前统一初始化脚本只有一个文件：[SQLQuery1.sql](./SQLQuery1.sql)。
 
-## Device master table: `T_DeviceMaster`
+它已经合并了设备事件中心重构所需的完整结构，包括：
 
-`T_DeviceMaster` only stores low-frequency device profile data:
+- `T_DeviceMaster` 主数据表
+- `T_DeviceRuntime` 运行态表
+- `T_AlarmRecord` 告警表
+- `T_DeviceEvent` 真实事件流表
 
-- Identity: `DeviceId`, `DeviceName`, `DeviceCode`, `DeviceType`
-- Location: `WorkshopName`, `LineName`, `StationName`
-- Communication: `IpAddress`, `Port`, `SerialPort`, `SlaveId`
-- Enable/config: `IsEnabled`, `Criticality`, `SortOrder`, `Remark`
-- Audit: `CreatedAt`, `UpdatedAt`
+其中 `T_DeviceEvent` 已内置以下人工闭环字段：
 
-This is the table for:
+- `ConfirmedByUserId`
+- `ConfirmedAt`
+- `ResolutionNote`
 
-- device management
-- line/station grouping
-- sort priority
-- device configuration
+这表示脚本同时支持：
 
-## Device runtime table: `T_DeviceRuntime`
+- 系统恢复轨迹：`IsResolved`、`ResolvedAt`
+- 人工确认轨迹：`ConfirmedByUserId`、`ConfirmedAt`、`ResolutionNote`
 
-`T_DeviceRuntime` stores high-frequency board state:
+语义上仍保持分离：
 
-- `DeviceState`
-- `CurrentOrderNo`
-- `LastUpdateTime`
-- `LastHeartbeatTime`
-- `LastStateChangeTime`
-- `UpdatedAt`
+- 恢复 = 系统事件，例如 `FaultRecovered`、`CommunicationRestored`
+- 确认 = 人工动作，例如 `AlarmAcknowledged`
 
-Why these fields matter:
+## 使用方式
 
-- `LastHeartbeatTime` supports "offline for how long" instead of only "latest update time".
-- `LastStateChangeTime` supports "fault duration" and board prioritization.
-- `CurrentOrderNo` lets the board connect device state with production context.
+如果是新库初始化：
 
-## Alarm table: `T_AlarmRecord`
+1. 在 SSMS 中打开 [SQLQuery1.sql](./SQLQuery1.sql)
+2. 直接执行整份脚本
 
-The alarm table now includes:
-
-- Alarm identity: `AlarmCode`
-- Severity: `AlarmLevel`
-- Source: `AlarmSource`
-- Ack trail: `AckUserId`, `AckTime`
-- Recovery time: `RecoverTime`
-- Audit: `CreatedAt`
-
-This is the minimum structure needed for:
-
-- unacknowledged alarm counters
-- critical-first sorting
-- ack tracing
-- alarm duration metrics
-
-## Device event table: `T_DeviceEvent`
-
-`T_DeviceEvent` is added for real timeline data. The current board UI only has device snapshots, but a true timeline should come from events such as:
-
-- state changed
-- communication lost
-- communication recovered
-- fault raised
-- fault acknowledged
-
-Suggested UI mapping:
-
-- board timeline -> `T_DeviceEvent`
-- exception focus -> `T_DeviceMaster` + `T_DeviceRuntime` + latest active `T_AlarmRecord`
-- management filters -> `T_DeviceMaster`
-
-## Compatibility
-
-This script is intended for a clean rebuild after the split-table change.
-
-Recommended execution:
-
-1. Back up the current `SimpleMES_DB` if you need the data.
-2. Drop `SimpleMES_DB`.
-3. Run [SQLQuery1.sql](./SQLQuery1.sql) once in SSMS.
+如果后面还有表结构调整，建议继续优先维护这份统一初始化脚本，避免新建库时还要额外拼接升级脚本。

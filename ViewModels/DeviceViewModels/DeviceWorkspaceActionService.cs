@@ -58,12 +58,12 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 {
                     if (string.IsNullOrWhiteSpace(device.DeviceName))
                     {
-                        throw new Exception("设备名为空或空格");
+                        throw new Exception("设备名不能为空");
                     }
 
                     if (string.IsNullOrWhiteSpace(device.IpAddress) && string.IsNullOrWhiteSpace(device.SerialPort))
                     {
-                        throw new Exception("IP地址或串口至少一个不为空");
+                        throw new Exception("IP 地址或串口至少填写一项");
                     }
 
                     savedDevice = new DeviceModel
@@ -77,12 +77,23 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     };
 
                     newId = await _repository.InsertDeviceAsync(savedDevice);
+                    await _repository.InsertDeviceEventAsync(new DeviceEventModel
+                    {
+                        DeviceId = newId,
+                        EventType = "DeviceAdded",
+                        EventLevel = "Info",
+                        EventMessage = "设备已接入系统，等待建立通信",
+                        SnapshotState = nameof(Services.State.DeviceState.Disconnected),
+                        OccurredAt = DateTime.Now,
+                        IsResolved = true,
+                        ResolvedAt = DateTime.Now
+                    });
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("新增设备失败，错误：{Message}", ex.Message);
-                    _toast.Error($"新增设备失败，错误：{ex.Message}", null, 3.5);
+                    Log.Error("新增设备失败：{Message}", ex.Message);
+                    _toast.Error($"新增设备失败：{ex.Message}", null, 3.5);
                     return false;
                 }
             }
@@ -93,19 +104,25 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             }
 
             var confirmed = await _deviceDialogService.ShowAddDeviceDialogAsync(draft, SaveAsync, TestAsync);
-            if (!confirmed || savedDevice is null) return;
+            if (!confirmed || savedDevice is null)
+            {
+                return;
+            }
 
             savedDevice.DeviceId = newId;
             _configNotifier.NotifyConfigChanged(savedDevice, ConfigChangeType.Added);
             Log.Information("设备添加成功，设备名：{DeviceName}", savedDevice.DeviceName);
-            _toast.Success($"设备添加成功，设备名：{savedDevice.DeviceName}", null, 3.5);
+            _toast.Success($"设备添加成功：{savedDevice.DeviceName}", null, 3.5);
         }
 
         public async Task EditDeviceConfigAsync(DeviceDto? device)
         {
-            if (device is null) return;
+            if (device is null)
+            {
+                return;
+            }
 
-            Log.Information("修改设备配置，设备Id：{DeviceId},设备名：{DeviceName}", device.DeviceId, device.DeviceName);
+            Log.Information("修改设备配置，设备Id：{DeviceId}，设备名：{DeviceName}", device.DeviceId, device.DeviceName);
             var editing = new DeviceDto
             {
                 DeviceId = device.DeviceId,
@@ -122,12 +139,12 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 {
                     if (string.IsNullOrWhiteSpace(dto.DeviceName?.Trim()))
                     {
-                        throw new Exception("设备名不能为空和空格");
+                        throw new Exception("设备名不能为空");
                     }
 
                     if (string.IsNullOrWhiteSpace(dto.IpAddress) && string.IsNullOrWhiteSpace(dto.SerialPort))
                     {
-                        throw new Exception("设备IP地址或串口至少一个不为空和空格");
+                        throw new Exception("设备 IP 地址或串口至少填写一项");
                     }
 
                     var newDevice = new DeviceModel
@@ -142,6 +159,18 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     };
 
                     await _repository.UpdateDeviceAsync(newDevice);
+                    await _repository.InsertDeviceEventAsync(new DeviceEventModel
+                    {
+                        DeviceId = newDevice.DeviceId,
+                        EventType = "ConfigUpdated",
+                        EventLevel = "Info",
+                        EventMessage = "设备配置已更新",
+                        SnapshotState = device.DeviceState.ToString(),
+                        OccurredAt = DateTime.Now,
+                        IsResolved = true,
+                        ResolvedAt = DateTime.Now
+                    });
+
                     device.DeviceName = dto.DeviceName;
                     device.IpAddress = dto.IpAddress ?? string.Empty;
                     device.Port = dto.Port;
@@ -153,8 +182,8 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("设备配置修改失败，设备Id：{DeviceId},设备名：{DeviceName}，错误内容：{Message}", device.DeviceId, device.DeviceName, ex.Message);
-                    _toast.Error($"保存失败，错误：{ex.Message}", null, 3.5);
+                    Log.Error("设备配置修改失败，设备Id：{DeviceId}，设备名：{DeviceName}，错误：{Message}", device.DeviceId, device.DeviceName, ex.Message);
+                    _toast.Error($"保存失败：{ex.Message}", null, 3.5);
                     return false;
                 }
             }
@@ -174,21 +203,39 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             }
 
             var confirmed = await _deviceDialogService.ShowEditDeviceDialogAsync(editing, SaveAsync, TestAsync);
-            if (!confirmed) return;
+            if (!confirmed)
+            {
+                return;
+            }
 
-            Log.Information("设备配置修改成功，设备Id：{DeviceId},设备名：{DeviceName}", device.DeviceId, device.DeviceName);
+            Log.Information("设备配置修改成功，设备Id：{DeviceId}，设备名：{DeviceName}", device.DeviceId, device.DeviceName);
             _toast.Success("设备配置更新成功", null, 3.5);
         }
 
         public async Task ToggleDeviceEnabledAsync(DeviceDto? device)
         {
-            if (device is null) return;
+            if (device is null)
+            {
+                return;
+            }
 
             var toEnable = device.DeviceState == Services.State.DeviceState.Disabled;
             try
             {
                 var updateTime = DateTime.Now;
                 await _repository.SetDeviceEnabledAsync(device.DeviceId, toEnable, updateTime);
+                await _repository.InsertDeviceEventAsync(new DeviceEventModel
+                {
+                    DeviceId = device.DeviceId,
+                    EventType = toEnable ? "DeviceEnabled" : "DeviceDisabled",
+                    EventLevel = "Info",
+                    EventMessage = toEnable ? "设备已启用，等待重新建立通信" : "设备已停用，停止参与实时监控",
+                    SnapshotState = toEnable ? nameof(Services.State.DeviceState.Disconnected) : nameof(Services.State.DeviceState.Disabled),
+                    OccurredAt = updateTime,
+                    IsResolved = true,
+                    ResolvedAt = updateTime
+                });
+
                 device.DeviceState = toEnable ? Services.State.DeviceState.Disconnected : Services.State.DeviceState.Disabled;
                 device.LastUpdateTime = updateTime;
                 if (!toEnable)
@@ -228,21 +275,20 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             }
             catch (Exception ex)
             {
-                _toast.Error($"加载警告失败：{ex.Message}", null, 3);
+                _toast.Error($"加载告警失败：{ex.Message}", null, 3);
             }
         }
 
         public async Task AckAlarmAsync(AlarmRecordModel? alarm)
         {
-            if (alarm is null) return;
+            if (alarm is null)
+            {
+                return;
+            }
 
             try
             {
-                var rows = await _repository.AckAlarmAsync(alarm.AlarmId);
-                if (rows <= 0) return;
-
-                _workspaceState.RemovePendingAlarm(alarm);
-                _toast.Success($"已确认警告 #{alarm.AlarmId}", null, 3);
+                await ConfirmAlarmAsync(alarm.DeviceId, alarm.AlarmId, alarm.AlarmMessage, null, null);
             }
             catch (Exception ex)
             {
@@ -250,9 +296,117 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             }
         }
 
+        public async Task ConfirmDeviceEventAsync(DeviceEventDto? deviceEvent, string? resolutionNote)
+        {
+            if (deviceEvent is null || !deviceEvent.RequiresManualConfirmation || deviceEvent.IsConfirmed)
+            {
+                return;
+            }
+
+            try
+            {
+                if (deviceEvent.RelatedAlarmId.HasValue)
+                {
+                    var alarmMessage = string.IsNullOrWhiteSpace(deviceEvent.RelatedAlarmMessage)
+                        ? deviceEvent.EventMessage
+                        : deviceEvent.RelatedAlarmMessage;
+                    await ConfirmAlarmAsync(deviceEvent.DeviceId, deviceEvent.RelatedAlarmId.Value, alarmMessage, resolutionNote, deviceEvent);
+                    return;
+                }
+
+                var currentUser = _session.CurrentUser;
+                if (currentUser is null)
+                {
+                    _toast.Error("当前未登录用户，无法确认事件", null, 3);
+                    return;
+                }
+
+                var confirmedAt = DateTime.Now;
+                var normalizedNote = NormalizeResolutionNote(resolutionNote);
+                await _repository.ConfirmDeviceEventAsync(deviceEvent.EventId, currentUser.UserId, confirmedAt, normalizedNote);
+                await _repository.InsertDeviceEventAsync(new DeviceEventModel
+                {
+                    DeviceId = deviceEvent.DeviceId,
+                    EventType = "EventConfirmed",
+                    EventLevel = "Info",
+                    EventMessage = $"事件已确认：{deviceEvent.EventMessage}",
+                    SnapshotState = ResolveSnapshotState(deviceEvent.DeviceId, deviceEvent.SnapshotState),
+                    OccurredAt = confirmedAt,
+                    RelatedAlarmId = deviceEvent.RelatedAlarmId,
+                    IsResolved = true,
+                    ResolvedAt = confirmedAt,
+                    ConfirmedByUserId = currentUser.UserId,
+                    ConfirmedAt = confirmedAt,
+                    ResolutionNote = normalizedNote
+                });
+
+                await RefreshRecentEventsAsync();
+                _toast.Success($"事件 #{deviceEvent.EventId} 已确认", null, 3);
+            }
+            catch (Exception ex)
+            {
+                _toast.Error($"确认事件失败：{ex.Message}", null, 3);
+            }
+        }
+
+        public async Task RefreshRecentEventsAsync(int top = 120)
+        {
+            var recentEvents = await _repository.GetRecentDeviceEventsAsync(top);
+            _workspaceState.ApplyRecentEvents(recentEvents);
+        }
+
+        public Task<DeviceEventQueryResult> QueryDeviceEventsAsync(DeviceEventQueryCriteria criteria)
+        {
+            return _repository.GetDeviceEventsPageAsync(criteria);
+        }
+
         public void Dispose()
         {
             _session.PropertyChanged -= OnSessionPropertyChanged;
+        }
+
+        private async Task ConfirmAlarmAsync(int deviceId, int alarmId, string alarmMessage, string? resolutionNote, DeviceEventDto? deviceEvent)
+        {
+            var currentUser = _session.CurrentUser;
+            if (currentUser is null)
+            {
+                _toast.Error("当前未登录用户，无法确认告警", null, 3);
+                return;
+            }
+
+            var confirmedAt = DateTime.Now;
+            var normalizedNote = NormalizeResolutionNote(resolutionNote);
+            var rows = await _repository.AckAlarmAsync(alarmId, currentUser.UserId, confirmedAt);
+            if (rows <= 0)
+            {
+                return;
+            }
+
+            await _repository.ConfirmDeviceEventsByAlarmAsync(alarmId, currentUser.UserId, confirmedAt, normalizedNote);
+            await _repository.InsertDeviceEventAsync(new DeviceEventModel
+            {
+                DeviceId = deviceId,
+                EventType = "AlarmAcknowledged",
+                EventLevel = "Info",
+                EventMessage = string.IsNullOrWhiteSpace(alarmMessage) ? $"告警 #{alarmId} 已确认" : $"告警已确认：{alarmMessage}",
+                SnapshotState = ResolveSnapshotState(deviceId, deviceEvent?.SnapshotState),
+                OccurredAt = confirmedAt,
+                RelatedAlarmId = alarmId,
+                IsResolved = true,
+                ResolvedAt = confirmedAt,
+                ConfirmedByUserId = currentUser.UserId,
+                ConfirmedAt = confirmedAt,
+                ResolutionNote = normalizedNote
+            });
+
+            var pendingAlarm = _workspaceState.PendingAlarms.FirstOrDefault(item => item.AlarmId == alarmId);
+            if (pendingAlarm is not null)
+            {
+                _workspaceState.RemovePendingAlarm(pendingAlarm);
+            }
+
+            await RefreshRecentEventsAsync();
+            _toast.Success($"已确认告警 #{alarmId}", null, 3);
         }
 
         private async Task<(bool IsSuccess, string Message)> TestConnectionAsync(DeviceModel raw)
@@ -269,7 +423,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 
             if (string.IsNullOrWhiteSpace(device.IpAddress) && string.IsNullOrWhiteSpace(device.SerialPort))
             {
-                return (false, "IP地址和串口不能同时为空");
+                return (false, "IP 地址和串口不能同时为空");
             }
 
             try
@@ -294,9 +448,28 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             }
         }
 
+        private string? ResolveSnapshotState(int deviceId, string? fallbackSnapshotState)
+        {
+            var relatedDevice = _workspaceState.ListDeviceDto.FirstOrDefault(device => device.DeviceId == deviceId);
+            return relatedDevice?.DeviceState.ToString() ?? fallbackSnapshotState;
+        }
+
+        private static string? NormalizeResolutionNote(string? resolutionNote)
+        {
+            if (string.IsNullOrWhiteSpace(resolutionNote))
+            {
+                return null;
+            }
+
+            return resolutionNote.Trim();
+        }
+
         private void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(UserSession.CurrentUser)) return;
+            if (e.PropertyName != nameof(UserSession.CurrentUser))
+            {
+                return;
+            }
 
             OnPropertyChanged(nameof(CanAddDevicePermission));
             OnPropertyChanged(nameof(CanEditDevicePermission));

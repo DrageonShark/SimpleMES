@@ -27,5 +27,9 @@ namespace SimpleMES.Services.DAL
         /// </summary>
         /// <returns>表示异步操作的任务。任务结果包含结果集首行首列的值，该值转换为类型 T；若结果集为空则返回 </returns>
         Task<T?> ExecuteScalarAsync<T>(string sql, object param = null);
+        /// <summary>
+        /// 异步查询多个结果集。
+        /// </summary>
+        Task<(IEnumerable<TFirst> First, IEnumerable<TSecond> Second)> QueryMultipleAsync<TFirst, TSecond>(string sql, object param = null);
     }
 }

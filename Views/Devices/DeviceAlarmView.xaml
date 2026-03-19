@@ -9,44 +9,27 @@
 
         <SolidColorBrush x:Key="PageBgBrush" Color="#F4F8FF" />
         <SolidColorBrush x:Key="CardBgBrush" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="CardSoftBgBrush" Color="#F8FBFF" />
         <SolidColorBrush x:Key="PrimaryBrush" Color="#2563EB" />
         <SolidColorBrush x:Key="BorderBrushSoft" Color="#D7E3F4" />
         <SolidColorBrush x:Key="TextBrush" Color="#0F172A" />
         <SolidColorBrush x:Key="MutedBrush" Color="#64748B" />
 
-        <Style
-            x:Key="ToolbarButtonStyle"
-            BasedOn="{StaticResource MaterialDesignPaperButton}"
-            TargetType="Button">
+        <Style x:Key="ToolbarButtonStyle" BasedOn="{StaticResource MaterialDesignPaperButton}" TargetType="Button">
             <Setter Property="Height" Value="36" />
             <Setter Property="MinWidth" Value="88" />
             <Setter Property="Padding" Value="14,0" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
-                    <Setter Property="Opacity" Value="0.96" />
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
-        <Style
-            x:Key="PrimaryButtonStyle"
-            BasedOn="{StaticResource ToolbarButtonStyle}"
-            TargetType="Button">
+        <Style x:Key="PrimaryButtonStyle" BasedOn="{StaticResource ToolbarButtonStyle}" TargetType="Button">
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
         </Style>
 
-        <Style
-            x:Key="OutlinedButtonStyle"
-            BasedOn="{StaticResource ToolbarButtonStyle}"
-            TargetType="Button">
+        <Style x:Key="OutlinedButtonStyle" BasedOn="{StaticResource ToolbarButtonStyle}" TargetType="Button">
             <Setter Property="Foreground" Value="#2563EB" />
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#BFDBFE" />
@@ -68,201 +51,421 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
-                <TextBlock FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="设备告警" />
-                <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding FilteredAlarmSummary}" />
+            <StackPanel>
+                <TextBlock FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="设备事件中心" />
+                <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding FilteredSummary}" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Margin="0,0,10,0" Command="{Binding ResetFiltersCommand}" Style="{StaticResource OutlinedButtonStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="FilterOffOutline" />
-                        <TextBlock VerticalAlignment="Center" Text="重置筛选" />
-                    </StackPanel>
-                </Button>
+                <Button Margin="0,0,10,0" Command="{Binding ResetFiltersCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="重置筛选" />
+                <Button Margin="0,0,10,0" Command="{Binding RefreshCurrentViewCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="{Binding RefreshButtonText}" />
                 <Button
-                    Margin="0,0,10,0"
                     Command="{Binding AckVisibleAlarmsCommand}"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Visibility="{Binding Actions.CanAckAlarmPermission, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="White" Kind="CheckAll" />
-                        <TextBlock VerticalAlignment="Center" Text="批量确认当前筛选" />
-                    </StackPanel>
-                </Button>
-                <Button Command="{Binding RefreshAlarmsCommand}" Style="{StaticResource OutlinedButtonStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="Refresh" />
-                        <TextBlock VerticalAlignment="Center" Text="刷新告警" />
-                    </StackPanel>
-                </Button>
-                <Button Margin="10,0,0,0" IsEnabled="False" Style="{StaticResource OutlinedButtonStyle}" ToolTip="{Binding HistoryEntryText}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#94A3B8" Kind="History" />
-                        <TextBlock VerticalAlignment="Center" Foreground="#94A3B8" Text="历史告警" />
-                    </StackPanel>
-                </Button>
+                    Content="批量确认当前筛选"
+                    Visibility="{Binding IsAlarmSection, Converter={StaticResource BoolToVisibilityConverter}}" />
             </StackPanel>
         </Grid>
 
-        <UniformGrid Grid.Row="1" Margin="0,18,0,0" Columns="4">
-            <Border Margin="0,0,12,0" Padding="16" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="16">
-                <StackPanel>
-                    <TextBlock Foreground="#1D4ED8" Text="未确认总数" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding State.PendingAlarms.Count}" />
-                </StackPanel>
-            </Border>
-            <Border Margin="0,0,12,0" Padding="16" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="16">
-                <StackPanel>
-                    <TextBlock Foreground="#991B1B" Text="严重告警" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#991B1B" Text="{Binding CriticalCount}" />
-                </StackPanel>
-            </Border>
-            <Border Margin="0,0,12,0" Padding="16" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="16">
-                <StackPanel>
-                    <TextBlock Foreground="#92400E" Text="普通告警" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#92400E" Text="{Binding WarningCount}" />
-                </StackPanel>
-            </Border>
-            <Border Padding="16" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="16">
-                <StackPanel>
-                    <TextBlock Foreground="#047857" Text="提醒" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#047857" Text="{Binding NoticeCount}" />
-                </StackPanel>
-            </Border>
-        </UniformGrid>
+        <Border
+            Grid.Row="1"
+            Margin="0,18,0,0"
+            Padding="18"
+            Background="{StaticResource CardBgBrush}"
+            BorderBrush="{StaticResource BorderBrushSoft}"
+            BorderThickness="1"
+            CornerRadius="18">
+            <StackPanel>
+                <WrapPanel>
+                    <Button Command="{Binding ShowAlarmSectionCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="未确认告警" />
+                    <Button Margin="10,0,0,0" Command="{Binding ShowEventSectionCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="事件历史" />
+                </WrapPanel>
 
-        <Border Grid.Row="2" Margin="0,18,0,0" Padding="18" Background="{StaticResource CardBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.8*" />
-                    <ColumnDefinition Width="14" />
-                    <ColumnDefinition Width="1.1*" />
-                </Grid.ColumnDefinitions>
+                <WrapPanel Margin="0,16,0,0">
+                    <StackPanel Width="320" Margin="0,0,12,12">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="{Binding SearchHint}" />
+                        <TextBox Margin="0,6,0,0" Height="36" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
 
-                <StackPanel Grid.Column="0">
-                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="搜索告警 / 设备号" />
-                    <DockPanel Margin="0,6,0,0">
-                        <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
-                            <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="Magnify" />
-                        </Border>
-                        <TextBox Height="36" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
-                    </DockPanel>
-                </StackPanel>
+                    <StackPanel Width="180" Margin="0,0,12,12" Visibility="{Binding IsAlarmSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="告警等级" />
+                        <ComboBox Margin="0,6,0,0" Height="36" ItemsSource="{Binding SeverityFilterOptions}" SelectedItem="{Binding SeverityFilter, Mode=TwoWay}" />
+                    </StackPanel>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="告警级别" />
-                    <DockPanel Margin="0,6,0,0">
-                        <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
-                            <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="TuneVariant" />
-                        </Border>
-                        <ComboBox Height="36" ItemsSource="{Binding SeverityFilterOptions}" SelectedItem="{Binding SeverityFilter, Mode=TwoWay}" />
-                    </DockPanel>
-                </StackPanel>
-            </Grid>
+                    <StackPanel Width="180" Margin="0,0,12,12" Visibility="{Binding IsEventSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="事件等级" />
+                        <ComboBox Margin="0,6,0,0" Height="36" ItemsSource="{Binding EventSeverityFilterOptions}" SelectedItem="{Binding EventSeverityFilter, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Width="180" Margin="0,0,12,12" Visibility="{Binding IsEventSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="处理状态" />
+                        <ComboBox Margin="0,6,0,0" Height="36" ItemsSource="{Binding EventStatusFilterOptions}" SelectedItem="{Binding EventStatusFilter, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Width="210" Margin="0,0,12,12" Visibility="{Binding IsEventSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="设备" />
+                        <ComboBox Margin="0,6,0,0" Height="36" ItemsSource="{Binding EventDeviceFilterOptions}" SelectedItem="{Binding SelectedDeviceFilter, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Width="210" Margin="0,0,12,12" Visibility="{Binding IsEventSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="事件类型" />
+                        <ComboBox Margin="0,6,0,0" Height="36" ItemsSource="{Binding EventTypeFilterOptions}" SelectedItem="{Binding SelectedEventTypeFilter, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Width="180" Margin="0,0,0,12" Visibility="{Binding IsEventSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="时间范围" />
+                        <ComboBox Margin="0,6,0,0" Height="36" ItemsSource="{Binding TimeRangeFilterOptions}" SelectedItem="{Binding SelectedTimeRangeFilter, Mode=TwoWay}" />
+                    </StackPanel>
+                </WrapPanel>
+            </StackPanel>
         </Border>
 
-        <Grid Grid.Row="3" Margin="0,18,0,0">
-            <ListBox Background="Transparent" BorderThickness="0" ItemsSource="{Binding VisibleAlarms}" Visibility="{Binding HasVisibleAlarms, Converter={StaticResource BoolToVisibilityConverter}}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0,0,0,12" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="Background" Value="Transparent" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border Padding="18" BorderThickness="1" CornerRadius="18">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Background" Value="#FFFBEB" />
-                                    <Setter Property="BorderBrush" Value="#FDE68A" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SeverityKey}" Value="Critical">
-                                            <Setter Property="Background" Value="#FEF2F2" />
-                                            <Setter Property="BorderBrush" Value="#FECACA" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SeverityKey}" Value="Notice">
-                                            <Setter Property="Background" Value="#ECFDF5" />
-                                            <Setter Property="BorderBrush" Value="#A7F3D0" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+        <Grid Grid.Row="2" Margin="0,14,0,0">
+            <Border
+                Padding="14,12"
+                Background="White"
+                BorderBrush="#D7E3F4"
+                BorderThickness="1"
+                CornerRadius="18"
+                Visibility="{Binding IsAlarmSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Padding="10,4" BorderThickness="1" CornerRadius="999">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#FFFBEB" />
-                                                    <Setter Property="BorderBrush" Value="#FDE68A" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding SeverityKey}" Value="Critical">
-                                                            <Setter Property="Background" Value="#FEE2E2" />
-                                                            <Setter Property="BorderBrush" Value="#FCA5A5" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SeverityKey}" Value="Notice">
-                                                            <Setter Property="Background" Value="#DCFCE7" />
-                                                            <Setter Property="BorderBrush" Value="#86EFAC" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding SeverityText}" />
-                                        </Border>
-                                        <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="{Binding DeviceId, StringFormat=设备 #{0}}" />
-                                    </StackPanel>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="告警统计" />
+                        <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.AlarmSummary}" />
+                    </StackPanel>
 
-                                    <TextBlock Margin="0,12,0,0" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding AlarmMessage}" TextWrapping="Wrap" />
-                                    <TextBlock Margin="0,10,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding AlarmTime, StringFormat='发生时间：{0:yyyy-MM-dd HH:mm:ss}'}" />
-                                </StackPanel>
-
-                                <Button
-                                    Grid.Column="1"
-                                    Margin="16,0,0,0"
-                                    VerticalAlignment="Center"
-                                    Command="{Binding DataContext.AckAlarmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding}"
-                                    Style="{StaticResource OutlinedButtonStyle}"
-                                    Visibility="{Binding DataContext.Actions.CanAckAlarmPermission, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="CheckCircleOutline" />
-                                        <TextBlock VerticalAlignment="Center" Text="确认" />
-                                    </StackPanel>
-                                </Button>
-                            </Grid>
+                    <WrapPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border Margin="0,0,10,6" Padding="12,8" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#1D4ED8" Text="未确认总数" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding State.PendingAlarms.Count}" />
+                            </StackPanel>
                         </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-
-            <Border Padding="28" Background="{StaticResource CardSoftBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding HasVisibleAlarms}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <StackPanel VerticalAlignment="Center">
-                    <Border Width="56" Height="56" HorizontalAlignment="Left" Background="#DBEAFE" CornerRadius="28">
-                        <materialDesign:PackIcon Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="BellCheckOutline" />
-                    </Border>
-                    <TextBlock Margin="0,18,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding EmptyStateTitle}" />
-                    <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding EmptyStateDescription}" TextWrapping="Wrap" />
-                </StackPanel>
+                        <Border Margin="0,0,10,6" Padding="12,8" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#991B1B" Text="严重告警" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#991B1B" Text="{Binding CriticalCount}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,10,6" Padding="12,8" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#92400E" Text="普通告警" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#92400E" Text="{Binding WarningCount}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,0,6" Padding="12,8" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#047857" Text="提醒" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#047857" Text="{Binding NoticeCount}" />
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+                </Grid>
             </Border>
+
+            <Border
+                Padding="14,12"
+                Background="White"
+                BorderBrush="#D7E3F4"
+                BorderThickness="1"
+                CornerRadius="18"
+                Visibility="{Binding IsEventSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="事件统计" />
+                        <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding FilteredSummary}" />
+                    </StackPanel>
+
+                    <WrapPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border Margin="0,0,10,6" Padding="12,8" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#1D4ED8" Text="事件总数" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding EventTotalCount}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,10,6" Padding="12,8" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#991B1B" Text="严重事件" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#991B1B" Text="{Binding EventCriticalCount}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,10,6" Padding="12,8" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#92400E" Text="告警事件" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#92400E" Text="{Binding EventWarningCount}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,0,6" Padding="12,8" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="999">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#047857" Text="待人工确认" />
+                                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#047857" Text="{Binding EventPendingCount}" />
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <Grid Visibility="{Binding IsAlarmSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <ListBox Background="Transparent" BorderThickness="0" ItemsSource="{Binding VisibleAlarms}">
+                    <ListBox.Style>
+                        <Style TargetType="ListBox">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasVisibleAlarms}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Style>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0,0,0,12" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="18" Background="White" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="18">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding AlarmMessage}" TextWrapping="Wrap" />
+                                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding AlarmTime, StringFormat='发生时间：{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                    </StackPanel>
+                                    <Button
+                                        Grid.Column="1"
+                                        Margin="16,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding DataContext.AckAlarmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource OutlinedButtonStyle}"
+                                        Content="确认"
+                                        Visibility="{Binding DataContext.Actions.CanAckAlarmPermission, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Padding="28" Background="White" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasVisibleAlarms}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding EmptyStateTitle}" />
+                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding EmptyStateDescription}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Visibility="{Binding IsEventSection, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.6*" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <ListBox
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ItemsSource="{Binding VisibleEvents}"
+                        SelectedItem="{Binding SelectedEvent, Mode=TwoWay}">
+                        <ListBox.Style>
+                            <Style TargetType="ListBox">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasVisibleEvents}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.Style>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,0,12" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="18" Background="White" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="18">
+                                    <StackPanel>
+                                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding EventTypeText}" />
+                                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding DeviceName}" />
+                                        <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding EventMessage}" TextWrapping="Wrap" />
+                                        <WrapPanel Margin="0,10,0,0">
+                                            <Border Margin="0,0,8,8" Padding="10,4" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="999">
+                                                <TextBlock Foreground="#475569" Text="{Binding OccurredAtSummary}" />
+                                            </Border>
+                                            <Border Margin="0,0,8,8" Padding="10,4" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="999">
+                                                <TextBlock Foreground="#475569" Text="{Binding SnapshotStateText, StringFormat='状态快照：{0}'}" />
+                                            </Border>
+                                            <Border Margin="0,0,8,8" Padding="10,4" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="999">
+                                                <TextBlock Foreground="#475569" Text="{Binding ProcessingStatusText}" />
+                                            </Border>
+                                        </WrapPanel>
+                                        <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding RelatedAlarmSummary}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <Button
+                        Grid.Row="1"
+                        Margin="0,4,0,16"
+                        Command="{Binding LoadMoreEventsCommand}"
+                        Content="{Binding LoadMoreButtonText}"
+                        Style="{StaticResource OutlinedButtonStyle}"
+                        Visibility="{Binding HasMoreEvents, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                    <Border Padding="28" Background="White" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasVisibleEvents}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding EmptyStateTitle}" />
+                            <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding EmptyStateDescription}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border
+                    Grid.Column="2"
+                    Padding="20"
+                    Background="White"
+                    BorderBrush="{StaticResource BorderBrushSoft}"
+                    BorderThickness="1"
+                    CornerRadius="18">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="{Binding EventDetailTitle}" />
+                            <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding EventDetailSubtitle}" TextWrapping="Wrap" />
+
+                            <Border Margin="0,18,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="设备名" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding SelectedEvent.DeviceEvent.DeviceName}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="区域 / 产线 / 工位" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding SelectedEvent.DeviceEvent.LocationSummary}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="事件类型" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding SelectedEvent.EventTypeText}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="事件内容" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding SelectedEvent.DeviceEvent.EventMessage}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="状态快照" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding SelectedEvent.SnapshotStateText}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="关联告警" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding SelectedEvent.DeviceEvent.RelatedAlarmSummary}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="发生时间" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding SelectedEvent.DeviceEvent.OccurredAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="处理状态" />
+                                    <TextBlock Margin="0,6,0,0" FontWeight="SemiBold" Foreground="#2563EB" Text="{Binding SelectedEvent.ProcessingStatusText}" />
+                                    <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding SelectedEvent.ConfirmationSummary}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,12" Padding="14" Background="#F8FBFF" BorderBrush="#D7E3F4" BorderThickness="1" CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="处理说明 / 原因确认" />
+                                    <TextBox
+                                        Margin="0,8,0,0"
+                                        MinHeight="92"
+                                        AcceptsReturn="True"
+                                        IsEnabled="{Binding SelectedEvent.CanConfirm}"
+                                        Text="{Binding EventResolutionNote, UpdateSourceTrigger=PropertyChanged}"
+                                        TextWrapping="Wrap"
+                                        VerticalScrollBarVisibility="Auto" />
+                                    <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="恢复事件只代表系统恢复；真正闭环仍需人工确认原因。" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Button
+                                Command="{Binding ConfirmSelectedEventCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Content="确认原因并闭环"
+                                Visibility="{Binding SelectedEvent.CanConfirm, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

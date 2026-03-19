@@ -314,6 +314,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock
+                        Height="30"
                         VerticalAlignment="Center"
                         Foreground="{StaticResource MutedBrush}"
                         Text="{Binding VisibleRangeSummary}" />

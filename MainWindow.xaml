@@ -5,17 +5,30 @@
     xmlns:controls="clr-namespace:SimpleMES.Views.Controls"
     xmlns:converters="clr-namespace:SimpleMES.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:deviceViewModels="clr-namespace:SimpleMES.ViewModels.DeviceViewModels"
     xmlns:local="clr-namespace:SimpleMES"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:deviceViewModels="clr-namespace:SimpleMES.ViewModels.DeviceViewModels"
     xmlns:orderViewModels="clr-namespace:SimpleMES.ViewModels.OrderViewModels"
     xmlns:views="clr-namespace:SimpleMES.Views"
     xmlns:vm="clr-namespace:SimpleMES.ViewModels"
     Title="简单MES系统"
     Width="1250"
     Height="800"
+    MinWidth="1180"
+    MinHeight="720"
+    Background="#F5F9FF"
+    ResizeMode="CanResize"
     WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
     mc:Ignorable="d">
+    <WindowChrome.WindowChrome>
+        <WindowChrome
+            CaptionHeight="0"
+            CornerRadius="0"
+            GlassFrameThickness="0"
+            ResizeBorderThickness="6"
+            UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
     <Window.Resources>
         <DataTemplate DataType="{x:Type deviceViewModels:DeviceShellViewModel}">
             <controls:DeviceShellView />
@@ -32,37 +45,189 @@
 
         <!--  侧边栏宽度值辅助改变转换器  -->
         <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
-        <!--  导航栏按钮  -->
-        <Style x:Key="NavButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="42" />
-            <Setter Property="Margin" Value="0,6,0,0" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Foreground" Value="White" />
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Foreground" Value="#1565C0" />
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border
                             x:Name="Bd"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="4">
-                            <ContentPresenter Margin="{TemplateBinding Margin}" />
+                            CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1D4F80" />
+                                <Setter TargetName="Bd" Property="Background" Value="#E3F2FD" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#173F67" />
+                                <Setter TargetName="Bd" Property="Background" Value="#D0E8FB" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style
+            x:Key="TitleBarCloseButtonStyle"
+            BasedOn="{StaticResource TitleBarButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Foreground" Value="#D32F2F" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFEBEE" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FFCDD2" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SidebarSectionToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Height" Value="52" />
+            <Setter Property="Margin" Value="0,8,0,0" />
+            <Setter Property="Padding" Value="16,0,14,0" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border
+                                    x:Name="Indicator"
+                                    Grid.Column="0"
+                                    Width="4"
+                                    Margin="0,10,0,10"
+                                    Background="#00FFFFFF"
+                                    CornerRadius="2" />
+
+                                <ContentPresenter
+                                    Grid.Column="1"
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1E5AA5" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2267BC" />
+                                <Setter TargetName="Indicator" Property="Background" Value="#BFE1FF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#184E90" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SidebarNavButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+            <Setter Property="Padding" Value="18,0,14,0" />
+            <Setter Property="Foreground" Value="#F6FAFF" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border
+                                    x:Name="Indicator"
+                                    Grid.Column="0"
+                                    Width="4"
+                                    Margin="0,8,0,8"
+                                    Background="#00FFFFFF"
+                                    CornerRadius="2" />
+
+                                <ContentPresenter
+                                    Grid.Column="1"
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1A4E8F" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#163F73" />
+                            </Trigger>
+                            <Trigger Property="IsDefaulted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2267BC" />
+                                <Setter TargetName="Indicator" Property="Background" Value="#BFE1FF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--  导航栏按钮  -->
+        <Style
+            x:Key="SidebarSubNavButtonStyle"
+            BasedOn="{StaticResource SidebarNavButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+            <Setter Property="Padding" Value="34,0,14,0" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+
+        <Style x:Key="SidebarIconTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+
+
         <!--  侧边栏按钮  -->
         <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="30" />
@@ -136,49 +301,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="WindowToggleButtonStyle" TargetType="ToggleButton">
-            <Setter Property="Height" Value="42" />
-            <Setter Property="Margin" Value="0,6,0,0" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Border
-                            x:Name="Bd"
-                            Background="{TemplateBinding Background}"
-                            CornerRadius="4">
-                            <ContentPresenter Margin="{TemplateBinding Margin}" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1D4F80" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#173F67" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
-        <Style
-            x:Key="SubNavButtonStyle"
-            BasedOn="{StaticResource NavButtonStyle}"
-            TargetType="Button">
-            <Setter Property="Height" Value="36" />
-            <Setter Property="Margin" Value="0,4,0,0" />
-            <Setter Property="Padding" Value="28,0,14,0" />
-            <Setter Property="FontSize" Value="14" />
-        </Style>
-
     </Window.Resources>
     <Grid Background="#F0F2F5">
         <Grid.ColumnDefinitions>
@@ -188,120 +310,188 @@
         <!--  侧边栏  -->
         <Border
             Grid.Column="0"
-            Background="#12304E"
-            CornerRadius="0 8 8 0">
+            Background="#123A67"
+            CornerRadius="0,14,14,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Margin="16,18,16,14">
-                    <TextBlock
-                        FontSize="24"
-                        FontWeight="Bold"
-                        Foreground="White"
-                        Text="Simple MES" />
-                    <TextBlock
-                        Margin="0,4,0,0"
-                        FontSize="12"
-                        Foreground="#BBD1E6"
-                        Text="设备管理中心" />
-                </StackPanel>
 
-                <StackPanel Grid.Row="1" Margin="10,8,10,10">
-                    <ToggleButton
-                        x:Name="DeviceWindowButton"
-                        IsChecked="{Binding IsDeviceWindowMenuOpen, Mode=TwoWay}"
-                        Style="{StaticResource WindowToggleButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                FontSize="16"
-                                Text="设备中心" />
-                            <TextBlock
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="10"
-                                Text="&#xE70D;" />
-                        </StackPanel>
-                    </ToggleButton>
+                <!--  顶部品牌区  -->
+                <Border
+                    Grid.Row="0"
+                    Padding="18,20,18,16"
+                    Background="#1565C0"
+                    CornerRadius="0,14,0,0">
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="26"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="Simple MES" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="12"
+                            Foreground="#DCEEFF"
+                            Text="设备管理中心" />
+                    </StackPanel>
+                </Border>
 
-                    <Border
-                        Margin="0,4,0,0"
-                        Padding="0,0,0,4"
-                        Visibility="{Binding IsDeviceWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel>
-                            <Button
-                                Command="{Binding ShowDeviceBoardCommand}"
-                                Content="设备看板"
-                                Style="{StaticResource SubNavButtonStyle}" />
-                            <Button
-                                Command="{Binding ShowDeviceManagementCommand}"
-                                Content="设备管理"
-                                Style="{StaticResource SubNavButtonStyle}" />
-                            <Button
-                                Command="{Binding ShowDeviceAlarmCommand}"
-                                Content="设备告警"
-                                Style="{StaticResource SubNavButtonStyle}" />
-                        </StackPanel>
-                    </Border>
+                <!--  菜单区  -->
+                <ScrollViewer
+                    Grid.Row="1"
+                    Background="#123A67"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12,12,12,14">
 
-                    <ToggleButton
-                        x:Name="OrderWindowButton"
-                        IsChecked="{Binding IsOrderWindowMenuOpen, Mode=TwoWay}"
-                        Style="{StaticResource WindowToggleButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                FontSize="16"
-                                Text="生产订单" />
-                            <TextBlock
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="10"
-                                Text="&#xE70D;" />
-                        </StackPanel>
-                    </ToggleButton>
+                        <ToggleButton
+                            x:Name="DeviceWindowButton"
+                            IsChecked="{Binding IsDeviceWindowMenuOpen, Mode=TwoWay}"
+                            Style="{StaticResource SidebarSectionToggleStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="22" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="18" />
+                                </Grid.ColumnDefinitions>
 
-                    <Border
-                        Margin="0,4,0,0"
-                        Padding="0,0,0,4"
-                        Visibility="{Binding IsOrderWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel>
-                            <Button
-                                Command="{Binding ShowOrderBoardCommand}"
-                                Content="订单看板"
-                                Style="{StaticResource SubNavButtonStyle}" />
-                            <Button
-                                Command="{Binding ShowManagementCommand}"
-                                Content="订单维护"
-                                Style="{StaticResource SubNavButtonStyle}" />
-                            <Button
-                                Command="{Binding ShowOrderDispatchCommand}"
-                                Content="订单调度"
-                                Style="{StaticResource SubNavButtonStyle}" />
-                        </StackPanel>
-                    </Border>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="14"
+                                    Style="{StaticResource SidebarIconTextStyle}"
+                                    Text="&#xE7F4;" />
 
-                    <Button
-                        Command="{Binding ShowReportCommand}"
-                        Content="数据报表"
-                        Style="{StaticResource NavButtonStyle}" />
-                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    Style="{StaticResource SidebarIconTextStyle}"
+                                    Text="设备中心" />
 
+                                <TextBlock
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="10"
+                                    Foreground="White"
+                                    Text="&#xE70D;" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <Border
+                            Margin="0,6,0,2"
+                            Padding="0,0,0,4"
+                            Visibility="{Binding IsDeviceWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <Button
+                                    Command="{Binding ShowDeviceBoardCommand}"
+                                    Content="设备看板"
+                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                                <Button
+                                    Command="{Binding ShowDeviceManagementCommand}"
+                                    Content="设备管理"
+                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                                <Button
+                                    Command="{Binding ShowDeviceAlarmCommand}"
+                                    Content="设备告警"
+                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                            </StackPanel>
+                        </Border>
+
+                        <ToggleButton
+                            x:Name="OrderWindowButton"
+                            IsChecked="{Binding IsOrderWindowMenuOpen, Mode=TwoWay}"
+                            Style="{StaticResource SidebarSectionToggleStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="22" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="18" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="14"
+                                    Style="{StaticResource SidebarIconTextStyle}"
+                                    Text="&#xE8A5;" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    Style="{StaticResource SidebarIconTextStyle}"
+                                    Text="生产订单" />
+
+                                <TextBlock
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="10"
+                                    Foreground="White"
+                                    Text="&#xE70D;" />
+                            </Grid>
+                        </ToggleButton>
+
+                        <Border
+                            Margin="0,6,0,2"
+                            Padding="0,0,0,4"
+                            Visibility="{Binding IsOrderWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <Button
+                                    Command="{Binding ShowOrderBoardCommand}"
+                                    Content="订单看板"
+                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                                <Button
+                                    Command="{Binding ShowManagementCommand}"
+                                    Content="订单维护"
+                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                                <Button
+                                    Command="{Binding ShowOrderDispatchCommand}"
+                                    Content="订单调度"
+                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Button Command="{Binding ShowReportCommand}" Style="{StaticResource SidebarNavButtonStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="22" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="14"
+                                    Style="{StaticResource SidebarIconTextStyle}"
+                                    Text="&#xE9D2;" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    Style="{StaticResource SidebarIconTextStyle}"
+                                    Text="数据报表" />
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Border>
+
         <!--  右侧主区  -->
         <Border
             Grid.Column="1"
-            Margin="12"
+            Margin="5"
             Background="White"
             CornerRadius="12">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50" />
+                    <RowDefinition Height="56" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Border
@@ -310,10 +500,11 @@
                     BorderBrush="#E8EEF5"
                     BorderThickness="0,0,0,1"
                     CornerRadius="12 12 0 0">
-                    <Grid Margin="12,0">
+                    <Grid Margin="12,0,10,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
@@ -335,6 +526,12 @@
                                 Text="{Binding PageTitle}" />
                         </StackPanel>
 
+                        <!--  中间空白拖动区  -->
+                        <Border
+                            Grid.Column="1"
+                            Background="Transparent"
+                            MouseLeftButtonDown="DragArea_OnMouseLeftButtonDown" />
+
                         <Grid Grid.Column="2" VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -347,14 +544,12 @@
                                 Grid.Column="0"
                                 Width="Auto"
                                 Margin="0"
-                                VerticalAlignment="Center"
                                 Style="{StaticResource SessionTextBlockStyle}"
                                 Text="{Binding CurrentUserName}" />
                             <TextBlock
                                 Grid.Column="1"
                                 Width="Auto"
                                 Margin="0,0,10,0"
-                                VerticalAlignment="Center"
                                 Style="{StaticResource SessionTextBlockStyle}"
                                 Text="{Binding CurrentRoleGreeting}" />
 
@@ -401,6 +596,7 @@
                                     Background="White"
                                     BorderBrush="#D4DCE6"
                                     BorderThickness="1"
+                                    CornerRadius="8"
                                     SnapsToDevicePixels="True">
                                     <StackPanel>
                                         <Button
@@ -427,12 +623,57 @@
                                 </Border>
                             </Popup>
                         </Grid>
+                        <!--  右上角自定义窗口按钮  -->
+                        <Border
+                            Grid.Column="3"
+                            Margin="20,0,0,0"
+                            VerticalAlignment="Center"
+                            Background="#F4F9FF"
+                            BorderBrush="#DCE8F5"
+                            BorderThickness="1"
+                            CornerRadius="16">
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Click="MinButton_OnClick"
+                                    Content="&#xE921;"
+                                    Style="{StaticResource TitleBarButtonStyle}" />
+
+                                <Button Click="MaxButton_OnClick" Content="&#xE922;">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource TitleBarButtonStyle}" TargetType="Button">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=WindowState}" Value="Maximized">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Click="RestoreButton_OnClick" Content="&#xE923;">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource TitleBarButtonStyle}" TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=WindowState}" Value="Maximized">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button
+                                    Click="CloseButton_OnClick"
+                                    Content="&#xE8BB;"
+                                    Style="{StaticResource TitleBarCloseButtonStyle}" />
+                            </StackPanel>
+                        </Border>
+
                     </Grid>
                 </Border>
-                <ContentControl
-                    Grid.Row="1"
-                    Margin="8"
-                    Content="{Binding CurrentView}" />
+                <ContentControl Grid.Row="1" Content="{Binding CurrentView}" />
             </Grid>
         </Border>
     </Grid>

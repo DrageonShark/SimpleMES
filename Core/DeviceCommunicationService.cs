@@ -23,6 +23,7 @@ namespace SimpleMES.Core
         // 每个设备独立的取消令牌，方便单独停止某个设备
         private readonly ConcurrentDictionary<int, CancellationTokenSource> _deviceTasksCts = new();
         private readonly ConcurrentDictionary<int, DeviceDto> _latestDeviceSnapshots = new();
+        private IReadOnlyList<DeviceEventDto> _latestDeviceEvents = Array.Empty<DeviceEventDto>();
         public event EventHandler<DeviceStatusChangedEventArgs>? DeviceStatusChanged;
         public DeviceCommunicationService(IDataRepository repository, IDeviceClientFactory deviceClientFactory, IDevicePollingStrategyResolver strategyResolver, IDeviceConfigNotifier configNotifier)
         {
@@ -39,6 +40,7 @@ namespace SimpleMES.Core
         {
             Log.Information("初始化并启动设备通信服务...");
             var devices = await _repository.GetAllDevicesAsync();
+            await RefreshRecentEventsAsync();
             foreach (var d in devices)
             {
                 _monitoredDevices[d.DeviceId] = d;
@@ -77,6 +79,7 @@ namespace SimpleMES.Core
 
             _monitoredDevices[e.Device.DeviceId] = monitored;
             _latestDeviceSnapshots[e.Device.DeviceId] = BuildSnapshot(monitored);
+            await RefreshRecentEventsAsync();
             PublishLatestSnapshots();
 
             if ((e.ChangeType == ConfigChangeType.Added || e.ChangeType == ConfigChangeType.Updated || e.ChangeType == ConfigChangeType.Enabled)
@@ -122,6 +125,7 @@ namespace SimpleMES.Core
             while (!token.IsCancellationRequested)
             {
                 var state = _deviceStates[device.DeviceId];
+                var previousStateName = state.Name;
                 try
                 {
                     // 1. 获取或创建长连接 Client
@@ -139,6 +143,10 @@ namespace SimpleMES.Core
                         await outcome.PersistAsync(_repository, token);
                     state = await state.HandleAsync(device, outcome.PollResult, _repository, token);
                     _deviceStates[device.DeviceId] = state;
+                    if (!string.Equals(previousStateName, state.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await RefreshRecentEventsAsync();
+                    }
                     NotifySingleDeviceUpdate(device, outcome, state);
                 }
                 catch (Exception ex)
@@ -149,6 +157,10 @@ namespace SimpleMES.Core
                         await badClient.DisposeAsync();
                     state = await state.HandleAsync(device, new DevicePollResult(false, null, ex, DateTime.Now), _repository, token);
                     _deviceStates[device.DeviceId] = state;
+                    if (!string.Equals(previousStateName, state.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await RefreshRecentEventsAsync();
+                    }
                     NotifySingleDeviceUpdate(device, null, state, ex);
                 }
                 try
@@ -251,7 +263,12 @@ namespace SimpleMES.Core
         private void PublishLatestSnapshots()
         {
             var latestList = _latestDeviceSnapshots.Values.ToList().AsReadOnly();
-            DeviceStatusChanged?.Invoke(this, new DeviceStatusChangedEventArgs(latestList));
+            DeviceStatusChanged?.Invoke(this, new DeviceStatusChangedEventArgs(latestList, _latestDeviceEvents));
+        }
+
+        private async Task RefreshRecentEventsAsync()
+        {
+            _latestDeviceEvents = (await _repository.GetRecentDeviceEventsAsync()).ToList().AsReadOnly();
         }
     }
 }
