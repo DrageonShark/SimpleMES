@@ -7,6 +7,7 @@ using SimpleMES.Services.Observer;
 using SimpleMES.Services.Orders;
 using SimpleMES.Services.Toast;
 using SimpleMES.ViewModels;
+using SimpleMES.ViewModels.DeviceViewModels;
 using SimpleMES.ViewModels.OrderViewModels;
 using SimpleMES.Views;
 using System.Windows;
@@ -53,7 +54,12 @@ namespace MESDemo
                 return;
             }
             //4.创建主界面 ViewModel
-            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier, deviceClientFactory);// 注入 Service
+            var deviceWorkspaceState = new DeviceWorkspaceState();
+            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier, deviceClientFactory, deviceWorkspaceState);// 注入 Service
+            var deviceBoardVM = new DeviceBoardViewModel(deviceWorkspaceState, monitorVM);
+            var deviceManagementVM = new DeviceManagementViewModel(deviceWorkspaceState, monitorVM);
+            var deviceAlarmVM = new DeviceAlarmViewModel(deviceWorkspaceState, monitorVM);
+            var deviceShellVM = new DeviceShellViewModel(deviceBoardVM, deviceManagementVM, deviceAlarmVM);
             var orderBoardVM = new OrderBoardViewModel(repo, toast);
             var orderDialogService = new OrderDialogService(repo, toast);
             var orderManagementVM = new OrderManagementHomeViewModel(repo, toast, orderDialogService);
@@ -65,7 +71,7 @@ namespace MESDemo
 
             var reportVM = new ReportViewModel(dbService, Dispatcher, _deviceCommunication);
 
-            var mainViewModel = new MainViewModel(monitorVM, orderShellVM, reportVM);     // 注入 MonitorVM
+            var mainViewModel = new MainViewModel(deviceShellVM, orderShellVM, reportVM);     // 注入 shell VM
             // 5. 创建主窗口，并赋值 DataContext
             var mainWindow = new MainWindow();
             mainWindow.DataContext = mainViewModel;

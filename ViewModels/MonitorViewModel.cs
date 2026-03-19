@@ -11,22 +11,22 @@ using SimpleMES.Services.Security;
 using SimpleMES.Services.State;
 using SimpleMES.Services.Toast;
 using SimpleMES.Services.UI;
+using SimpleMES.ViewModels.DeviceViewModels;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class MonitorViewModel : DialogViewModelBase, IDisposable
+    public partial class MonitorViewModel : DialogViewModelBase, IDisposable, IDeviceWorkspaceActions
     {
         private readonly IDeviceClientFactory _deviceClientFactory;
         private readonly IDeviceConfigNotifier _configNotifier;
-        private readonly Dispatcher _dispatcher;
         private readonly IDeviceStatusNotifier _statusNotifier;
         private readonly IDataRepository _repository;
-        private IToastService _toast;
+        private readonly IToastService _toast;
         private readonly IDeviceDialogService _deviceDialogService;
         private readonly IUiDispatcher _uiDispatcher;
+        private readonly DeviceWorkspaceState _workspaceState;
         private bool _disposed;
         private readonly UserSession _session = UserSession.Current;
 
@@ -38,31 +38,61 @@ namespace SimpleMES.ViewModels
         [ObservableProperty] private int? _port;
         [ObservableProperty] private string? _serialPort;
         [ObservableProperty] private byte _slaveId = 1;
-        //筛选条件
-        [ObservableProperty] private string _searchKeyword = string.Empty;
 
-        [ObservableProperty] private string _stateFilter = "全部";
+        public DeviceWorkspaceState WorkspaceState => _workspaceState;
 
-        public IReadOnlyList<string> StateFilterOptions { get; } = new[] { "全部", "运行", "断连", "故障", "停用" };
-        //状态统计数字
-        [ObservableProperty] private int _runningCount;
-        [ObservableProperty] private int _disconnectedCount;
-        [ObservableProperty] private int _faultCount;
-        [ObservableProperty] private int _disabledCount;
+        public string SearchKeyword
+        {
+            get => _workspaceState.SearchKeyword;
+            set
+            {
+                if (_workspaceState.SearchKeyword == value) return;
+                _workspaceState.SearchKeyword = value;
+                OnPropertyChanged();
+            }
+        }
 
-        //警告页面的侧边栏按钮触发通知UI和提示文字改变
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(AlarmPanelToggleText))]
-        [NotifyPropertyChangedFor(nameof(AlarmPanelToggleContent))]
-        private bool _isAlarmPanelCollapsed = false;
+        public string StateFilter
+        {
+            get => _workspaceState.StateFilter;
+            set
+            {
+                if (_workspaceState.StateFilter == value) return;
+                _workspaceState.StateFilter = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public string AlarmPanelToggleContent => IsAlarmPanelCollapsed ? "<" : ">";
-        public string AlarmPanelToggleText => IsAlarmPanelCollapsed ? "展开告警侧栏" : "收起告警侧栏";
-        // 界面绑定的设备列表
-        public ObservableCollection<DeviceDto> ListDeviceDto { get; set; } = new ObservableCollection<DeviceDto>();
-        public ObservableCollection<DeviceDto> FilteredDeviceDto { get; } = new();
-        // 右侧告警面板数据源
-        public ObservableCollection<AlarmRecordModel> PendingAlarms { get; } = new();
+        public IReadOnlyList<string> StateFilterOptions => _workspaceState.StateFilterOptions;
+        public int RunningCount => _workspaceState.RunningCount;
+        public int DisconnectedCount => _workspaceState.DisconnectedCount;
+        public int FaultCount => _workspaceState.FaultCount;
+        public int DisabledCount => _workspaceState.DisabledCount;
+        public bool IsAlarmPanelCollapsed => _workspaceState.IsAlarmPanelCollapsed;
+        public string AlarmPanelToggleContent => _workspaceState.AlarmPanelToggleContent;
+        public string AlarmPanelToggleText => _workspaceState.AlarmPanelToggleText;
+        public ObservableCollection<DeviceDto> ListDeviceDto => _workspaceState.ListDeviceDto;
+        public ObservableCollection<DeviceDto> FilteredDeviceDto => _workspaceState.FilteredDeviceDto;
+        public ObservableCollection<AlarmRecordModel> PendingAlarms => _workspaceState.PendingAlarms;
+        public ObservableCollection<DeviceDto> AttentionDevices => _workspaceState.AttentionDevices;
+        public ObservableCollection<DeviceDto> RecentDevices => _workspaceState.RecentDevices;
+        public int TotalDeviceCount => _workspaceState.TotalDeviceCount;
+        public int AttentionDeviceCount => _workspaceState.AttentionDeviceCount;
+        public bool HasDevices => _workspaceState.HasDevices;
+        public bool HasFilteredDevices => _workspaceState.HasFilteredDevices;
+        public bool HasActiveFilters => _workspaceState.HasActiveFilters;
+        public bool HasPendingAlarms => _workspaceState.HasPendingAlarms;
+        public bool HasAttentionDevices => _workspaceState.HasAttentionDevices;
+        public bool HasRecentDevices => _workspaceState.HasRecentDevices;
+        public string DeviceOverviewSummary => _workspaceState.DeviceOverviewSummary;
+        public string ManagementEmptyTitle => _workspaceState.ManagementEmptyTitle;
+        public string ManagementEmptyDescription => _workspaceState.ManagementEmptyDescription;
+        public string AlarmSummary => _workspaceState.AlarmSummary;
+        public string LatestAlarmPreview => _workspaceState.LatestAlarmPreview;
+        public string BoardHeadline => _workspaceState.BoardHeadline;
+        public string BoardDescription => _workspaceState.BoardDescription;
+        public string AttentionSummary => _workspaceState.AttentionSummary;
+        public string RecentDeviceSummary => _workspaceState.RecentDeviceSummary;
         //权限属性
         public bool CanAddDevicePermission => PermissionMatrix.HasPermission(_session.CurrentUser, UserPermission.AddDevice);
         public bool CanEditDevicePermission => PermissionMatrix.HasPermission(_session.CurrentUser, UserPermission.EditDevice);
@@ -73,6 +103,7 @@ namespace SimpleMES.ViewModels
             IDeviceStatusNotifier notifier, IDataRepository repository,
             IToastService toast, IDeviceConfigNotifier configNotifier,
             IDeviceClientFactory deviceClientFactory,
+            DeviceWorkspaceState workspaceState,
             IDeviceDialogService? deviceDialogService = null,
             IUiDispatcher? uiDispatcher = null)
         {
@@ -81,10 +112,12 @@ namespace SimpleMES.ViewModels
             _toast = toast;
             _configNotifier = configNotifier;
             _deviceClientFactory = deviceClientFactory;
+            _workspaceState = workspaceState;
             _deviceDialogService = deviceDialogService ?? new DeviceDialogService();
             _uiDispatcher = uiDispatcher ?? WpfUiDispatcher.CreateDefault();
 
             _statusNotifier.DeviceStatusChanged += OnDeviceStatusChanged;
+            _workspaceState.PropertyChanged += OnWorkspaceStatePropertyChanged;
             _ = RefreshAlarms();
             _session.PropertyChanged += OnSessionPropertyChanged;
         }
@@ -94,37 +127,7 @@ namespace SimpleMES.ViewModels
             //回到主线程更新 UI
             _uiDispatcher.Invoke(() =>
             {
-                var listLatestDeviceDto = e.LatestDevices;
-                // 如果列表是空的（第一次），就全部添加
-                if (ListDeviceDto.Count == 0)
-                {
-                    foreach (var deviceDto in listLatestDeviceDto.ToList())
-                    {
-                        ListDeviceDto.Add(deviceDto);
-                    }
-                }
-                else
-                {
-                    // 如果已经有数据，就只更新属性，不要 Clear 再 Add（否则界面会闪烁）
-                    foreach (var newDeviceDto in listLatestDeviceDto)
-                    {
-                        var oldDeviceDto =
-                            ListDeviceDto.FirstOrDefault(d => d.DeviceId == newDeviceDto.DeviceId);
-                        if (oldDeviceDto is null)
-                        {
-                            continue;
-                        }
-                        oldDeviceDto.Temperature = newDeviceDto.Temperature;
-                        oldDeviceDto.Pressure = newDeviceDto.Pressure;
-                        oldDeviceDto.Speed = newDeviceDto.Speed;
-                        oldDeviceDto.DeviceState = newDeviceDto.DeviceState;
-                        oldDeviceDto.LastUpdateTime = newDeviceDto.LastUpdateTime;
-                    }
-                    //处理新增设备
-                    var newItems = listLatestDeviceDto.Where(n => ListDeviceDto.All(o => o.DeviceId != n.DeviceId));
-                    foreach (var item in newItems) ListDeviceDto.Add(item);
-                }
-                ApplyDeviceFilter();
+                _workspaceState.ApplyLatestDeviceSnapshot(e.LatestDevices);
             });
         }
         //设备配置修改逻辑
@@ -167,10 +170,11 @@ namespace SimpleMES.ViewModels
                     await _repository.UpdateDeviceAsync(newDevice);
                     // 回写到原始对象，刷新 UI
                     device.DeviceName = dto.DeviceName;
-                    device.IpAddress = dto.IpAddress;
+                    device.IpAddress = dto.IpAddress ?? string.Empty;
                     device.Port = dto.Port;
-                    device.SerialPort = dto.SerialPort;
+                    device.SerialPort = dto.SerialPort ?? string.Empty;
                     device.SlaveId = dto.SlaveId;
+                    _workspaceState.NotifyDeviceMetadataChanged();
                     // 告诉通信层：这个设备配置变了，需要重启该设备采集任务
                     _configNotifier.NotifyConfigChanged(newDevice, ConfigChangeType.Updated);
                     return true;
@@ -259,47 +263,10 @@ namespace SimpleMES.ViewModels
         {
             if (_disposed) return;
             _statusNotifier.DeviceStatusChanged -= OnDeviceStatusChanged;
+            _workspaceState.PropertyChanged -= OnWorkspaceStatePropertyChanged;
             _session.PropertyChanged -= OnSessionPropertyChanged;
             _disposed = true;
             GC.SuppressFinalize(this);
-        }
-        //设备状态统计和搜索功能相关代码
-        partial void OnSearchKeywordChanged(string value) => ApplyDeviceFilter();
-        partial void OnStateFilterChanged(string value) => ApplyDeviceFilter();
-
-        private void ApplyDeviceFilter()
-        {
-            IEnumerable<DeviceDto> query = ListDeviceDto;
-
-            //关键字可匹配：设备名/IP/串口
-            if (!string.IsNullOrWhiteSpace(SearchKeyword))
-            {
-                var kw = SearchKeyword.Trim();
-                query = query.Where(d =>
-                    (!string.IsNullOrWhiteSpace(d.DeviceName) && d.DeviceName.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrWhiteSpace(d.IpAddress) && d.IpAddress.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrWhiteSpace(d.SerialPort) && d.SerialPort.Contains(kw, StringComparison.OrdinalIgnoreCase)));
-            }
-
-            //状态筛选
-            query = StateFilter switch
-            {
-                "运行" => query.Where(d => d.DeviceState == DeviceState.Running),
-                "断连" => query.Where(d => d.DeviceState == DeviceState.Disconnected),
-                "故障" => query.Where(d => d.DeviceState == DeviceState.Fault),
-                "停用" => query.Where(d => d.DeviceState == DeviceState.Disabled),
-                _ => query
-            };
-            FilteredDeviceDto.Clear();
-            foreach (var item in query.OrderBy(d => d.DeviceId))
-            {
-                FilteredDeviceDto.Add(item);
-            }
-            // 统计基于全量数据，不受筛选条件影响
-            RunningCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Running);
-            DisconnectedCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Disconnected);
-            FaultCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Fault);
-            DisabledCount = ListDeviceDto.Count(d => d.DeviceState == DeviceState.Disabled);
         }
         //UI界面设备停用和启用逻辑
         [RelayCommand(CanExecute = nameof(CanToggleDeviceEnabled))]
@@ -335,7 +302,7 @@ namespace SimpleMES.ViewModels
                     LastUpdateTime = device.LastUpdateTime
                 };
                 _configNotifier.NotifyConfigChanged(changed, toEnable ? ConfigChangeType.Enabled : ConfigChangeType.Disabled);
-                ApplyDeviceFilter();
+                _workspaceState.RefreshDeviceFilter();
                 _toast.Success(toEnable ? $"已启用：{device.DeviceName}" : $"已停用：{device.DeviceName}");
             }
             catch (Exception ex)
@@ -387,11 +354,7 @@ namespace SimpleMES.ViewModels
             try
             {
                 var alarms = await _repository.GetUnAckAlarmsAsync(30);
-                PendingAlarms.Clear();
-                foreach (var alarm in alarms)
-                {
-                    PendingAlarms.Add(alarm);
-                }
+                _workspaceState.ReplacePendingAlarms(alarms);
             }
             catch (Exception ex)
             {
@@ -408,7 +371,7 @@ namespace SimpleMES.ViewModels
                 var rows = await _repository.AckAlarmAsync(alarm.AlarmId);
                 if (rows <= 0) return;
 
-                PendingAlarms.Remove(alarm);
+                _workspaceState.RemovePendingAlarm(alarm);
                 _toast.Success($"已确认警告 #{alarm.AlarmId}", null, 3);
             }
             catch (Exception ex)
@@ -422,7 +385,7 @@ namespace SimpleMES.ViewModels
         [RelayCommand]
         private void ToggleAlarmPanel()
         {
-            IsAlarmPanelCollapsed = !IsAlarmPanelCollapsed;
+            _workspaceState.ToggleAlarmPanel();
         }
         //根据当前用户权限判断操作是否可用
         private bool CanAddDevice() => CanAddDevicePermission;
@@ -445,6 +408,37 @@ namespace SimpleMES.ViewModels
             EditDeviceConfigCommand.NotifyCanExecuteChanged();
             ToggleDeviceEnabledCommand.NotifyCanExecuteChanged();
             AckAlarmCommand.NotifyCanExecuteChanged();
+        }
+
+        private void OnWorkspaceStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(e.PropertyName)) return;
+            OnPropertyChanged(e.PropertyName);
+        }
+
+        public Task AddDeviceAsync()
+        {
+            return AddDevice();
+        }
+
+        public Task EditDeviceConfigAsync(DeviceDto? device)
+        {
+            return EditDeviceConfig(device);
+        }
+
+        public Task ToggleDeviceEnabledAsync(DeviceDto? device)
+        {
+            return ToggleDeviceEnabled(device);
+        }
+
+        public Task RefreshAlarmsAsync()
+        {
+            return RefreshAlarms();
+        }
+
+        public Task AckAlarmAsync(AlarmRecordModel? alarm)
+        {
+            return AckAlarm(alarm);
         }
     }
 }

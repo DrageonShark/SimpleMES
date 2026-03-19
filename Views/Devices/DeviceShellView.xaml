@@ -1,0 +1,31 @@
+<UserControl
+    x:Class="SimpleMES.Views.Controls.DeviceShellView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:deviceViewModels="clr-namespace:SimpleMES.ViewModels.DeviceViewModels"
+    xmlns:deviceViews="clr-namespace:SimpleMES.Views.Devices"
+    Background="#F5F7FB">
+
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type deviceViewModels:DeviceBoardViewModel}">
+            <deviceViews:DeviceBoardView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type deviceViewModels:DeviceManagementViewModel}">
+            <deviceViews:DeviceManagementView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type deviceViewModels:DeviceAlarmViewModel}">
+            <deviceViews:DeviceAlarmView />
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="#F5F7FB">
+        <Border
+            Margin="12"
+            Background="White"
+            CornerRadius="10">
+            <ContentControl Content="{Binding CurrentChild}" />
+        </Border>
+    </Grid>
+</UserControl>

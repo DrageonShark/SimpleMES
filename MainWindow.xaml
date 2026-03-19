@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:SimpleMES"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:deviceViewModels="clr-namespace:SimpleMES.ViewModels.DeviceViewModels"
     xmlns:orderViewModels="clr-namespace:SimpleMES.ViewModels.OrderViewModels"
     xmlns:views="clr-namespace:SimpleMES.Views"
     xmlns:vm="clr-namespace:SimpleMES.ViewModels"
@@ -18,6 +19,9 @@
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:MonitorViewModel}">
             <views:MonitorView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type deviceViewModels:DeviceShellViewModel}">
+            <controls:DeviceShellView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type orderViewModels:OrderViewModel}">
             <views:OrderView />
@@ -208,10 +212,43 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Margin="10,8,10,10">
-                    <Button
-                        Command="{Binding ShowMonitorCommand}"
-                        Content="设备监控"
-                        Style="{StaticResource NavButtonStyle}" />
+                    <ToggleButton
+                        x:Name="DeviceWindowButton"
+                        IsChecked="{Binding IsDeviceWindowMenuOpen, Mode=TwoWay}"
+                        Style="{StaticResource WindowToggleButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="16"
+                                Text="设备中心" />
+                            <TextBlock
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="10"
+                                Text="&#xE70D;" />
+                        </StackPanel>
+                    </ToggleButton>
+
+                    <Border
+                        Margin="0,4,0,0"
+                        Padding="0,0,0,4"
+                        Visibility="{Binding IsDeviceWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <Button
+                                Command="{Binding ShowDeviceBoardCommand}"
+                                Content="设备看板"
+                                Style="{StaticResource SubNavButtonStyle}" />
+                            <Button
+                                Command="{Binding ShowDeviceManagementCommand}"
+                                Content="设备管理"
+                                Style="{StaticResource SubNavButtonStyle}" />
+                            <Button
+                                Command="{Binding ShowDeviceAlarmCommand}"
+                                Content="设备告警"
+                                Style="{StaticResource SubNavButtonStyle}" />
+                        </StackPanel>
+                    </Border>
 
                     <ToggleButton
                         x:Name="OrderWindowButton"

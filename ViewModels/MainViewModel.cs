@@ -1,6 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SimpleMES.Services.Security;
+using SimpleMES.ViewModels.DeviceViewModels;
 using SimpleMES.ViewModels.OrderViewModels;
 using System.ComponentModel;
 
@@ -8,22 +9,22 @@ namespace SimpleMES.ViewModels
 {
     public partial class MainViewModel : DialogViewModelBase
     {
-        [ObservableProperty] private DialogViewModelBase _currentView;
+        [ObservableProperty] private DialogViewModelBase _currentView = null!;
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(MenuToggleContent))]
         [NotifyPropertyChangedFor(nameof(MenuToggleToolTip))]
-        private bool _isMenuCollapsed = false;
+        private bool _isMenuCollapsed;
         [ObservableProperty] private bool _isSettingsMenuOpen;
+        [ObservableProperty] private bool _isDeviceWindowMenuOpen;
         [ObservableProperty] private bool _isOrderWindowMenuOpen;
         [ObservableProperty] private UserSession _session = UserSession.Current;
 
-        private MonitorViewModel MonitorView { get; }
-        private OrderViewModels.OrderShellViewModel OrderView { get; }
+        private DeviceShellViewModel DeviceView { get; }
+        private OrderShellViewModel OrderView { get; }
         private ReportViewModel ReportView { get; }
 
         public string MenuToggleContent => IsMenuCollapsed ? "☰" : "❮";
         public string MenuToggleToolTip => IsMenuCollapsed ? "显示侧边栏" : "隐藏侧边栏";
-
         public string CurrentUserName => Session.CurrentUser?.UserName ?? "未登录";
 
         public string CurrentRoleGreeting
@@ -41,9 +42,9 @@ namespace SimpleMES.ViewModels
             }
         }
 
-        public MainViewModel(MonitorViewModel monitor, OrderViewModels.OrderShellViewModel orderView, ReportViewModel reportView)
+        public MainViewModel(DeviceShellViewModel deviceView, OrderShellViewModel orderView, ReportViewModel reportView)
         {
-            MonitorView = monitor;
+            DeviceView = deviceView;
             OrderView = orderView;
             ReportView = reportView;
 
@@ -54,9 +55,41 @@ namespace SimpleMES.ViewModels
         [RelayCommand]
         private void ShowMonitor()
         {
+            CurrentView = DeviceView;
+            DeviceView.NavigateTo(DeviceModulePage.Board);
+            PageTitle = DeviceView.PageTitle;
+            IsDeviceWindowMenuOpen = true;
             IsOrderWindowMenuOpen = false;
-            PageTitle = "设备监控";
-            CurrentView = MonitorView;
+        }
+
+        [RelayCommand]
+        private void ShowDeviceBoard()
+        {
+            CurrentView = DeviceView;
+            DeviceView.NavigateTo(DeviceModulePage.Board);
+            PageTitle = DeviceView.PageTitle;
+            IsDeviceWindowMenuOpen = true;
+            IsOrderWindowMenuOpen = false;
+        }
+
+        [RelayCommand]
+        private void ShowDeviceManagement()
+        {
+            CurrentView = DeviceView;
+            DeviceView.NavigateTo(DeviceModulePage.Management);
+            PageTitle = DeviceView.PageTitle;
+            IsDeviceWindowMenuOpen = true;
+            IsOrderWindowMenuOpen = false;
+        }
+
+        [RelayCommand]
+        private void ShowDeviceAlarm()
+        {
+            CurrentView = DeviceView;
+            DeviceView.NavigateTo(DeviceModulePage.Alarm);
+            PageTitle = DeviceView.PageTitle;
+            IsDeviceWindowMenuOpen = true;
+            IsOrderWindowMenuOpen = false;
         }
 
         [RelayCommand]
@@ -65,6 +98,7 @@ namespace SimpleMES.ViewModels
             CurrentView = OrderView;
             OrderView.NavigateTo(OrderModulePage.Board);
             PageTitle = OrderView.PageTitle;
+            IsDeviceWindowMenuOpen = false;
             IsOrderWindowMenuOpen = true;
         }
 
@@ -74,6 +108,7 @@ namespace SimpleMES.ViewModels
             CurrentView = OrderView;
             OrderView.NavigateTo(OrderModulePage.Board);
             PageTitle = OrderView.PageTitle;
+            IsDeviceWindowMenuOpen = false;
             IsOrderWindowMenuOpen = true;
         }
 
@@ -83,6 +118,7 @@ namespace SimpleMES.ViewModels
             CurrentView = OrderView;
             OrderView.NavigateTo(OrderModulePage.Management);
             PageTitle = OrderView.PageTitle;
+            IsDeviceWindowMenuOpen = false;
             IsOrderWindowMenuOpen = true;
         }
 
@@ -92,12 +128,14 @@ namespace SimpleMES.ViewModels
             CurrentView = OrderView;
             OrderView.NavigateTo(OrderModulePage.Dispatch);
             PageTitle = OrderView.PageTitle;
+            IsDeviceWindowMenuOpen = false;
             IsOrderWindowMenuOpen = true;
         }
 
         [RelayCommand]
         private void ShowReport()
         {
+            IsDeviceWindowMenuOpen = false;
             IsOrderWindowMenuOpen = false;
             PageTitle = "数据报表";
             CurrentView = ReportView;

@@ -1,0 +1,394 @@
+<UserControl
+    x:Class="SimpleMES.Views.Devices.DeviceBoardView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:SimpleMES.Views.Controls"
+    xmlns:converters="clr-namespace:SimpleMES.Converters"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:state="clr-namespace:SimpleMES.Services.State">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:DeviceStateConverter x:Key="DeviceStateConverter" />
+
+        <SolidColorBrush x:Key="PageBgBrush" Color="#F4F8FF" />
+        <SolidColorBrush x:Key="CardBgBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="CardSoftBgBrush" Color="#F8FBFF" />
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#2563EB" />
+        <SolidColorBrush x:Key="PrimarySoftBrush" Color="#DBEAFE" />
+        <SolidColorBrush x:Key="BorderBrushSoft" Color="#D7E3F4" />
+        <SolidColorBrush x:Key="TextBrush" Color="#0F172A" />
+        <SolidColorBrush x:Key="MutedBrush" Color="#64748B" />
+
+        <Style
+            x:Key="ToolbarButtonStyle"
+            BasedOn="{StaticResource MaterialDesignPaperButton}"
+            TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="MinWidth" Value="88" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#2563EB" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#BFDBFE" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+                    <Setter Property="Opacity" Value="0.96" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style
+            x:Key="PrimaryButtonStyle"
+            BasedOn="{StaticResource ToolbarButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+        </Style>
+
+        <Style x:Key="BoardCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="Background" Value="{StaticResource CardBgBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="18" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24" Background="{StaticResource PageBgBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="设备看板" />
+                <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.DeviceOverviewSummary}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button
+                    Margin="0,0,10,0"
+                    Command="{Binding AddDeviceCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Visibility="{Binding Actions.CanAddDevicePermission, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="White" Kind="PlusCircleOutline" />
+                        <TextBlock VerticalAlignment="Center" Text="新增设备" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    Margin="0,0,10,0"
+                    Command="{Binding DataContext.ShowManagementCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}"
+                    Style="{StaticResource ToolbarButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="CogOutline" />
+                        <TextBlock VerticalAlignment="Center" Text="设备管理" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    Command="{Binding DataContext.ShowAlarmCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}"
+                    Style="{StaticResource ToolbarButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="AlertOutline" />
+                        <TextBlock VerticalAlignment="Center" Text="设备告警" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Border
+            Grid.Row="1"
+            Margin="0,18,0,0"
+            Padding="22"
+            Background="White"
+            BorderBrush="#BFDBFE"
+            BorderThickness="1"
+            CornerRadius="22">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.7*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <Border Width="60" Height="60" Background="{StaticResource PrimarySoftBrush}" CornerRadius="30">
+                        <materialDesign:PackIcon Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Kind="ViewDashboardOutline" />
+                    </Border>
+                    <TextBlock Margin="0,18,0,0" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="{Binding State.BoardHeadline}" />
+                    <TextBlock Margin="0,10,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.BoardDescription}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Border Grid.Column="2" Padding="18" Background="#F8FBFF" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                    <StackPanel>
+                        <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="最新未确认告警" />
+                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.AlarmSummary}" />
+                        <Border Margin="0,16,0,0" Padding="14" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="14">
+                            <StackPanel>
+                                <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#B91C1C" Text="告警预览" />
+                                <TextBlock Margin="0,8,0,0" Foreground="#7F1D1D" Text="{Binding State.LatestAlarmPreview}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Button Margin="0,16,0,0" Command="{Binding RefreshAlarmsCommand}" Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="Refresh" />
+                                <TextBlock VerticalAlignment="Center" Text="刷新告警摘要" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <UniformGrid Grid.Row="2" Margin="0,18,0,0" Columns="4">
+            <Border Margin="0,0,12,0" Padding="16" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="16">
+                <StackPanel>
+                    <TextBlock Foreground="#065F46" Text="运行中" />
+                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#065F46" Text="{Binding State.RunningCount}" />
+                </StackPanel>
+            </Border>
+            <Border Margin="0,0,12,0" Padding="16" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="16">
+                <StackPanel>
+                    <TextBlock Foreground="#92400E" Text="断连中" />
+                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#92400E" Text="{Binding State.DisconnectedCount}" />
+                </StackPanel>
+            </Border>
+            <Border Margin="0,0,12,0" Padding="16" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="16">
+                <StackPanel>
+                    <TextBlock Foreground="#991B1B" Text="故障设备" />
+                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#991B1B" Text="{Binding State.FaultCount}" />
+                </StackPanel>
+            </Border>
+            <Border Padding="16" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="16">
+                <StackPanel>
+                    <TextBlock Foreground="#1D4ED8" Text="停用设备" />
+                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding State.DisabledCount}" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <Grid Grid.Row="3" Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.25*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="1.25*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource BoardCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="重点设备" />
+                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.AttentionSummary}" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,16,0,0">
+                        <ListBox Background="Transparent" BorderThickness="0" ItemsSource="{Binding State.AttentionDevices}" Visibility="{Binding State.HasAttentionDevices, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,0,0,10" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="14" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="14">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding DeviceName}" />
+                                                <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding IpAddress}" />
+                                                <TextBlock Margin="0,8,0,0" Foreground="#475569">
+                                                    <Run Text="温度 " /><Run Text="{Binding Temperature}" />
+                                                    <Run Text=" / 压力 " /><Run Text="{Binding Pressure}" />
+                                                    <Run Text=" / 转速 " /><Run Text="{Binding Speed}" />
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <Border Grid.Column="1" Padding="10,4" BorderThickness="1" CornerRadius="999">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#FFFBEB" />
+                                                        <Setter Property="BorderBrush" Value="#FDE68A" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
+                                                                <Setter Property="Background" Value="#FEF2F2" />
+                                                                <Setter Property="BorderBrush" Value="#FECACA" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <Border Padding="22" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="16">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State.HasAttentionDevices}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel VerticalAlignment="Center">
+                                <Border Width="52" Height="52" Background="#DBEAFE" CornerRadius="26">
+                                    <materialDesign:PackIcon Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="ShieldCheckOutline" />
+                                </Border>
+                                <TextBlock Margin="0,16,0,0" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="当前无重点设备" />
+                                <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="发生断连或故障的设备会优先聚合到这里，便于快速定位。" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource BoardCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="最近动态" />
+                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.RecentDeviceSummary}" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,16,0,0">
+                        <ListView Background="Transparent" BorderThickness="0" ItemsSource="{Binding State.RecentDevices}" Visibility="{Binding State.HasRecentDevices, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,0,0,10" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="14" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="14">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding DeviceName}" />
+                                                <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding LastUpdateTime, StringFormat='最近更新：{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" Padding="10,4" BorderThickness="1" CornerRadius="999">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#ECFDF5" />
+                                                        <Setter Property="BorderBrush" Value="#A7F3D0" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disconnected}">
+                                                                <Setter Property="Background" Value="#FFFBEB" />
+                                                                <Setter Property="BorderBrush" Value="#FDE68A" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
+                                                                <Setter Property="Background" Value="#FEF2F2" />
+                                                                <Setter Property="BorderBrush" Value="#FECACA" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disabled}">
+                                                                <Setter Property="Background" Value="#F3F4F6" />
+                                                                <Setter Property="BorderBrush" Value="#D1D5DB" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <Border Padding="22" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="16">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State.HasRecentDevices}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel VerticalAlignment="Center">
+                                <Border Width="52" Height="52" Background="#DBEAFE" CornerRadius="26">
+                                    <materialDesign:PackIcon Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="Pulse" />
+                                </Border>
+                                <TextBlock Margin="0,16,0,0" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="等待实时数据" />
+                                <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="设备开始推送状态后，这里会按最新更新时间展示动态。" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Column="4">
+                <Border Margin="0,0,0,16" Padding="16" Background="{StaticResource CardSoftBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
+                    <StackPanel>
+                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="快捷入口" />
+                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="常用设备操作集中在这里，减少切页成本。" />
+                        <Button Margin="0,16,0,0" Command="{Binding DataContext.ShowManagementCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}" Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="CogOutline" />
+                                <TextBlock VerticalAlignment="Center" Text="打开设备管理" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0,10,0,0" Command="{Binding DataContext.ShowAlarmCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}" Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="BellOutline" />
+                                <TextBlock VerticalAlignment="Center" Text="打开设备告警" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <Border Padding="16" Background="{StaticResource CardSoftBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
+                    <StackPanel>
+                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="处理建议" />
+                        <TextBlock Margin="0,14,0,0" Foreground="{StaticResource TextBrush}" Text="1. 优先处理故障和断连设备，避免异常扩大。" TextWrapping="Wrap" />
+                        <TextBlock Margin="0,10,0,0" Foreground="{StaticResource TextBrush}" Text="2. 管理页用于统一做筛选、启停、编辑和分页浏览。" TextWrapping="Wrap" />
+                        <TextBlock Margin="0,10,0,0" Foreground="{StaticResource TextBrush}" Text="3. 告警页适合批量确认和按级别追踪未处理告警。" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
