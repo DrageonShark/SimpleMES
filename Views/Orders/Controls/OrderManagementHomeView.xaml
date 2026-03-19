@@ -24,24 +24,40 @@
         <SolidColorBrush x:Key="MutedBrush" Color="#64748B" />
         <SolidColorBrush x:Key="BorderBrushSoft" Color="#D7E3F4" />
 
-        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Style
+            x:Key="BaseToolbarButtonStyle"
+            BasedOn="{StaticResource MaterialDesignPaperButton}"
+            TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="MinWidth" Value="88" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+                    <Setter Property="Opacity" Value="0.9" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" BasedOn="{StaticResource BaseToolbarButtonStyle}" TargetType="Button">
             <Setter Property="Height" Value="40" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Padding" Value="14,0" />
         </Style>
 
-        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="36" />
+        <Style x:Key="SecondaryButtonStyle" BasedOn="{StaticResource BaseToolbarButtonStyle}" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="{StaticResource PrimarySoftBrush}" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="materialDesign:RippleAssist.Feedback" Value="#2563EB" />
         </Style>
 
         <Style
@@ -192,9 +208,20 @@
                 <Button
                     Margin="0,24,0,0"
                     Command="{Binding CreateOrderCommand}"
-                    Content="创建订单"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Visibility="{Binding CanCreateOrderPermission, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    Visibility="{Binding CanCreateOrderPermission, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Width="16"
+                                Height="16"
+                                Margin="0,0,8,0"
+                                Foreground="White"
+                                Kind="PlusCircleOutline" />
+                            <TextBlock VerticalAlignment="Center" Text="创建订单" />
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
             </StackPanel>
         </Border>
 
@@ -208,6 +235,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -217,123 +245,242 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock
-                        Grid.Column="0"
-                        FontSize="22"
-                        FontWeight="Bold"
-                        Foreground="#1F2937"
-                        Text="最近订单" />
+                    <StackPanel Grid.Column="0">
+                        <TextBlock
+                            FontSize="22"
+                            FontWeight="Bold"
+                            Foreground="#1F2937"
+                            Text="最近订单" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            Foreground="{StaticResource MutedBrush}"
+                            Text="{Binding OrdersSummary}" />
+                    </StackPanel>
                     <TextBlock Grid.Column="1" />
                     <Button
                         Grid.Column="2"
-                        Width="88"
                         Command="{Binding LoadInitialDataCommand}"
-                        Content="刷新"
                         DockPanel.Dock="Right"
-                        Style="{StaticResource SecondaryButtonStyle}" />
+                        Style="{StaticResource SecondaryButtonStyle}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="16"
+                                    Height="16"
+                                    Margin="0,0,8,0"
+                                    Foreground="#2563EB"
+                                    Kind="Refresh" />
+                                <TextBlock VerticalAlignment="Center" Text="刷新" />
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2.2*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="1.2*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="88" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="搜索" />
+                        <TextBox
+                            Height="36"
+                            Margin="0,6,0,0"
+                            Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="状态" />
+                        <ComboBox
+                            Height="36"
+                            Margin="0,6,0,0"
+                            DisplayMemberPath="Value"
+                            ItemsSource="{Binding StatusFilterOptions}"
+                            SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}"
+                            SelectedValuePath="Key" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="显示条数" />
+                        <ComboBox
+                            Height="36"
+                            Margin="0,6,0,0"
+                            ItemsSource="{Binding RecentOrderLimitOptions}"
+                            SelectedItem="{Binding RecentOrderLimit, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <Button
+                        Grid.Column="6"
+                        Margin="0,24,0,0"
+                        Command="{Binding ClearFiltersCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="16"
+                                    Height="16"
+                                    Margin="0,0,8,0"
+                                    Foreground="#2563EB"
+                                    Kind="FilterOffOutline" />
+                                <TextBlock VerticalAlignment="Center" Text="重置" />
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
                 </Grid>
 
                 <Border
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Padding="8"
                     Background="#F8FBFF"
                     BorderBrush="#E2EAF6"
                     BorderThickness="1"
                     CornerRadius="14">
-                    <DataGrid
-                        CellStyle="{StaticResource OrderGridCellStyle}"
-                        ColumnHeaderStyle="{StaticResource OrderGridHeaderStyle}"
-                        IsReadOnly="True"
-                        ItemsSource="{Binding RecentOrders}"
-                        RowStyle="{StaticResource OrderGridRowStyle}"
-                        Style="{StaticResource OrderGridStyle}">
+                    <Grid>
+                        <DataGrid
+                            CellStyle="{StaticResource OrderGridCellStyle}"
+                            ColumnHeaderStyle="{StaticResource OrderGridHeaderStyle}"
+                            IsReadOnly="True"
+                            ItemsSource="{Binding RecentOrders}"
+                            RowStyle="{StaticResource OrderGridRowStyle}"
+                            Style="{StaticResource OrderGridStyle}"
+                            Visibility="{Binding HasRecentOrders, Converter={StaticResource BoolToVisibilityConverter}}">
 
-                        <DataGrid.Columns>
-                            <DataGridTextColumn
-                                Width="140"
-                                Binding="{Binding OrderNo}"
-                                Header="工单号" />
-                            <DataGridTextColumn
-                                Width="100"
-                                Binding="{Binding ProductCode}"
-                                Header="产品" />
-                            <DataGridTextColumn
-                                Width="80"
-                                Binding="{Binding PlanQty}"
-                                Header="计划数" />
-                            <DataGridTemplateColumn Width="110" Header="状态">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border
-                                            x:Name="StatusBadge"
-                                            Padding="10,4"
-                                            HorizontalAlignment="Left"
-                                            Background="#EFF6FF"
-                                            BorderBrush="#BFDBFE"
-                                            BorderThickness="1"
-                                            CornerRadius="999">
-                                            <TextBlock
-                                                x:Name="StatusText"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                FontWeight="SemiBold"
-                                                Foreground="#1D4ED8"
-                                                Text="{Binding OrderStatus, Converter={StaticResource OrderStatusConverter}}" />
-                                        </Border>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Width="140"
+                                    Binding="{Binding OrderNo}"
+                                    Header="工单号" />
+                                <DataGridTextColumn
+                                    Width="100"
+                                    Binding="{Binding ProductCode}"
+                                    Header="产品" />
+                                <DataGridTextColumn
+                                    Width="80"
+                                    Binding="{Binding PlanQty}"
+                                    Header="计划数" />
+                                <DataGridTemplateColumn Width="110" Header="状态">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border
+                                                x:Name="StatusBadge"
+                                                Padding="10,4"
+                                                HorizontalAlignment="Left"
+                                                Background="#EFF6FF"
+                                                BorderBrush="#BFDBFE"
+                                                BorderThickness="1"
+                                                CornerRadius="999">
+                                                <TextBlock
+                                                    x:Name="StatusText"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="12"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="#1D4ED8"
+                                                    Text="{Binding OrderStatus, Converter={StaticResource OrderStatusConverter}}" />
+                                            </Border>
 
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Pending">
-                                                <Setter TargetName="StatusBadge" Property="Background" Value="#FFF7ED" />
-                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FED7AA" />
-                                                <Setter TargetName="StatusText" Property="Foreground" Value="#C2410C" />
-                                            </DataTrigger>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Pending">
+                                                    <Setter TargetName="StatusBadge" Property="Background" Value="#FFF7ED" />
+                                                    <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FED7AA" />
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="#C2410C" />
+                                                </DataTrigger>
 
-                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Producing">
-                                                <Setter TargetName="StatusBadge" Property="Background" Value="#ECFDF5" />
-                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#A7F3D0" />
-                                                <Setter TargetName="StatusText" Property="Foreground" Value="#047857" />
-                                            </DataTrigger>
+                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Producing">
+                                                    <Setter TargetName="StatusBadge" Property="Background" Value="#ECFDF5" />
+                                                    <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#A7F3D0" />
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="#047857" />
+                                                </DataTrigger>
 
-                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Paused">
-                                                <Setter TargetName="StatusBadge" Property="Background" Value="#FEF3C7" />
-                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FDE68A" />
-                                                <Setter TargetName="StatusText" Property="Foreground" Value="#B45309" />
-                                            </DataTrigger>
+                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Paused">
+                                                    <Setter TargetName="StatusBadge" Property="Background" Value="#FEF3C7" />
+                                                    <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FDE68A" />
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="#B45309" />
+                                                </DataTrigger>
 
-                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Completed">
-                                                <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
-                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
-                                                <Setter TargetName="StatusText" Property="Foreground" Value="#1D4ED8" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Scrapped">
-                                                <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
-                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
-                                                <Setter TargetName="StatusText" Property="Foreground" Value="Black" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Other">
-                                                <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
-                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
-                                                <Setter TargetName="StatusText" Property="Foreground" Value="Black" />
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
+                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Completed">
+                                                    <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
+                                                    <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="#1D4ED8" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Scrapped">
+                                                    <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
+                                                    <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="Black" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Other">
+                                                    <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
+                                                    <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="Black" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
 
-                            <DataGridTemplateColumn Width="90" Header="详情">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button
-                                            Command="{Binding DataContext.OpenOrderDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            Content="详情"
-                                            Style="{StaticResource GridActionButtonStyle}" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                                <DataGridTemplateColumn Width="90" Header="详情">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button
+                                                Command="{Binding DataContext.OpenOrderDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Content="详情"
+                                                Style="{StaticResource GridActionButtonStyle}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <Border
+                            Padding="24"
+                            Background="#F8FBFF"
+                            CornerRadius="12">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasRecentOrders}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel VerticalAlignment="Center">
+                                <Border
+                                    Width="56"
+                                    Height="56"
+                                    HorizontalAlignment="Left"
+                                    Background="#DBEAFE"
+                                    CornerRadius="28">
+                                    <materialDesign:PackIcon
+                                        Width="28"
+                                        Height="28"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="#2563EB"
+                                        Kind="ClipboardTextSearchOutline" />
+                                </Border>
+                                <TextBlock
+                                    Margin="0,18,0,0"
+                                    FontSize="20"
+                                    FontWeight="SemiBold"
+                                    Foreground="{StaticResource TextBrush}"
+                                    Text="{Binding EmptyResultTitle}" />
+                                <TextBlock
+                                    Margin="0,8,0,0"
+                                    Foreground="{StaticResource MutedBrush}"
+                                    Text="{Binding EmptyResultDescription}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Border>
 
             </Grid>

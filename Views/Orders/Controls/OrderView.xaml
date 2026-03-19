@@ -57,16 +57,26 @@
         </Style>
         <Style
             x:Key="OutlinedActionButtonStyle"
-            BasedOn="{StaticResource MaterialDesignOutlinedButton}"
+            BasedOn="{StaticResource MaterialDesignPaperButton}"
             TargetType="Button">
-            <Setter Property="Height" Value="34" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="MinWidth" Value="88" />
             <Setter Property="Padding" Value="14,0" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Foreground" Value="#2563EB" />
             <Setter Property="BorderBrush" Value="#BFDBFE" />
             <Setter Property="Background" Value="White" />
+            <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+            <Setter Property="materialDesign:RippleAssist.Feedback" Value="#2563EB" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+                    <Setter Property="Opacity" Value="0.9" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style
@@ -176,15 +186,25 @@
                             Text="选择订单后，可在右侧执行调度和状态流转。" />
                         <TextBlock
                             Foreground="#1D4ED8"
-                            Text="(状态流转：Pending → Producing → Paused → Producing → Completed)"
+                            Text="(状态流转：待生产→生产中→已暂停→......→已完成)"
                             TextWrapping="Wrap" />
                     </StackPanel>
                     <Button
                         Grid.Column="1"
-                        MinWidth="88"
                         Command="{Binding LoadOrdersCommand}"
-                        Content="刷新"
-                        Style="{StaticResource OutlinedActionButtonStyle}" />
+                        Style="{StaticResource OutlinedActionButtonStyle}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="16"
+                                    Height="16"
+                                    Margin="0,0,8,0"
+                                    Foreground="#2563EB"
+                                    Kind="Refresh" />
+                                <TextBlock VerticalAlignment="Center" Text="刷新" />
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
                 </Grid>
 
                 <Border

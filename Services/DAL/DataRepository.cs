@@ -46,8 +46,28 @@ namespace SimpleMES.Services.DAL
 
         public async Task<IEnumerable<OrderModel>> GetAllOrdersAsync()
         {
-            const string sql = @"SELECT * FROM T_ProductionOrders ORDER BY CreateTime DESC";
-            return await _db.QueryAsync<OrderModel>(sql);
+            return await GetOrdersAsync();
+        }
+
+        public async Task<IEnumerable<OrderModel>> GetOrdersAsync(string? keyword = null, string? status = null, int? take = null)
+        {
+            var normalizedKeyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim();
+            var normalizedStatus = string.IsNullOrWhiteSpace(status) ? null : status.Trim();
+            var topClause = take.HasValue ? "TOP (@Take) " : string.Empty;
+            var sql = $@"SELECT {topClause}*
+                         FROM T_ProductionOrders
+                         WHERE (@Keyword IS NULL
+                                OR OrderNo LIKE '%' + @Keyword + '%'
+                                OR ProductCode LIKE '%' + @Keyword + '%')
+                           AND (@Status IS NULL OR OrderStatus = @Status)
+                         ORDER BY CreateTime DESC";
+
+            return await _db.QueryAsync<OrderModel>(sql, new
+            {
+                Keyword = normalizedKeyword,
+                Status = normalizedStatus,
+                Take = take
+            });
         }
 
         public async Task<int> UpdateOrderAsync(OrderModel order)

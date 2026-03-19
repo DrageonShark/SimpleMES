@@ -1,8 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SimpleMES.ViewModels.OrderViewModels;
 
-namespace SimpleMES.ViewModels
+namespace SimpleMES.ViewModels.OrderViewModels
 {
     public enum OrderModulePage
     {

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SimpleMES.Services.Security;
+using SimpleMES.ViewModels.OrderViewModels;
 using System.ComponentModel;
 
 namespace SimpleMES.ViewModels
@@ -17,7 +18,7 @@ namespace SimpleMES.ViewModels
         [ObservableProperty] private UserSession _session = UserSession.Current;
 
         private MonitorViewModel MonitorView { get; }
-        private OrderShellViewModel OrderView { get; }
+        private OrderViewModels.OrderShellViewModel OrderView { get; }
         private ReportViewModel ReportView { get; }
 
         public string MenuToggleContent => IsMenuCollapsed ? "☰" : "❮";
@@ -40,7 +41,7 @@ namespace SimpleMES.ViewModels
             }
         }
 
-        public MainViewModel(MonitorViewModel monitor, OrderShellViewModel orderView, ReportViewModel reportView)
+        public MainViewModel(MonitorViewModel monitor, OrderViewModels.OrderShellViewModel orderView, ReportViewModel reportView)
         {
             MonitorView = monitor;
             OrderView = orderView;

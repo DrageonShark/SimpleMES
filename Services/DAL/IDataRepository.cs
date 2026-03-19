@@ -20,6 +20,10 @@ namespace SimpleMES.Services.DAL
         /// </summary>
         Task<IEnumerable<OrderModel>> GetAllOrdersAsync();
         /// <summary>
+        /// 按条件查询订单
+        /// </summary>
+        Task<IEnumerable<OrderModel>> GetOrdersAsync(string? keyword = null, string? status = null, int? take = null);
+        /// <summary>
         /// 更新生产工单
         /// </summary>
         Task<int> UpdateOrderAsync(OrderModel order);

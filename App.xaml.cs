@@ -10,6 +10,7 @@ using SimpleMES.ViewModels;
 using SimpleMES.ViewModels.OrderViewModels;
 using SimpleMES.Views;
 using System.Windows;
+using OrderShellViewModel = SimpleMES.ViewModels.OrderViewModels.OrderShellViewModel;
 using OrderViewModel = SimpleMES.ViewModels.OrderViewModels.OrderViewModel;
 
 namespace MESDemo
