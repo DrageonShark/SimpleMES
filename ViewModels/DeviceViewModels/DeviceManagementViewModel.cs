@@ -40,11 +40,18 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public bool HasMultiplePages => State.FilteredDeviceDto.Count > PageSize;
         public bool CanGoPrevious => CurrentPage > 1;
         public bool CanGoNext => CurrentPage < TotalPages;
+        public int VisibleStartIndex => State.FilteredDeviceDto.Count == 0 ? 0 : ((CurrentPage - 1) * PageSize) + 1;
+        public int VisibleEndIndex => State.FilteredDeviceDto.Count == 0 ? 0 : VisibleStartIndex + VisibleDevices.Count - 1;
 
         public string PagingSummary =>
             State.FilteredDeviceDto.Count == 0
                 ? "\u6682\u65e0\u8bbe\u5907\u53ef\u5c55\u793a"
                 : $"\u7b2c {CurrentPage}/{TotalPages} \u9875\uff0c\u5f53\u524d\u663e\u793a {VisibleDevices.Count} / \u5171 {State.FilteredDeviceDto.Count} \u53f0\u8bbe\u5907";
+
+        public string VisibleRangeSummary =>
+            State.FilteredDeviceDto.Count == 0
+                ? "\u5f53\u524d\u6ca1\u6709\u53ef\u6d4f\u89c8\u7684\u8bbe\u5907"
+                : $"\u6b63\u5728\u67e5\u770b\u7b2c {VisibleStartIndex}-{VisibleEndIndex} \u53f0\uff0c\u5171 {State.FilteredDeviceDto.Count} \u53f0";
 
         partial void OnPageSizeChanged(int value)
         {
@@ -88,6 +95,30 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         {
             State.RefreshDeviceFilter();
             RefreshVisibleDevices();
+        }
+
+        [RelayCommand]
+        private void FilterAll()
+        {
+            State.StateFilter = "全部";
+        }
+
+        [RelayCommand]
+        private void FilterRunning()
+        {
+            State.StateFilter = "运行";
+        }
+
+        [RelayCommand]
+        private void FilterDisconnected()
+        {
+            State.StateFilter = "断连";
+        }
+
+        [RelayCommand]
+        private void FilterFault()
+        {
+            State.StateFilter = "故障";
         }
 
         [RelayCommand(CanExecute = nameof(CanGoPrevious))]
@@ -142,6 +173,9 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             OnPropertyChanged(nameof(CanGoPrevious));
             OnPropertyChanged(nameof(CanGoNext));
             OnPropertyChanged(nameof(PagingSummary));
+            OnPropertyChanged(nameof(VisibleStartIndex));
+            OnPropertyChanged(nameof(VisibleEndIndex));
+            OnPropertyChanged(nameof(VisibleRangeSummary));
             PreviousPageCommand.NotifyCanExecuteChanged();
             NextPageCommand.NotifyCanExecuteChanged();
         }

@@ -74,6 +74,12 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Margin="0,0,10,0" Command="{Binding ResetFiltersCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="FilterOffOutline" />
+                        <TextBlock VerticalAlignment="Center" Text="重置筛选" />
+                    </StackPanel>
+                </Button>
                 <Button
                     Margin="0,0,10,0"
                     Command="{Binding AckVisibleAlarmsCommand}"
@@ -88,6 +94,12 @@
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="Refresh" />
                         <TextBlock VerticalAlignment="Center" Text="刷新告警" />
+                    </StackPanel>
+                </Button>
+                <Button Margin="10,0,0,0" IsEnabled="False" Style="{StaticResource OutlinedButtonStyle}" ToolTip="{Binding HistoryEntryText}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#94A3B8" Kind="History" />
+                        <TextBlock VerticalAlignment="Center" Foreground="#94A3B8" Text="历史告警" />
                     </StackPanel>
                 </Button>
             </StackPanel>

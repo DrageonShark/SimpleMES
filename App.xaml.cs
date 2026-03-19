@@ -6,6 +6,7 @@ using SimpleMES.Services.Dialog;
 using SimpleMES.Services.Observer;
 using SimpleMES.Services.Orders;
 using SimpleMES.Services.Toast;
+using SimpleMES.Services.UI;
 using SimpleMES.ViewModels;
 using SimpleMES.ViewModels.DeviceViewModels;
 using SimpleMES.ViewModels.OrderViewModels;
@@ -23,6 +24,8 @@ namespace MESDemo
     {
         // 保持服务的引用，防止被回收
         private DeviceCommunicationService _deviceCommunication;
+        private DeviceWorkspaceActionService? _deviceWorkspaceActions;
+        private DeviceWorkspaceRealtimeBridge? _deviceRealtimeBridge;
         protected override void OnStartup(StartupEventArgs e)
         {
             Logging.Initialize();
@@ -55,10 +58,11 @@ namespace MESDemo
             }
             //4.创建主界面 ViewModel
             var deviceWorkspaceState = new DeviceWorkspaceState();
-            var monitorVM = new MonitorViewModel(_deviceCommunication, repo, toast, configNotifier, deviceClientFactory, deviceWorkspaceState);// 注入 Service
-            var deviceBoardVM = new DeviceBoardViewModel(deviceWorkspaceState, monitorVM);
-            var deviceManagementVM = new DeviceManagementViewModel(deviceWorkspaceState, monitorVM);
-            var deviceAlarmVM = new DeviceAlarmViewModel(deviceWorkspaceState, monitorVM);
+            _deviceWorkspaceActions = new DeviceWorkspaceActionService(repo, toast, configNotifier, deviceClientFactory, deviceWorkspaceState);
+            _deviceRealtimeBridge = new DeviceWorkspaceRealtimeBridge(_deviceCommunication, deviceWorkspaceState, WpfUiDispatcher.CreateDefault());
+            var deviceBoardVM = new DeviceBoardViewModel(deviceWorkspaceState, _deviceWorkspaceActions);
+            var deviceManagementVM = new DeviceManagementViewModel(deviceWorkspaceState, _deviceWorkspaceActions);
+            var deviceAlarmVM = new DeviceAlarmViewModel(deviceWorkspaceState, _deviceWorkspaceActions);
             var deviceShellVM = new DeviceShellViewModel(deviceBoardVM, deviceManagementVM, deviceAlarmVM);
             var orderBoardVM = new OrderBoardViewModel(repo, toast);
             var orderDialogService = new OrderDialogService(repo, toast);
@@ -82,6 +86,8 @@ namespace MESDemo
         protected override void OnExit(ExitEventArgs e)
         {
             // 程序退出时停止通信
+            _deviceRealtimeBridge?.Dispose();
+            _deviceWorkspaceActions?.Dispose();
             _deviceCommunication?.Stop();
             Logging.Shutdown();
             base.OnExit(e);

@@ -148,38 +148,61 @@
 
         <Border Grid.Row="2" Margin="0,18,0,0" Padding="18" Background="{StaticResource CardBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.8*" />
-                    <ColumnDefinition Width="14" />
-                    <ColumnDefinition Width="1.1*" />
-                    <ColumnDefinition Width="14" />
-                    <ColumnDefinition Width="110" />
-                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="0">
-                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="搜索设备" />
-                    <DockPanel Margin="0,6,0,0">
-                        <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
-                            <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="Magnify" />
-                        </Border>
-                        <TextBox Height="36" Text="{Binding State.SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
-                    </DockPanel>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.8*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="1.1*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="110" />
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="状态筛选" />
-                    <DockPanel Margin="0,6,0,0">
-                        <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
-                            <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="TuneVariant" />
-                        </Border>
-                        <ComboBox Height="36" ItemsSource="{Binding State.StateFilterOptions}" SelectedItem="{Binding State.StateFilter, Mode=TwoWay}" />
-                    </DockPanel>
-                </StackPanel>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="搜索设备" />
+                        <DockPanel Margin="0,6,0,0">
+                            <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
+                                <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="Magnify" />
+                            </Border>
+                            <TextBox Height="36" Text="{Binding State.SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
+                        </DockPanel>
+                    </StackPanel>
 
-                <StackPanel Grid.Column="4">
-                    <TextBlock Foreground="{StaticResource MutedBrush}" Text="每页显示" />
-                    <ComboBox Height="36" Margin="0,6,0,0" ItemsSource="{Binding PageSizeOptions}" SelectedItem="{Binding PageSize, Mode=TwoWay}" />
-                </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="状态筛选" />
+                        <DockPanel Margin="0,6,0,0">
+                            <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
+                                <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="TuneVariant" />
+                            </Border>
+                            <ComboBox Height="36" ItemsSource="{Binding State.StateFilterOptions}" SelectedItem="{Binding State.StateFilter, Mode=TwoWay}" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Foreground="{StaticResource MutedBrush}" Text="每页显示" />
+                        <ComboBox Height="36" Margin="0,6,0,0" ItemsSource="{Binding PageSizeOptions}" SelectedItem="{Binding PageSize, Mode=TwoWay}" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="{Binding VisibleRangeSummary}" />
+
+                    <WrapPanel Grid.Column="1">
+                        <Button Margin="0,0,8,0" Command="{Binding FilterAllCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="全部" />
+                        <Button Margin="0,0,8,0" Command="{Binding FilterRunningCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="运行中" />
+                        <Button Margin="0,0,8,0" Command="{Binding FilterDisconnectedCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="断连" />
+                        <Button Command="{Binding FilterFaultCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="故障" />
+                    </WrapPanel>
+                </Grid>
             </Grid>
         </Border>
 

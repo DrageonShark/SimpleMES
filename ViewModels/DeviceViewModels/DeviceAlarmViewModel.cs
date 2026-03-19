@@ -63,6 +63,8 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 ? "\u8c03\u6574\u5173\u952e\u5b57\u6216\u7ea7\u522b\u7b5b\u9009\u540e\u518d\u8bd5\u3002"
                 : "\u8bbe\u5907\u544a\u8b66\u4f1a\u96c6\u4e2d\u663e\u793a\u5728\u8fd9\u91cc\uff0c\u4fbf\u4e8e\u7edf\u4e00\u786e\u8ba4\u3001\u8ddf\u8fdb\u548c\u540e\u7eed\u6269\u5c55\u5386\u53f2\u544a\u8b66\u3002";
 
+        public string HistoryEntryText => "\u5386\u53f2\u544a\u8b66\u5165\u53e3\u5f85\u540e\u7eed\u63a5\u5165";
+
         partial void OnSearchKeywordChanged(string value)
         {
             RefreshVisibleAlarms();
@@ -77,6 +79,14 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         private Task RefreshAlarms()
         {
             return _actions.RefreshAlarmsAsync();
+        }
+
+        [RelayCommand]
+        private void ResetFilters()
+        {
+            SearchKeyword = string.Empty;
+            SeverityFilter = AllSeverityFilter;
+            RefreshVisibleAlarms();
         }
 
         [RelayCommand]

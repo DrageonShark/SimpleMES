@@ -17,9 +17,6 @@
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type vm:MonitorViewModel}">
-            <views:MonitorView />
-        </DataTemplate>
         <DataTemplate DataType="{x:Type deviceViewModels:DeviceShellViewModel}">
             <controls:DeviceShellView />
         </DataTemplate>
