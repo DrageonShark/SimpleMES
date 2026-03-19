@@ -1,152 +1,203 @@
-﻿<Window x:Class="SimpleMES.Views.DeviceEditWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        Title="编辑设备"
-        Height="430"
-        Width="500"
-        WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
-        Background="#F3F4F6">
+﻿<Window
+    x:Class="SimpleMES.Views.DeviceEditWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="编辑设备"
+    Width="500"
+    Height="430"
+    Background="#F3F4F6"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
 
     <Window.Resources>
         <Style x:Key="TitleTextStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#111827"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#111827" />
+            <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#374151"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#374151" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
         <Style x:Key="InputStyle" TargetType="TextBox">
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="Padding" Value="5,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="BorderBrush" Value="#D1D5DB"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="5,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="BorderBrush" Value="#D1D5DB" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="White" />
         </Style>
 
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#2563EB"/>
-            <Setter Property="BorderBrush" Value="#2563EB"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="BorderBrush" Value="#2563EB" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
         </Style>
 
         <Style x:Key="GhostButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#374151"/>
-            <Setter Property="Background" Value="#F3F4F6"/>
-            <Setter Property="BorderBrush" Value="#D1D5DB"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#374151" />
+            <Setter Property="Background" Value="#F3F4F6" />
+            <Setter Property="BorderBrush" Value="#D1D5DB" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
         </Style>
 
-        <Style x:Key="TestButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-            <Setter Property="Background" Value="#059669"/>
-            <Setter Property="BorderBrush" Value="#059669"/>
+        <Style
+            x:Key="TestButtonStyle"
+            BasedOn="{StaticResource PrimaryButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Background" Value="#059669" />
+            <Setter Property="BorderBrush" Value="#059669" />
         </Style>
     </Window.Resources>
 
     <Grid Margin="18">
-        <Border CornerRadius="14" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" Padding="18">
+        <Border
+            Padding="18"
+            Background="White"
+            BorderBrush="#E5E7EB"
+            BorderThickness="1"
+            CornerRadius="14">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="6" ShadowDepth="2"/>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="2" />
             </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="12"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="18"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="18" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- 头部 -->
+                <!--  头部  -->
                 <StackPanel Grid.Row="0">
-                    <TextBlock Style="{StaticResource TitleTextStyle}" FontSize="20" Text="编辑设备"/>
-                    <TextBlock Margin="0,4,0,0" Foreground="#6B7280" FontSize="12"
-                               Text="修改后可先测试连接，再保存配置。"/>
+                    <TextBlock
+                        FontSize="20"
+                        Style="{StaticResource TitleTextStyle}"
+                        Text="编辑设备" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="12"
+                        Foreground="#6B7280"
+                        Text="修改后可先测试连接，再保存配置。" />
                 </StackPanel>
 
-                <!-- 表单 -->
+                <!--  表单  -->
                 <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="86"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="86" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="设备名称" Style="{StaticResource LabelStyle}"/>
-                    <TextBox Grid.Row="0" Grid.Column="1"
-                             Style="{StaticResource InputStyle}"
-                             Text="{Binding DeviceName, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource LabelStyle}"
+                        Text="设备名称" />
+                    <TextBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource InputStyle}"
+                        Text="{Binding DeviceName, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="IP地址" Style="{StaticResource LabelStyle}"/>
-                    <TextBox Grid.Row="2" Grid.Column="1"
-                             Style="{StaticResource InputStyle}"
-                             Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource LabelStyle}"
+                        Text="IP地址" />
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource InputStyle}"
+                        Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="端口" Style="{StaticResource LabelStyle}"/>
-                    <TextBox Grid.Row="4" Grid.Column="1"
-                             Style="{StaticResource InputStyle}"
-                             Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}"/>
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Style="{StaticResource LabelStyle}"
+                        Text="端口" />
+                    <TextBox
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Style="{StaticResource InputStyle}"
+                        Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}" />
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="串口号" Style="{StaticResource LabelStyle}"/>
-                    <TextBox Grid.Row="6" Grid.Column="1"
-                             Style="{StaticResource InputStyle}"
-                             Text="{Binding SerialPort, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Style="{StaticResource LabelStyle}"
+                        Text="串口号" />
+                    <TextBox
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Style="{StaticResource InputStyle}"
+                        Text="{Binding SerialPort, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="从站号" Style="{StaticResource LabelStyle}"/>
-                    <TextBox Grid.Row="8" Grid.Column="1"
-                             Style="{StaticResource InputStyle}"
-                             Text="{Binding SlaveId, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}"/>
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="0"
+                        Style="{StaticResource LabelStyle}"
+                        Text="从站号" />
+                    <TextBox
+                        Grid.Row="8"
+                        Grid.Column="1"
+                        Style="{StaticResource InputStyle}"
+                        Text="{Binding SlaveId, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}" />
                 </Grid>
 
-                <!-- 底部按钮 -->
-                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <!-- 测试连接按钮：需要你在 code-behind 有 OnTestConnection -->
-                    <Button x:Name="BtnTestConnection"
-                            Content="测试连接"
-                            Margin="0,0,10,0"
-                            Style="{StaticResource TestButtonStyle}"
-                            Command="{Binding TestConnectionCommand}"/>
+                <!--  底部按钮  -->
+                <StackPanel
+                    Grid.Row="4"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <!--  测试连接按钮：需要你在 code-behind 有 OnTestConnection  -->
+                    <Button
+                        x:Name="BtnTestConnection"
+                        Margin="0,0,10,0"
+                        Command="{Binding TestConnectionCommand}"
+                        Content="测试连接"
+                        Style="{StaticResource TestButtonStyle}" />
 
-                    <Button Content="保存"
-                            Margin="0,0,10,0"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Command="{Binding SaveCommand}"
-                            IsDefault="True"/>
+                    <Button
+                        Margin="0,0,10,0"
+                        Command="{Binding SaveCommand}"
+                        Content="保存"
+                        IsDefault="True"
+                        Style="{StaticResource PrimaryButtonStyle}" />
 
-                    <Button Content="取消"
-                            Style="{StaticResource GhostButtonStyle}"
-                            IsCancel="True"/>
+                    <Button
+                        Content="取消"
+                        IsCancel="True"
+                        Style="{StaticResource GhostButtonStyle}" />
                 </StackPanel>
             </Grid>
         </Border>

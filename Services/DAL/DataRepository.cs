@@ -69,6 +69,18 @@ namespace SimpleMES.Services.DAL
             return await _db.ExecuteAsync(sql, order);
         }
 
+        public async Task<int> DeleteOrderAsync(string orderNo)
+        {
+            if (string.IsNullOrWhiteSpace(orderNo))
+            {
+                throw new ArgumentException("订单号不能为空", nameof(orderNo));
+            }
+
+            const string sql = @"DELETE FROM T_ProductionOrders WHERE OrderNo = @OrderNo;";
+            return await _db.ExecuteAsync(sql, new { OrderNo = orderNo });
+        }
+
+
         public async Task<IEnumerable<DeviceModel>> GetAllDevicesAsync()
         {
             const string sql = @"SELECT * FROM T_Devices";

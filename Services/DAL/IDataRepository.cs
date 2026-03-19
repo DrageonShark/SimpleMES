@@ -24,6 +24,12 @@ namespace SimpleMES.Services.DAL
         /// </summary>
         Task<int> UpdateOrderAsync(OrderModel order);
         /// <summary>
+        /// 删除订单
+        /// </summary>
+        /// <param name="orderNo"></param>
+        /// <returns></returns>
+        Task<int> DeleteOrderAsync(string orderNo);
+        /// <summary>
         /// 获取所有设备
         /// </summary>
         Task<IEnumerable<DeviceModel>> GetAllDevicesAsync();

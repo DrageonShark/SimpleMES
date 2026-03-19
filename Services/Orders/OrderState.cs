@@ -3,7 +3,7 @@
     /// <summary>
     /// 订单状态枚举
     /// </summary>
-    public enum OrderState
+    public enum OrderStatus
     {
         /// <summary>
         /// 待产

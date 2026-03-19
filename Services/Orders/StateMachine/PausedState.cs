@@ -13,14 +13,14 @@ namespace SimpleMES.Services.Orders.StateMachine
             if (!result.IsSuccess) return this;
             switch (result.Operation)
             {
-                case OrderState.Producing:
-                    order.OrderStatus = nameof(OrderState.Producing);
+                case OrderStatus.Producing:
+                    order.OrderStatus = nameof(OrderStatus.Producing);
                     order.StartTime = result.OccurredAt;
                     order.LastOperationTime = result.OccurredAt;
                     await repository.UpdateOrderAsync(order);
                     return new ProducingState();
-                case OrderState.Scrapped:
-                    order.OrderStatus = nameof(OrderState.Scrapped);
+                case OrderStatus.Scrapped:
+                    order.OrderStatus = nameof(OrderStatus.Scrapped);
                     order.EndTime = result.OccurredAt;
                     order.LastOperationTime = result.OccurredAt;
                     await repository.UpdateOrderAsync(order);

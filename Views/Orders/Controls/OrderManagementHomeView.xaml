@@ -1,0 +1,342 @@
+﻿<UserControl
+    x:Class="SimpleMES.Views.Controls.OrderManagementHomeView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:SimpleMES.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="900"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:OrderStatusConverter x:Key="OrderStatusConverter" />
+
+        <SolidColorBrush x:Key="PageBgBrush" Color="#F4F8FF" />
+        <SolidColorBrush x:Key="CardBgBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="CardSoftBgBrush" Color="#F8FBFF" />
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#2563EB" />
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#1D4ED8" />
+        <SolidColorBrush x:Key="PrimarySoftBrush" Color="#DBEAFE" />
+        <SolidColorBrush x:Key="TextBrush" Color="#0F172A" />
+        <SolidColorBrush x:Key="MutedBrush" Color="#64748B" />
+        <SolidColorBrush x:Key="BorderBrushSoft" Color="#D7E3F4" />
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimarySoftBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+
+        <Style
+            x:Key="OrderGridStyle"
+            BasedOn="{x:Null}"
+            TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="CanUserDeleteRows" Value="False" />
+            <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="CanUserSortColumns" Value="True" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="GridLinesVisibility" Value="Horizontal" />
+            <Setter Property="HorizontalGridLinesBrush" Value="#E8EEF8" />
+            <Setter Property="VerticalGridLinesBrush" Value="#E8EEF8" />
+            <Setter Property="RowHeaderWidth" Value="0" />
+            <Setter Property="RowBackground" Value="White" />
+            <Setter Property="AlternatingRowBackground" Value="#FAFCFF" />
+            <Setter Property="AlternationCount" Value="2" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <!--  列名  -->
+        <Style x:Key="OrderGridHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="14,0,14,0" />
+            <Setter Property="Background" Value="#F4F8FF" />
+            <Setter Property="Foreground" Value="#475569" />
+            <Setter Property="BorderBrush" Value="#D7E3F4" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <!--  列元素  -->
+        <Style x:Key="OrderGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="Padding" Value="14,0,14,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#EAF2FF" />
+                    <Setter Property="Foreground" Value="#0F172A" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="OrderGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Height" Value="52" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F8FBFF" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#EAF2FF" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style
+            x:Key="GridActionButtonStyle"
+            BasedOn="{StaticResource MaterialDesignPaperButton}"
+            TargetType="Button">
+            <Setter Property="Width" Value="68" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#1D4ED8" />
+            <Setter Property="Background" Value="#F8FBFF" />
+            <!--<Setter Property="BorderBrush" Value="#BFDBFE" />-->
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+            <Setter Property="materialDesign:RippleAssist.Feedback" Value="#2563EB" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+                    <Setter Property="Opacity" Value="0.85" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24" Background="{StaticResource PageBgBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="340" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border
+            Grid.Column="0"
+            Padding="20"
+            Background="{StaticResource CardBgBrush}"
+            BorderBrush="{StaticResource BorderBrushSoft}"
+            BorderThickness="1"
+            CornerRadius="16">
+            <StackPanel>
+                <TextBlock
+                    FontSize="22"
+                    FontWeight="Bold"
+                    Foreground="#1F2937"
+                    Text="新增订单" />
+
+                <TextBlock Margin="0,20,0,6" Text="订单编号" />
+                <TextBox Height="36" Text="{Binding NewOrderNo, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Margin="0,16,0,6" Text="产品" />
+                <ComboBox
+                    Height="36"
+                    DisplayMemberPath="ProductName"
+                    ItemsSource="{Binding Products}"
+                    SelectedItem="{Binding SelectedProduct, Mode=TwoWay}" />
+
+                <TextBlock Margin="0,16,0,6" Text="计划数量" />
+                <TextBox Height="36" Text="{Binding NewPlanQty, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Button
+                    Margin="0,24,0,0"
+                    Command="{Binding CreateOrderCommand}"
+                    Content="创建订单"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Visibility="{Binding CanCreateOrderPermission, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </StackPanel>
+        </Border>
+
+        <Border
+            Grid.Column="2"
+            Padding="20"
+            Background="{StaticResource CardBgBrush}"
+            BorderBrush="{StaticResource BorderBrushSoft}"
+            BorderThickness="1"
+            CornerRadius="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        FontSize="22"
+                        FontWeight="Bold"
+                        Foreground="#1F2937"
+                        Text="最近订单" />
+                    <TextBlock Grid.Column="1" />
+                    <Button
+                        Grid.Column="2"
+                        Width="88"
+                        Command="{Binding LoadInitialDataCommand}"
+                        Content="刷新"
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+                </Grid>
+
+                <Border
+                    Grid.Row="1"
+                    Padding="8"
+                    Background="#F8FBFF"
+                    BorderBrush="#E2EAF6"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                    <DataGrid
+                        CellStyle="{StaticResource OrderGridCellStyle}"
+                        ColumnHeaderStyle="{StaticResource OrderGridHeaderStyle}"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding RecentOrders}"
+                        RowStyle="{StaticResource OrderGridRowStyle}"
+                        Style="{StaticResource OrderGridStyle}">
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="140"
+                                Binding="{Binding OrderNo}"
+                                Header="工单号" />
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding ProductCode}"
+                                Header="产品" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding PlanQty}"
+                                Header="计划数" />
+                            <DataGridTemplateColumn Width="110" Header="状态">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            x:Name="StatusBadge"
+                                            Padding="10,4"
+                                            HorizontalAlignment="Left"
+                                            Background="#EFF6FF"
+                                            BorderBrush="#BFDBFE"
+                                            BorderThickness="1"
+                                            CornerRadius="999">
+                                            <TextBlock
+                                                x:Name="StatusText"
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                FontWeight="SemiBold"
+                                                Foreground="#1D4ED8"
+                                                Text="{Binding OrderStatus, Converter={StaticResource OrderStatusConverter}}" />
+                                        </Border>
+
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Pending">
+                                                <Setter TargetName="StatusBadge" Property="Background" Value="#FFF7ED" />
+                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FED7AA" />
+                                                <Setter TargetName="StatusText" Property="Foreground" Value="#C2410C" />
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Producing">
+                                                <Setter TargetName="StatusBadge" Property="Background" Value="#ECFDF5" />
+                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#A7F3D0" />
+                                                <Setter TargetName="StatusText" Property="Foreground" Value="#047857" />
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Paused">
+                                                <Setter TargetName="StatusBadge" Property="Background" Value="#FEF3C7" />
+                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FDE68A" />
+                                                <Setter TargetName="StatusText" Property="Foreground" Value="#B45309" />
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Completed">
+                                                <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
+                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
+                                                <Setter TargetName="StatusText" Property="Foreground" Value="#1D4ED8" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Scrapped">
+                                                <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
+                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
+                                                <Setter TargetName="StatusText" Property="Foreground" Value="Black" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Other">
+                                                <Setter TargetName="StatusBadge" Property="Background" Value="#EFF6FF" />
+                                                <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#BFDBFE" />
+                                                <Setter TargetName="StatusText" Property="Foreground" Value="Black" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+
+                            <DataGridTemplateColumn Width="90" Header="详情">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button
+                                            Command="{Binding DataContext.OpenOrderDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Content="详情"
+                                            Style="{StaticResource GridActionButtonStyle}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

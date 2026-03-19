@@ -13,19 +13,19 @@ namespace SimpleMES.Services.Orders.StateMachine
             if (result.CompletedQtyDelta is int delta && delta > 0) order.CompletedQty += delta;
             switch (result.Operation)
             {
-                case OrderState.Paused:
-                    order.OrderStatus = nameof(OrderState.Paused);
+                case OrderStatus.Paused:
+                    order.OrderStatus = nameof(OrderStatus.Paused);
                     order.LastOperationTime = result.OccurredAt;
                     await repository.UpdateOrderAsync(order);
                     return new PausedState();
-                case OrderState.Completed:
-                    order.OrderStatus = nameof(OrderState.Completed);
+                case OrderStatus.Completed:
+                    order.OrderStatus = nameof(OrderStatus.Completed);
                     order.EndTime = result.OccurredAt;
                     order.LastOperationTime = result.OccurredAt;
                     await repository.UpdateOrderAsync(order);
                     return new CompletedState();
-                case OrderState.Scrapped:
-                    order.OrderStatus = nameof(OrderState.Scrapped);
+                case OrderStatus.Scrapped:
+                    order.OrderStatus = nameof(OrderStatus.Scrapped);
                     order.EndTime = result.OccurredAt;
                     order.LastOperationTime = result.OccurredAt;
                     await repository.UpdateOrderAsync(order);

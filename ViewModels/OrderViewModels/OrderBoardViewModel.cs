@@ -21,10 +21,10 @@ namespace SimpleMES.ViewModels.OrderViewModels
         [ObservableProperty]
         private OrderModel? _selectedOrder;
 
-        public OrderBoardViewModel(IDbService dbService, IToastService toast)
+        public OrderBoardViewModel(IDataRepository repository, IToastService toast)
         {
             _toast = toast;
-            _repository = new DataRepository(dbService);
+            _repository = repository;
             _ = LoadOrders();
         }
 

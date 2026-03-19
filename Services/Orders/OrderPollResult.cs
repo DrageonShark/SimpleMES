@@ -3,7 +3,7 @@
     public record class OrderPollResult
     {
         public string OrderNo { get; }
-        public OrderState Operation { get; }
+        public OrderStatus Operation { get; }
         public bool IsSuccess { get; }
         public int? CompletedQtyDelta { get; }//完成数量的变化值
         public string? Comment { get; }//备注
@@ -11,7 +11,7 @@
         public DateTime? OccurredAt { get; }
 
         public OrderPollResult(string orderNo,
-            OrderState operation, bool isSuccess,
+            OrderStatus operation, bool isSuccess,
             int? completedQtyDelta = null, string? comment = null,
             Exception? exception = null, DateTime? occurredAt = null)
         {
@@ -25,7 +25,7 @@
         }
         public static OrderPollResult Success(
             string orderNo,
-            OrderState operation,
+            OrderStatus operation,
             int? completedQtyDelta = null,
             string? comment = null,
             DateTime? occurredAt = null)
@@ -34,7 +34,7 @@
         }
         public static OrderPollResult Fail(
             string orderNo,
-            OrderState operation,
+            OrderStatus operation,
             int? completedQtyDelta = null,
             string? comment = null,
             DateTime? occurredAt = null)

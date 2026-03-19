@@ -9,7 +9,7 @@ using SimpleMES.Services.Toast;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace SimpleMES.ViewModels
+namespace SimpleMES.ViewModels.OrderViewModels
 {
     public partial class OrderViewModel : DialogViewModelBase
     {
@@ -29,6 +29,16 @@ namespace SimpleMES.ViewModels
             PermissionMatrix.HasPermission(_session.CurrentUser, UserPermission.PauseOrder);
 
         public bool CanCompleteOrderPermission => CanExecuteOrderPermission;
+        public bool HasSelectedOrder => SelectedOrder is not null;
+        public bool HasOrders => Orders.Count > 0;
+
+        public string EmptyStateTitle =>
+            HasOrders ? "请选择要调度的订单" : "暂无可调度订单";
+
+        public string EmptyStateDescription =>
+            HasOrders
+                ? "从左侧订单列表中选择一条工单，右侧将显示调度详情和可执行状态流转。"
+                : "当前还没有可调度订单，请先到订单维护页创建工单后再进行调度。";
 
         public bool CanDispatchSelectedOrder =>
             CanRunAction(UserPermission.ExecuteOrder, OrderWorkflowAction.Start);
@@ -38,6 +48,7 @@ namespace SimpleMES.ViewModels
 
         public bool CanCompleteSelectedOrderByRule =>
             CanRunAction(UserPermission.ExecuteOrder, OrderWorkflowAction.Complete);
+
         private bool HasPermission(UserPermission permission) =>
             PermissionMatrix.HasPermission(_session.CurrentUser, permission);
 
@@ -47,6 +58,7 @@ namespace SimpleMES.ViewModels
         public bool ShowStartButton => HasPermission(UserPermission.ExecuteOrder);
         public bool ShowPauseButton => HasPermission(UserPermission.PauseOrder);
         public bool ShowCompleteButton => HasPermission(UserPermission.ExecuteOrder);
+
         public OrderViewModel(
             IDataRepository repository,
             IToastService toast,
@@ -63,6 +75,7 @@ namespace SimpleMES.ViewModels
 
         partial void OnSelectedOrderChanged(OrderModel? value)
         {
+            OnPropertyChanged(nameof(HasSelectedOrder));
             RefreshCommandStates();
         }
 
@@ -80,9 +93,11 @@ namespace SimpleMES.ViewModels
                 {
                     Orders.Add(order);
                 }
-                SelectedOrder = Orders.FirstOrDefault(x => x.OrderNo == selectedOrderNo)
-                                ?? SelectedOrder
-                                ?? Orders.FirstOrDefault();
+
+                SelectedOrder = Orders.FirstOrDefault(x => x.OrderNo == selectedOrderNo);
+                OnPropertyChanged(nameof(HasOrders));
+                OnPropertyChanged(nameof(EmptyStateTitle));
+                OnPropertyChanged(nameof(EmptyStateDescription));
                 RefreshCommandStates();
             }
             catch (Exception ex)
@@ -139,7 +154,6 @@ namespace SimpleMES.ViewModels
             OnPropertyChanged(nameof(ShowStartButton));
             OnPropertyChanged(nameof(ShowPauseButton));
             OnPropertyChanged(nameof(ShowCompleteButton));
-
             OnPropertyChanged(nameof(CanDispatchSelectedOrder));
             OnPropertyChanged(nameof(CanPauseSelectedOrderByRule));
             OnPropertyChanged(nameof(CanCompleteSelectedOrderByRule));

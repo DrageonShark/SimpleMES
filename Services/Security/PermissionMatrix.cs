@@ -13,19 +13,19 @@ namespace SimpleMES.Services.Security
 
             return user.Role switch
             {
-                1 => UserPermission.All, // 管理员：全部
+                1 => UserPermission.All,
                 2 => UserPermission.ToggleDevice
                      | UserPermission.CreateOrder
+                     | UserPermission.EditOrder
+                     | UserPermission.DeleteOrder
                      | UserPermission.ExecuteOrder
                      | UserPermission.PauseOrder
-                     | UserPermission.AckAlarm, // 组长
-                3 => UserPermission.None, // 员工
-                _ => UserPermission.None //未登录
+                     | UserPermission.AckAlarm,
+                3 => UserPermission.None,
+                _ => UserPermission.None
             };
         }
-        /// <summary>
-        /// 检查用户是否拥有某个权限
-        /// </summary>
+
         public static bool HasPermission(UserModel? user, UserPermission permission)
             => (GetPermissions(user) & permission) == permission;
     }

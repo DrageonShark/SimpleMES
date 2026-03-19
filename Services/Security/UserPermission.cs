@@ -8,9 +8,11 @@
         EditDevice = 1 << 1,
         ToggleDevice = 1 << 2,
         CreateOrder = 1 << 3,
-        ExecuteOrder = 1 << 4,
-        PauseOrder = 1 << 5,
-        AckAlarm = 1 << 6,
-        All = AddDevice | EditDevice | ToggleDevice | CreateOrder | ExecuteOrder | PauseOrder | AckAlarm
+        EditOrder = 1 << 4,
+        DeleteOrder = 1 << 5,
+        ExecuteOrder = 1 << 6,
+        PauseOrder = 1 << 7,
+        AckAlarm = 1 << 8,
+        All = AddDevice | EditDevice | ToggleDevice | CreateOrder | EditOrder | DeleteOrder | ExecuteOrder | PauseOrder | AckAlarm
     }
 }

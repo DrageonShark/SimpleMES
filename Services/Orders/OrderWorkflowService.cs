@@ -14,15 +14,16 @@ namespace SimpleMES.Services.Orders
             return action switch
             {
                 OrderWorkflowAction.Start =>
-                    status.Equals(nameof(OrderState.Pending), StringComparison.OrdinalIgnoreCase)
-                    || status.Equals(nameof(OrderState.Paused), StringComparison.OrdinalIgnoreCase),
+                    status.Equals(nameof(OrderStatus.Pending), StringComparison.OrdinalIgnoreCase)
+                    || status.Equals(nameof(OrderStatus.Paused), StringComparison.OrdinalIgnoreCase),
 
                 OrderWorkflowAction.Pause =>
-                    status.Equals(nameof(OrderState.Producing), StringComparison.OrdinalIgnoreCase),
+                    status.Equals(nameof(OrderStatus.Producing), StringComparison.OrdinalIgnoreCase),
 
                 OrderWorkflowAction.Complete =>
-                    order.PlanQty == order.CompletedQty,
-
+                    (status.Equals(nameof(OrderStatus.Producing), StringComparison.OrdinalIgnoreCase)
+                     || status.Equals(nameof(OrderStatus.Paused), StringComparison.OrdinalIgnoreCase))
+                     && order.PlanQty == order.CompletedQty,
                 _ => false
             };
         }
@@ -32,15 +33,17 @@ namespace SimpleMES.Services.Orders
             if (!CanTransit(order, action))
             {
                 Log.Error("订单 {order.OrderNo} 当前状态不允许执行 {action}", order.OrderNo, action);
+                throw new InvalidOperationException(
+                    $"订单 {order.OrderNo} 当前状态 {order.OrderStatus} 不允许执行 {action}");
             }
 
             var at = now ?? DateTime.Now;
 
             var nextState = action switch
             {
-                OrderWorkflowAction.Start => OrderState.Producing,
-                OrderWorkflowAction.Pause => OrderState.Paused,
-                OrderWorkflowAction.Complete => OrderState.Completed,
+                OrderWorkflowAction.Start => OrderStatus.Producing,
+                OrderWorkflowAction.Pause => OrderStatus.Paused,
+                OrderWorkflowAction.Complete => OrderStatus.Completed,
                 _ => throw new InvalidOperationException($"不支持的流转动作: {action}")
             };
             return new OrderModel

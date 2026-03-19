@@ -15,7 +15,7 @@ namespace SimpleMES.ViewModels
     {
         private readonly OrderBoardViewModel _boardViewModel;
         private readonly OrderManagementHomeViewModel _managementViewModel;
-        private readonly OrderViewModel _dispatchViewModel;
+        private readonly OrderViewModels.OrderViewModel _dispatchViewModel;
 
         [ObservableProperty]
         private DialogViewModelBase _currentChild = null!;
@@ -23,7 +23,7 @@ namespace SimpleMES.ViewModels
         public OrderShellViewModel(
             OrderBoardViewModel boardViewModel,
             OrderManagementHomeViewModel managementViewModel,
-            OrderViewModel dispatchViewModel)
+            OrderViewModels.OrderViewModel dispatchViewModel)
         {
             _boardViewModel = boardViewModel;
             _managementViewModel = managementViewModel;

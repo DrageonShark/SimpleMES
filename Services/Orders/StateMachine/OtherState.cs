@@ -11,14 +11,14 @@ namespace SimpleMES.Services.Orders.StateMachine
             if (!result.IsSuccess) return this;
             switch (result.Operation)
             {
-                case OrderState.Pending:
-                    order.OrderStatus = nameof(OrderState.Pending);
+                case OrderStatus.Pending:
+                    order.OrderStatus = nameof(OrderStatus.Pending);
                     order.StartTime = result.OccurredAt;
                     order.LastOperationTime = result.OccurredAt;
                     await repository.UpdateOrderAsync(order);
                     return new PendingState();
-                case OrderState.Scrapped:
-                    order.OrderStatus = nameof(OrderState.Scrapped);
+                case OrderStatus.Scrapped:
+                    order.OrderStatus = nameof(OrderStatus.Scrapped);
                     order.EndTime = result.OccurredAt;
                     order.LastOperationTime = result.OccurredAt;
                     await repository.UpdateOrderAsync(order);

@@ -17,7 +17,7 @@
             <controls:OrderManagementHomeView />
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type vm:OrderViewModel}">
+        <DataTemplate DataType="{x:Type orderViewModels:OrderViewModel}">
             <views:OrderView />
         </DataTemplate>
     </UserControl.Resources>
