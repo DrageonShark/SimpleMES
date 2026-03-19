@@ -9,7 +9,12 @@ namespace SimpleMES.ViewModels.DeviceViewModels
     public partial class DeviceWorkspaceState : ObservableObject
     {
         private const string AllFilter = "全部";
+        private const string RunningFilter = "运行";
+        private const string DisconnectedFilter = "断连";
+        private const string FaultFilter = "故障";
+        private const string DisabledFilter = "停用";
         private const int AttentionLimit = 5;
+        private const int SpotlightLimit = 3;
         private const int RecentLimit = 6;
 
         [ObservableProperty]
@@ -37,7 +42,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 
         public DeviceWorkspaceState()
         {
-            StateFilterOptions = new[] { AllFilter, "运行", "断连", "故障", "停用" };
+            StateFilterOptions = new[] { AllFilter, RunningFilter, DisconnectedFilter, FaultFilter, DisabledFilter };
         }
 
         public ObservableCollection<DeviceDto> ListDeviceDto { get; } = new();
@@ -51,6 +56,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public int TotalDeviceCount => ListDeviceDto.Count;
         public int AttentionDeviceCount => FaultCount + DisconnectedCount;
         public int OnlineDeviceCount => RunningCount;
+        public int EnabledDeviceCount => ListDeviceDto.Count(device => device.IsEnabled);
 
         public bool HasDevices => ListDeviceDto.Count > 0;
         public bool HasFilteredDevices => FilteredDeviceDto.Count > 0;
@@ -58,14 +64,17 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public bool HasPendingAlarms => PendingAlarms.Count > 0;
         public bool HasAttentionDevices => AttentionDevices.Count > 0;
         public bool HasRecentDevices => RecentDevices.Count > 0;
+        public IReadOnlyList<DeviceDto> SpotlightDevices => AttentionDevices.Take(SpotlightLimit).ToList();
+        public bool HasSpotlightOverflow => AttentionDevices.Count > SpotlightLimit;
+        public int SpotlightOverflowCount => Math.Max(0, AttentionDevices.Count - SpotlightLimit);
 
         public string AlarmPanelToggleContent => IsAlarmPanelCollapsed ? "<" : ">";
         public string AlarmPanelToggleText => IsAlarmPanelCollapsed ? "展开告警侧栏" : "收起告警侧栏";
 
         public string DeviceOverviewSummary =>
             HasActiveFilters
-                ? $"当前设备 {ListDeviceDto.Count} 台，筛选结果 {FilteredDeviceDto.Count} 台"
-                : $"当前共 {ListDeviceDto.Count} 台设备在线展示";
+                ? $"当前设备 {ListDeviceDto.Count} 台，筛选结果 {FilteredDeviceDto.Count} 台。"
+                : $"当前共 {ListDeviceDto.Count} 台设备，已启用 {EnabledDeviceCount} 台。";
 
         public string ManagementEmptyTitle =>
             HasActiveFilters ? "没有匹配的设备" : "暂无设备数据";
@@ -73,7 +82,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public string ManagementEmptyDescription =>
             HasActiveFilters
                 ? "调整搜索词或状态筛选后再试。"
-                : "设备接入后会在这里展示实时状态和操作入口。";
+                : "设备接入后，这里会展示实时状态和运维入口。";
 
         public string AlarmSummary =>
             HasPendingAlarms ? $"当前有 {PendingAlarms.Count} 条未确认告警" : "当前没有未确认告警";
@@ -83,26 +92,31 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 
         public string BoardHeadline =>
             FaultCount > 0
-                ? $"有 {FaultCount} 台设备故障，建议优先处理"
+                ? $"有 {FaultCount} 台设备故障，建议优先派修"
                 : DisconnectedCount > 0
                     ? $"有 {DisconnectedCount} 台设备断连，建议检查通信"
                     : HasDevices
-                        ? "设备运行整体平稳"
+                        ? "设备运行整体稳定"
                         : "等待设备接入";
 
         public string BoardDescription =>
             HasDevices
-                ? $"运行 {RunningCount} 台，关注 {AttentionDeviceCount} 台，停用 {DisabledCount} 台。"
-                : "接入设备后，这里会聚合展示实时状态、异常摘要和快捷操作。";
+                ? $"运行 {RunningCount} 台，异常 {AttentionDeviceCount} 台，停用 {DisabledCount} 台。异常卡片已按持续时长排序。"
+                : "接入设备后，这里会展示实时状态、异常摘要和快捷操作。";
 
         public string AttentionSummary =>
             HasAttentionDevices
-                ? $"共 {AttentionDevices.Count} 台重点设备需要关注"
-                : "当前没有需要优先关注的设备";
+                ? $"共有 {AttentionDevices.Count} 台重点设备需要处理"
+                : "当前没有需要优先处理的设备";
+
+        public string SpotlightOverflowSummary =>
+            HasSpotlightOverflow
+                ? $"另有 {SpotlightOverflowCount} 台异常设备待跟进"
+                : "当前重点设备已全部展开";
 
         public string RecentDeviceSummary =>
             HasRecentDevices
-                ? "按照最近更新时间展示设备动态"
+                ? "按照最近通信时间或更新时间展示设备动态"
                 : "暂无可展示的实时刷新记录";
 
         partial void OnSearchKeywordChanged(string value)
@@ -137,15 +151,25 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     }
 
                     existing.DeviceName = device.DeviceName;
+                    existing.DeviceCode = device.DeviceCode;
+                    existing.DeviceType = device.DeviceType;
                     existing.IpAddress = device.IpAddress;
                     existing.Port = device.Port;
                     existing.SerialPort = device.SerialPort;
                     existing.SlaveId = device.SlaveId;
+                    existing.WorkshopName = device.WorkshopName;
+                    existing.LineName = device.LineName;
+                    existing.StationName = device.StationName;
+                    existing.IsEnabled = device.IsEnabled;
+                    existing.Criticality = device.Criticality;
                     existing.Temperature = device.Temperature;
                     existing.Pressure = device.Pressure;
                     existing.Speed = device.Speed;
                     existing.DeviceState = device.DeviceState;
                     existing.LastUpdateTime = device.LastUpdateTime;
+                    existing.LastHeartbeatTime = device.LastHeartbeatTime;
+                    existing.LastStateChangeTime = device.LastStateChangeTime;
+                    existing.CurrentOrderNo = device.CurrentOrderNo;
                 }
             }
 
@@ -161,16 +185,21 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 var keyword = SearchKeyword.Trim();
                 query = query.Where(device =>
                     (!string.IsNullOrWhiteSpace(device.DeviceName) && device.DeviceName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(device.DeviceCode) && device.DeviceCode.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(device.DeviceType) && device.DeviceType.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(device.WorkshopName) && device.WorkshopName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(device.LineName) && device.LineName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(device.StationName) && device.StationName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
                     (!string.IsNullOrWhiteSpace(device.IpAddress) && device.IpAddress.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
                     (!string.IsNullOrWhiteSpace(device.SerialPort) && device.SerialPort.Contains(keyword, StringComparison.OrdinalIgnoreCase)));
             }
 
             query = StateFilter switch
             {
-                "运行" => query.Where(device => device.DeviceState == DeviceState.Running),
-                "断连" => query.Where(device => device.DeviceState == DeviceState.Disconnected),
-                "故障" => query.Where(device => device.DeviceState == DeviceState.Fault),
-                "停用" => query.Where(device => device.DeviceState == DeviceState.Disabled),
+                RunningFilter => query.Where(device => device.DeviceState == DeviceState.Running),
+                DisconnectedFilter => query.Where(device => device.DeviceState == DeviceState.Disconnected),
+                FaultFilter => query.Where(device => device.DeviceState == DeviceState.Fault),
+                DisabledFilter => query.Where(device => device.DeviceState == DeviceState.Disabled),
                 _ => query
             };
 
@@ -219,13 +248,14 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             var attentionDevices = ListDeviceDto
                 .Where(device => device.DeviceState is DeviceState.Fault or DeviceState.Disconnected)
                 .OrderBy(device => device.DeviceState == DeviceState.Fault ? 0 : 1)
-                .ThenByDescending(device => device.LastUpdateTime)
+                .ThenBy(device => device.LastStateChangeTime ?? device.LastUpdateTime)
+                .ThenByDescending(device => device.Criticality)
                 .ThenBy(device => device.DeviceId)
                 .Take(AttentionLimit);
             SyncCollection(AttentionDevices, attentionDevices);
 
             var recentDevices = ListDeviceDto
-                .OrderByDescending(device => device.LastUpdateTime)
+                .OrderByDescending(device => device.LastHeartbeatTime ?? device.LastUpdateTime)
                 .ThenBy(device => device.DeviceId)
                 .Take(RecentLimit);
             SyncCollection(RecentDevices, recentDevices);
@@ -236,17 +266,22 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             OnPropertyChanged(nameof(TotalDeviceCount));
             OnPropertyChanged(nameof(AttentionDeviceCount));
             OnPropertyChanged(nameof(OnlineDeviceCount));
+            OnPropertyChanged(nameof(EnabledDeviceCount));
             OnPropertyChanged(nameof(HasDevices));
             OnPropertyChanged(nameof(HasFilteredDevices));
             OnPropertyChanged(nameof(HasActiveFilters));
             OnPropertyChanged(nameof(HasAttentionDevices));
             OnPropertyChanged(nameof(HasRecentDevices));
+            OnPropertyChanged(nameof(SpotlightDevices));
+            OnPropertyChanged(nameof(HasSpotlightOverflow));
+            OnPropertyChanged(nameof(SpotlightOverflowCount));
             OnPropertyChanged(nameof(DeviceOverviewSummary));
             OnPropertyChanged(nameof(ManagementEmptyTitle));
             OnPropertyChanged(nameof(ManagementEmptyDescription));
             OnPropertyChanged(nameof(BoardHeadline));
             OnPropertyChanged(nameof(BoardDescription));
             OnPropertyChanged(nameof(AttentionSummary));
+            OnPropertyChanged(nameof(SpotlightOverflowSummary));
             OnPropertyChanged(nameof(RecentDeviceSummary));
         }
 

@@ -6,6 +6,6 @@ namespace SimpleMES.Services.Strategy
     public interface IDevicePollingStrategy
     {
         string Key { get; }
-        Task<PollingResult> PollAsync(IDeviceClient client, DeviceModel device, CancellationToken token = default);
+        Task<PollingResult> PollAsync(IDeviceClient client, MonitoredDeviceModel device, CancellationToken token = default);
     }
 }

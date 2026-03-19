@@ -101,39 +101,123 @@ namespace SimpleMES.Services.DAL
         }
 
 
-        public async Task<IEnumerable<DeviceModel>> GetAllDevicesAsync()
+        public async Task<IEnumerable<MonitoredDeviceModel>> GetAllDevicesAsync()
         {
-            const string sql = @"SELECT * FROM T_Devices";
-            return await _db.QueryAsync<DeviceModel>(sql);
+            const string sql = @"SELECT
+                                     m.DeviceId,
+                                     m.DeviceName,
+                                     m.DeviceCode,
+                                     m.DeviceType,
+                                     m.WorkshopName,
+                                     m.LineName,
+                                     m.StationName,
+                                     m.IpAddress,
+                                     m.Port,
+                                     m.SerialPort,
+                                     m.SlaveId,
+                                     COALESCE(r.DeviceState, 'Disconnected') AS RuntimeDeviceState,
+                                     m.IsEnabled,
+                                     m.Criticality,
+                                     m.SortOrder,
+                                     COALESCE(r.LastUpdateTime, GETDATE()) AS RuntimeLastUpdateTime,
+                                     r.LastHeartbeatTime AS RuntimeLastHeartbeatTime,
+                                     r.LastStateChangeTime AS RuntimeLastStateChangeTime,
+                                     r.CurrentOrderNo AS RuntimeCurrentOrderNo,
+                                     m.Remark,
+                                     m.CreatedAt,
+                                     m.UpdatedAt,
+                                     COALESCE(r.UpdatedAt, m.UpdatedAt) AS RuntimeUpdatedAt
+                                 FROM T_DeviceMaster m
+                                 LEFT JOIN T_DeviceRuntime r ON r.DeviceId = m.DeviceId
+                                 ORDER BY m.SortOrder, m.DeviceId";
+
+            var rows = await _db.QueryAsync<MonitoredDeviceRow>(sql);
+            return rows.Select(row => new MonitoredDeviceModel
+            {
+                Device = new DeviceModel
+                {
+                    DeviceId = row.DeviceId,
+                    DeviceName = row.DeviceName ?? string.Empty,
+                    DeviceCode = row.DeviceCode,
+                    DeviceType = row.DeviceType,
+                    WorkshopName = row.WorkshopName,
+                    LineName = row.LineName,
+                    StationName = row.StationName,
+                    IpAddress = row.IpAddress ?? string.Empty,
+                    Port = row.Port,
+                    SerialPort = row.SerialPort ?? string.Empty,
+                    SlaveId = row.SlaveId,
+                    IsEnabled = row.IsEnabled,
+                    Criticality = row.Criticality,
+                    SortOrder = row.SortOrder,
+                    Remark = row.Remark,
+                    CreatedAt = row.CreatedAt,
+                    UpdatedAt = row.UpdatedAt
+                },
+                Runtime = new DeviceRuntimeModel
+                {
+                    DeviceId = row.DeviceId,
+                    DeviceState = row.RuntimeDeviceState ?? "Disconnected",
+                    LastUpdateTime = row.RuntimeLastUpdateTime,
+                    LastHeartbeatTime = row.RuntimeLastHeartbeatTime,
+                    LastStateChangeTime = row.RuntimeLastStateChangeTime,
+                    CurrentOrderNo = row.RuntimeCurrentOrderNo,
+                    UpdatedAt = row.RuntimeUpdatedAt
+                }
+            });
         }
 
         public async Task<int> UpdateDeviceStateAsync(int deviceId, string deviceState, DateTime? lastUpDateTime = null)
         {
-            const string sql = @"UPDATE T_Devices
+            const string sql = @"UPDATE T_DeviceRuntime
                                  SET DeviceState = @DeviceState,
-                                 LastUpdateTime = ISNULL(@LastUpdateTime, LastUpdateTime)
+                                     LastUpdateTime = COALESCE(@LastUpdateTime, LastUpdateTime, GETDATE()),
+                                     LastHeartbeatTime = CASE
+                                                             WHEN @DeviceState = 'Running'
+                                                                 THEN COALESCE(@LastUpdateTime, GETDATE())
+                                                             ELSE LastHeartbeatTime
+                                                         END,
+                                     LastStateChangeTime = CASE
+                                                               WHEN DeviceState <> @DeviceState OR LastStateChangeTime IS NULL
+                                                                   THEN COALESCE(@LastUpdateTime, GETDATE())
+                                                               ELSE LastStateChangeTime
+                                                           END,
+                                     UpdatedAt = SYSDATETIME()
                                  WHERE DeviceId = @DeviceId;";
             return await _db.ExecuteAsync(sql, new { DeviceId = deviceId, DeviceState = deviceState, LastUpdateTime = lastUpDateTime });
         }
 
         public async Task<int> UpdateDeviceAsync(DeviceModel device)
         {
-            const string sql = @"UPDATE T_Devices
+            const string sql = @"UPDATE T_DeviceMaster
                          SET DeviceName   = @DeviceName,
+                             DeviceCode   = COALESCE(NULLIF(@DeviceCode, ''), DeviceCode),
+                             DeviceType   = COALESCE(NULLIF(@DeviceType, ''), DeviceType),
+                             WorkshopName = COALESCE(NULLIF(@WorkshopName, ''), WorkshopName),
+                             LineName     = COALESCE(NULLIF(@LineName, ''), LineName),
+                             StationName  = COALESCE(NULLIF(@StationName, ''), StationName),
                              IpAddress    = @IpAddress,
                              Port         = ISNULL(@Port, Port),
                              SerialPort   = @SerialPort,
                              SlaveId      = ISNULL(@SlaveId, SlaveId),
-                             LastUpdateTime = GETDATE()
-                         WHERE DeviceId   = @DeviceId;";
+                             Remark       = COALESCE(NULLIF(@Remark, ''), Remark),
+                             UpdatedAt    = SYSDATETIME()
+                          WHERE DeviceId   = @DeviceId;";
             return await _db.ExecuteAsync(sql, device);
         }
 
         public async Task<int> SetDeviceEnabledAsync(int deviceId, bool isEnabled, DateTime? changedAt = null)
         {
-            const string sql = @"UPDATE T_Devices
+            const string sql = @"UPDATE T_DeviceMaster
+                                 SET IsEnabled = @IsEnabled,
+                                     UpdatedAt = SYSDATETIME()
+                                 WHERE DeviceId = @DeviceId;
+
+                                 UPDATE T_DeviceRuntime
                                  SET DeviceState = CASE WHEN @IsEnabled = 1 THEN 'Disconnected' ELSE 'Disabled' END,
-                                 LastUpdateTime = ISNULL(@ChangedAt, GETDATE())
+                                     LastUpdateTime = ISNULL(@ChangedAt, GETDATE()),
+                                     LastStateChangeTime = ISNULL(@ChangedAt, GETDATE()),
+                                     UpdatedAt = SYSDATETIME()
                                  WHERE DeviceId = @DeviceId;";
 
             return await _db.ExecuteAsync(sql, new
@@ -146,10 +230,65 @@ namespace SimpleMES.Services.DAL
 
         public async Task<int> InsertDeviceAsync(DeviceModel device)
         {
-            const string sql = @"INSERT INTO T_Devices
-                                 (DeviceName, IpAddress, Port, SerialPort, SlaveId)
-                                 VALUES (@DeviceName, @IpAddress, @Port, @SerialPort, @SlaveId);
-                                 SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            const string sql = @"DECLARE @NewDeviceId int;
+
+                                 INSERT INTO T_DeviceMaster
+                                 (
+                                     DeviceName,
+                                     DeviceCode,
+                                     DeviceType,
+                                     WorkshopName,
+                                     LineName,
+                                     StationName,
+                                     IpAddress,
+                                     Port,
+                                     SerialPort,
+                                     SlaveId,
+                                     IsEnabled,
+                                     Criticality,
+                                     SortOrder,
+                                     Remark
+                                 )
+                                 VALUES
+                                 (
+                                     @DeviceName,
+                                     @DeviceCode,
+                                     @DeviceType,
+                                     @WorkshopName,
+                                     @LineName,
+                                     @StationName,
+                                     @IpAddress,
+                                     @Port,
+                                     @SerialPort,
+                                     @SlaveId,
+                                     1,
+                                     CASE WHEN @Criticality = 0 THEN 2 ELSE @Criticality END,
+                                     @SortOrder,
+                                     @Remark
+                                 );
+
+                                 SET @NewDeviceId = CAST(SCOPE_IDENTITY() AS int);
+
+                                 INSERT INTO T_DeviceRuntime
+                                 (
+                                     DeviceId,
+                                     DeviceState,
+                                     CurrentOrderNo,
+                                     LastUpdateTime,
+                                     LastHeartbeatTime,
+                                     LastStateChangeTime
+                                 )
+                                 VALUES
+                                 (
+                                     @NewDeviceId,
+                                     'Disconnected',
+                                     NULL,
+                                     GETDATE(),
+                                     NULL,
+                                     GETDATE()
+                                 );
+
+                                 SELECT @NewDeviceId;";
             return await _db.ExecuteScalarAsync<int>(sql, device);
         }
 
@@ -180,14 +319,25 @@ namespace SimpleMES.Services.DAL
                 throw new ArgumentNullException(nameof(alarmRecord));
             }
             const string sql = @"INSERT INTO T_AlarmRecord 
-                                 (DeviceId, AlarmMessage, AlarmTime, IsAck)
-                                 VALUES (@DeviceId, @AlarmMessage, @AlarmTime, @IsAck);";
+                                 (DeviceId, AlarmCode, AlarmLevel, AlarmSource, AlarmMessage, AlarmTime, IsAck, AckUserId, AckTime, RecoverTime)
+                                 VALUES (
+                                     @DeviceId,
+                                     @AlarmCode,
+                                     COALESCE(NULLIF(@AlarmLevel, ''), 'Warning'),
+                                     COALESCE(NULLIF(@AlarmSource, ''), 'System'),
+                                     @AlarmMessage,
+                                     @AlarmTime,
+                                     @IsAck,
+                                     @AckUserId,
+                                     @AckTime,
+                                     @RecoverTime
+                                 );";
             return await _db.ExecuteAsync(sql, alarmRecord);
         }
 
         public async Task<IEnumerable<AlarmRecordModel>> GetUnAckAlarmsAsync(int top = 20)
         {
-            const string sql = @"SELECT TOP (@Top) AlarmId, DeviceId, AlarmMessage, AlarmTime, IsAck
+            const string sql = @"SELECT TOP (@Top) AlarmId, DeviceId, AlarmCode, AlarmLevel, AlarmSource, AlarmMessage, AlarmTime, IsAck, AckUserId, AckTime, RecoverTime, CreatedAt
                                  FROM T_AlarmRecord
                                  WHERE IsAck = 0
                                  ORDER BY AlarmTime DESC;";
@@ -196,7 +346,10 @@ namespace SimpleMES.Services.DAL
 
         public async Task<int> AckAlarmAsync(int alarmId)
         {
-            const string sql = @"UPDATE T_AlarmRecord SET IsAck = 1 WHERE AlarmId = @AlarmId;";
+            const string sql = @"UPDATE T_AlarmRecord
+                                 SET IsAck = 1,
+                                     AckTime = COALESCE(AckTime, GETDATE())
+                                 WHERE AlarmId = @AlarmId;";
             return await _db.ExecuteAsync(sql, new { AlarmId = alarmId });
         }
 
@@ -257,6 +410,33 @@ namespace SimpleMES.Services.DAL
         {
             const string sql = @"DELETE T_User WHERE UserId = @UserId";
             return await _db.ExecuteAsync(sql, new { UserId = userId });
+        }
+
+        private sealed class MonitoredDeviceRow
+        {
+            public int DeviceId { get; set; }
+            public string? DeviceName { get; set; }
+            public string? DeviceCode { get; set; }
+            public string? DeviceType { get; set; }
+            public string? WorkshopName { get; set; }
+            public string? LineName { get; set; }
+            public string? StationName { get; set; }
+            public string? IpAddress { get; set; }
+            public int? Port { get; set; }
+            public string? SerialPort { get; set; }
+            public byte? SlaveId { get; set; }
+            public bool IsEnabled { get; set; }
+            public byte Criticality { get; set; }
+            public int SortOrder { get; set; }
+            public string? Remark { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime UpdatedAt { get; set; }
+            public string? RuntimeDeviceState { get; set; }
+            public DateTime RuntimeLastUpdateTime { get; set; }
+            public DateTime? RuntimeLastHeartbeatTime { get; set; }
+            public DateTime? RuntimeLastStateChangeTime { get; set; }
+            public string? RuntimeCurrentOrderNo { get; set; }
+            public DateTime RuntimeUpdatedAt { get; set; }
         }
     }
 }

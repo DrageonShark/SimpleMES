@@ -48,7 +48,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public async Task AddDeviceAsync()
         {
             Log.Information("添加新设备");
-            var draft = new DeviceModel { SlaveId = 1 };
+            var draft = new DeviceModel { SlaveId = 1, IsEnabled = true };
             DeviceModel? savedDevice = null;
             var newId = 0;
 
@@ -72,7 +72,8 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                         IpAddress = device.IpAddress?.Trim() ?? string.Empty,
                         Port = device.Port,
                         SerialPort = device.SerialPort?.Trim() ?? string.Empty,
-                        SlaveId = device.SlaveId is null or 0 ? (byte)1 : device.SlaveId
+                        SlaveId = device.SlaveId is null or 0 ? (byte)1 : device.SlaveId,
+                        IsEnabled = true
                     };
 
                     newId = await _repository.InsertDeviceAsync(savedDevice);
@@ -137,6 +138,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                         Port = dto.Port,
                         SerialPort = dto.SerialPort?.Trim() ?? string.Empty,
                         SlaveId = dto.SlaveId is null or 0 ? (byte)1 : dto.SlaveId,
+                        IsEnabled = device.DeviceState != Services.State.DeviceState.Disabled
                     };
 
                     await _repository.UpdateDeviceAsync(newDevice);
@@ -204,8 +206,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     Port = device.Port,
                     SerialPort = device.SerialPort,
                     SlaveId = device.SlaveId,
-                    DeviceState = toEnable ? nameof(Services.State.DeviceState.Disconnected) : nameof(Services.State.DeviceState.Disabled),
-                    LastUpdateTime = device.LastUpdateTime
+                    IsEnabled = toEnable
                 };
 
                 _configNotifier.NotifyConfigChanged(changed, toEnable ? ConfigChangeType.Enabled : ConfigChangeType.Disabled);

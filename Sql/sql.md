@@ -1,128 +1,81 @@
---创建数据库 (如果不存在)
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'SimpleMES_DB')
-BEGIN
-    CREATE DATABASE SimpleMES_DB;
-END
-GO
+# SimpleMES schema notes
 
-USE SimpleMES_DB;
-GO
+The executable bootstrap script is [SQLQuery1.sql](./SQLQuery1.sql). This note explains the device-side schema changes that support a better board design.
 
---创建设备表 (Devices)
--- 存储生产线上的设备基础信息及当前状态
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID (N'[dbo].[T_Devices]') AND type in (N'U'))
-BEGIN
-	CREATE TABLE [dbo].[T_Devices](
-		DeviceId int IDENTITY(1,1) NOT NULL PRIMARY KEY, --设备ID
-		DeviceName nvarchar(50) NOT NULL, --设备名
-		IpAddress nvarchar(20) NULL, --设备IP (Modbus TCP)
-		Port int DEFAULT 502 NULL, --端口
-		SerialPort nvarchar(50) NULL, --串口名
-        SlaveId tinyint NULL DEFAULT 1, --从站ID
-		DeviceState nvarchar(20) DEFAULT 'Disconnected', --状态: Running/Disconnected/Fault
-		LastUpdateTime datetime DEFAULT GETDATE() --最后通信时间
-		);
-		
-		--插入模拟数据(3台设备)
-		INSERT INTO T_Devices (DeviceName, IpAddress, Status, Port) VALUES
-		('注塑机-A01', '127.0.0.1', 'Disconnected', 501),
-		('冲压机-B02', '127.0.0.1', 'Disconnected', 502);
-		INSERT INTO T_Devices (DeviceName, SerialPort, Status) VALUES
-		('包装机-C03', 'COM1', 'Disconnected');
-END;
-GO
+## Device master table: `T_DeviceMaster`
 
+`T_DeviceMaster` only stores low-frequency device profile data:
 
---创建产品表
---产品温度，压力
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.T_Products') AND type in (N'U'))
-BEGIN
-	CREATE TABLE dbo.T_Products (
-		ProductCode nvarchar(50) NOT NULL PRIMARY KEY, --产品编号
-		ProductName nvarchar(100) NOT NULL, --产品名
-		SetTemperature FLOAT NOT NULL,        -- 设定温度 (配方参数1)
-		SetPressure FLOAT DEFAULT 0,          -- 设定压力 (配方参数2)
-		Description NVARCHAR(200)             -- 备注
-	);
-	--插入两种产品配方
-	INSERT INTO T_Products (ProductCode, ProductName, SetTemperature, SetPressure) 
-	VALUES ('PROD_A', '苹果手机壳', 60.5, 100);
+- Identity: `DeviceId`, `DeviceName`, `DeviceCode`, `DeviceType`
+- Location: `WorkshopName`, `LineName`, `StationName`
+- Communication: `IpAddress`, `Port`, `SerialPort`, `SlaveId`
+- Enable/config: `IsEnabled`, `Criticality`, `SortOrder`, `Remark`
+- Audit: `CreatedAt`, `UpdatedAt`
 
-	INSERT INTO T_Products (ProductCode, ProductName, SetTemperature, SetPressure)
-	VALUES ('PROD_B', '特斯拉配件', 120.0, 250);
-END
-GO
+This is the table for:
 
+- device management
+- line/station grouping
+- sort priority
+- device configuration
 
---创建生产订单表
---管理生产人物，包含计划数和完成数
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.T_ProductionOrders') AND type in (N'U'))
-BEGIN
-	CREATE TABLE dbo.T_ProductionOrders (
-		OrderNo nvarchar(50) NOT NULL PRIMARY KEY, --订单号
-		ProductCode nvarchar(50) FOREIGN KEY REFERENCES T_Products (ProductCode), --产品编号
-		PlanQty int NOT NULL, --计划数量
-		CompletedQty int DEFAULT 0, --已完成数量
-		OrderStatus string	DEFAULT "Pending", --状态：Pending, Producing, Paused,Completed, Scrapped
-		StartTime datetime NULL,  --开始时间
-		EndTime datetime NULL, --结束时间
-		LastOperationTime datetime NULL, --上次操作时间
-		CreateTime datetime DEFAULT GETDATE()
-	);
+## Device runtime table: `T_DeviceRuntime`
 
-	-- 插入一条测试订单
-    --INSERT INTO T_ProductionOrders (OrderNo, ProductCode, PlanQty, OrderStatus) 
-    --VALUES ('MO-20231027001', 'Widget-X', 1000, 0);
+`T_DeviceRuntime` stores high-frequency board state:
 
-END
-GO
+- `DeviceState`
+- `CurrentOrderNo`
+- `LastUpdateTime`
+- `LastHeartbeatTime`
+- `LastStateChangeTime`
+- `UpdatedAt`
 
---创建生产过程记录表
---用于生成历史趋势图，记录核心参数
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.T_ProductionRecords') AND type in (N'U'))
-BEGIN
-	CREATE TABLE T_ProductionRecords (
-		RecordId bigint IDENTITY(1,1) NOT NULL  PRIMARY KEY, 
-		DeviceId int FOREIGN KEY REFERENCES T_Devices(DeviceId) NOT NULL, --关联设备ID
-		Temperature decimal(10,2) NULL, --温度
-		Pressure decimal(10,2) NULL, --压力
-		Speed int NULL, --转速
-		RecordTime datetime DEFAULT GETDATE() --记录时间
-		);
-END
-GO
+Why these fields matter:
 
---创建报警记录表
---记录设备故障历史
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.T_AlarmRecord') AND type in (N'U'))
-BEGIN
-	CREATE TABLE T_AlarmRecord (
-	AlarmId int IDENTITY(1,1) NOT NULL PRIMARY KEY,
-	DeviceId int FOREIGN KEY REFERENCES T_Devices(DeviceId) NOT NULL, --关联设备ID
-	AlarmMessage nvarchar(200) NOT NULL, --报警内容
-	AlarmTime datetime DEFAULT GETDATE(), --报警时间
-	IsAck bit DEFAULT 0 --是否确认 (扩展功能)
-	);
-END
-GO
+- `LastHeartbeatTime` supports "offline for how long" instead of only "latest update time".
+- `LastStateChangeTime` supports "fault duration" and board prioritization.
+- `CurrentOrderNo` lets the board connect device state with production context.
 
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID( N'dbo.T_User') AND type in(N'U'))
-BEGIN
-	CREATE TABLE T_User(
-	UserId int IDENTITY(1,1) NOT NULL PRIMARY KEY,
-	UserName nvarchar(60) NOT NULL,
-	Role int NOT NULL DEFAULT 3, --角色1:admin，2:leader，3:employee 
-	Account nvarchar(50) NOT NULL UNIQUE, 
-	PasswordHash nvarchar(255) NOT NULL, --密码哈希值
-	Salt nvarchar(128) NULL, --密码盐值
-	Email nvarchar(100) NULL UNIQUE, --邮箱
-	IsActive bit DEFAULT 1 --是否启用
-	);
-	--创建索引提高查询性能
-	CREATE INDEX IX_T_User_Account ON T_User(Account);
-    CREATE INDEX IX_T_User_Role ON T_User(Role);
-END
-GO
+## Alarm table: `T_AlarmRecord`
 
+The alarm table now includes:
 
+- Alarm identity: `AlarmCode`
+- Severity: `AlarmLevel`
+- Source: `AlarmSource`
+- Ack trail: `AckUserId`, `AckTime`
+- Recovery time: `RecoverTime`
+- Audit: `CreatedAt`
 
+This is the minimum structure needed for:
+
+- unacknowledged alarm counters
+- critical-first sorting
+- ack tracing
+- alarm duration metrics
+
+## Device event table: `T_DeviceEvent`
+
+`T_DeviceEvent` is added for real timeline data. The current board UI only has device snapshots, but a true timeline should come from events such as:
+
+- state changed
+- communication lost
+- communication recovered
+- fault raised
+- fault acknowledged
+
+Suggested UI mapping:
+
+- board timeline -> `T_DeviceEvent`
+- exception focus -> `T_DeviceMaster` + `T_DeviceRuntime` + latest active `T_AlarmRecord`
+- management filters -> `T_DeviceMaster`
+
+## Compatibility
+
+This script is intended for a clean rebuild after the split-table change.
+
+Recommended execution:
+
+1. Back up the current `SimpleMES_DB` if you need the data.
+2. Drop `SimpleMES_DB`.
+3. Run [SQLQuery1.sql](./SQLQuery1.sql) once in SSMS.

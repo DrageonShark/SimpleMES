@@ -13,7 +13,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         {
             State = state;
             _actions = actions;
-            PageTitle = "\u8bbe\u5907\u770b\u677f";
+            PageTitle = "设备看板";
         }
 
         [RelayCommand]

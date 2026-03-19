@@ -12,7 +12,7 @@ namespace SimpleMES.Core
     public class DefaultPollingStrategy : IDevicePollingStrategy
     {
         public string Key => "default";
-        public async Task<PollingResult> PollAsync(IDeviceClient client, DeviceModel device, CancellationToken token = default)
+        public async Task<PollingResult> PollAsync(IDeviceClient client, MonitoredDeviceModel device, CancellationToken token = default)
         {
             try
             {
@@ -31,9 +31,9 @@ namespace SimpleMES.Core
                     Temperature = temp,
                     Pressure = press,
                     Speed = speed,
-                    DeviceState = Enum.Parse<DeviceState>(device.DeviceState, true),
-                    LastUpdateTime = occurredAt
-                };
+                        DeviceState = Enum.Parse<DeviceState>(device.Runtime.DeviceState, true),
+                        LastUpdateTime = occurredAt
+                    };
                 PersistCallback persist = async (IDataRepository repository, CancellationToken ct) =>
                 {
                     await repository.InsertProductionRecordAsync(new ProductionRecordModel

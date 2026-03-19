@@ -7,7 +7,7 @@ namespace SimpleMES.Services.State
     {
         string Name { get; }
 
-        Task<IDeviceState> HandleAsync(DeviceModel device, DevicePollResult result,
+        Task<IDeviceState> HandleAsync(MonitoredDeviceModel device, DevicePollResult result,
             IDataRepository repository, CancellationToken token = default);
     }
 

@@ -20,7 +20,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         {
             State = state;
             _actions = actions;
-            PageTitle = "\u8bbe\u5907\u7ba1\u7406";
+            PageTitle = "设备管理";
 
             State.FilteredDeviceDto.CollectionChanged += OnFilteredDevicesChanged;
             PageSizeOptions = new ObservableCollection<int> { 8, 12, 16, 24 };
@@ -45,13 +45,13 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 
         public string PagingSummary =>
             State.FilteredDeviceDto.Count == 0
-                ? "\u6682\u65e0\u8bbe\u5907\u53ef\u5c55\u793a"
-                : $"\u7b2c {CurrentPage}/{TotalPages} \u9875\uff0c\u5f53\u524d\u663e\u793a {VisibleDevices.Count} / \u5171 {State.FilteredDeviceDto.Count} \u53f0\u8bbe\u5907";
+                ? "暂无设备可展示"
+                : $"第 {CurrentPage}/{TotalPages} 页，当前显示 {VisibleDevices.Count} / 共 {State.FilteredDeviceDto.Count} 台设备";
 
         public string VisibleRangeSummary =>
             State.FilteredDeviceDto.Count == 0
-                ? "\u5f53\u524d\u6ca1\u6709\u53ef\u6d4f\u89c8\u7684\u8bbe\u5907"
-                : $"\u6b63\u5728\u67e5\u770b\u7b2c {VisibleStartIndex}-{VisibleEndIndex} \u53f0\uff0c\u5171 {State.FilteredDeviceDto.Count} \u53f0";
+                ? "当前没有可浏览的设备"
+                : $"正在查看第 {VisibleStartIndex}-{VisibleEndIndex} 台，共 {State.FilteredDeviceDto.Count} 台";
 
         partial void OnPageSizeChanged(int value)
         {

@@ -59,6 +59,66 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="18" />
         </Style>
+
+        <Style x:Key="StatusBadgeBorderStyle" TargetType="Border">
+            <Setter Property="MinWidth" Value="86" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Background" Value="#ECFDF5" />
+            <Setter Property="BorderBrush" Value="#A7F3D0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disconnected}">
+                    <Setter Property="Background" Value="#FFFBEB" />
+                    <Setter Property="BorderBrush" Value="#FDE68A" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
+                    <Setter Property="Background" Value="#FEF2F2" />
+                    <Setter Property="BorderBrush" Value="#FECACA" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disabled}">
+                    <Setter Property="Background" Value="#EFF6FF" />
+                    <Setter Property="BorderBrush" Value="#BFDBFE" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StatusBadgeTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#065F46" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disconnected}">
+                    <Setter Property="Foreground" Value="#92400E" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
+                    <Setter Property="Foreground" Value="#991B1B" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disabled}">
+                    <Setter Property="Foreground" Value="#1D4ED8" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FocusCardStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="Background" Value="{StaticResource CardSoftBgBrush}" />
+            <Setter Property="BorderBrush" Value="#E2EAF6" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="18" />
+        </Style>
+
+        <Style x:Key="InfoChipStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,8,8" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#D7E3F4" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="999" />
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="24" Background="{StaticResource PageBgBrush}">
@@ -76,8 +136,15 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="设备看板" />
-                <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.DeviceOverviewSummary}" />
+                <TextBlock
+                    FontSize="26"
+                    FontWeight="Bold"
+                    Foreground="{StaticResource TextBrush}"
+                    Text="设备看板" />
+                <TextBlock
+                    Margin="0,6,0,0"
+                    Foreground="{StaticResource MutedBrush}"
+                    Text="{Binding State.DeviceOverviewSummary}" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -87,7 +154,12 @@
                     Style="{StaticResource PrimaryButtonStyle}"
                     Visibility="{Binding Actions.CanAddDevicePermission, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="White" Kind="PlusCircleOutline" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="0,0,8,0"
+                            Foreground="White"
+                            Kind="PlusCircleOutline" />
                         <TextBlock VerticalAlignment="Center" Text="新增设备" />
                     </StackPanel>
                 </Button>
@@ -96,15 +168,23 @@
                     Command="{Binding DataContext.ShowManagementCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}"
                     Style="{StaticResource ToolbarButtonStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="CogOutline" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="0,0,8,0"
+                            Foreground="#2563EB"
+                            Kind="CogOutline" />
                         <TextBlock VerticalAlignment="Center" Text="设备管理" />
                     </StackPanel>
                 </Button>
-                <Button
-                    Command="{Binding DataContext.ShowAlarmCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}"
-                    Style="{StaticResource ToolbarButtonStyle}">
+                <Button Command="{Binding DataContext.ShowAlarmCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}" Style="{StaticResource ToolbarButtonStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="AlertOutline" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="0,0,8,0"
+                            Foreground="#2563EB"
+                            Kind="AlertOutline" />
                         <TextBlock VerticalAlignment="Center" Text="设备告警" />
                     </StackPanel>
                 </Button>
@@ -113,8 +193,9 @@
 
         <Border
             Grid.Row="1"
-            Margin="0,18,0,0"
-            Padding="22"
+            Height="260"
+            Margin="0,12,0,0"
+            Padding="16"
             Background="White"
             BorderBrush="#BFDBFE"
             BorderThickness="1"
@@ -127,26 +208,82 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0">
-                    <Border Width="60" Height="60" Background="{StaticResource PrimarySoftBrush}" CornerRadius="30">
-                        <materialDesign:PackIcon Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Kind="ViewDashboardOutline" />
+                    <Border
+                        Width="60"
+                        Height="60"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource PrimarySoftBrush}"
+                        CornerRadius="30">
+                        <materialDesign:PackIcon
+                            Width="30"
+                            Height="30"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource PrimaryBrush}"
+                            Kind="ViewDashboardOutline" />
                     </Border>
-                    <TextBlock Margin="0,18,0,0" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="{Binding State.BoardHeadline}" />
-                    <TextBlock Margin="0,10,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.BoardDescription}" TextWrapping="Wrap" />
+                    <TextBlock
+                        Margin="0,18,0,0"
+                        FontSize="24"
+                        FontWeight="Bold"
+                        Foreground="{StaticResource TextBrush}"
+                        Text="{Binding State.BoardHeadline}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        Foreground="{StaticResource MutedBrush}"
+                        Text="{Binding State.BoardDescription}"
+                        TextWrapping="Wrap" />
                 </StackPanel>
 
-                <Border Grid.Column="2" Padding="18" Background="#F8FBFF" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                <Border
+                    Grid.Column="2"
+                    Padding="18"
+                    Background="#F8FBFF"
+                    BorderBrush="{StaticResource BorderBrushSoft}"
+                    BorderThickness="1"
+                    CornerRadius="18">
                     <StackPanel>
-                        <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="最新未确认告警" />
-                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.AlarmSummary}" />
-                        <Border Margin="0,16,0,0" Padding="14" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="14">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextBrush}"
+                            Text="最新未确认告警" />
+                        <TextBlock
+                            Margin="0,8,0,0"
+                            Foreground="{StaticResource MutedBrush}"
+                            Text="{Binding State.AlarmSummary}" />
+                        <Border
+                            Margin="0,16,0,0"
+                            Padding="14"
+                            Background="#FEF2F2"
+                            BorderBrush="#FECACA"
+                            BorderThickness="1"
+                            CornerRadius="14">
                             <StackPanel>
-                                <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#B91C1C" Text="告警预览" />
-                                <TextBlock Margin="0,8,0,0" Foreground="#7F1D1D" Text="{Binding State.LatestAlarmPreview}" TextWrapping="Wrap" />
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Foreground="#B91C1C"
+                                    Text="告警预览" />
+                                <TextBlock
+                                    Margin="0,8,0,0"
+                                    Foreground="#7F1D1D"
+                                    Text="{Binding State.LatestAlarmPreview}"
+                                    TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
-                        <Button Margin="0,16,0,0" Command="{Binding RefreshAlarmsCommand}" Style="{StaticResource ToolbarButtonStyle}">
+                        <Button
+                            Margin="0,16,0,0"
+                            Command="{Binding RefreshAlarmsCommand}"
+                            Style="{StaticResource ToolbarButtonStyle}">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="Refresh" />
+                                <materialDesign:PackIcon
+                                    Width="16"
+                                    Height="16"
+                                    Margin="0,0,8,0"
+                                    Foreground="#2563EB"
+                                    Kind="Refresh" />
                                 <TextBlock VerticalAlignment="Center" Text="刷新告警摘要" />
                             </StackPanel>
                         </Button>
@@ -155,40 +292,84 @@
             </Grid>
         </Border>
 
-        <UniformGrid Grid.Row="2" Margin="0,18,0,0" Columns="4">
-            <Border Margin="0,0,12,0" Padding="16" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="16">
+        <UniformGrid
+            Grid.Row="2"
+            Margin="0,18,0,0"
+            Columns="4">
+            <Border
+                Margin="0,0,12,0"
+                Padding="16"
+                Background="#ECFDF5"
+                BorderBrush="#A7F3D0"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#065F46" Text="运行中" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#065F46" Text="{Binding State.RunningCount}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#065F46"
+                        Text="{Binding State.RunningCount}" />
                 </StackPanel>
             </Border>
-            <Border Margin="0,0,12,0" Padding="16" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="16">
+            <Border
+                Margin="0,0,12,0"
+                Padding="16"
+                Background="#FFFBEB"
+                BorderBrush="#FDE68A"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#92400E" Text="断连中" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#92400E" Text="{Binding State.DisconnectedCount}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#92400E"
+                        Text="{Binding State.DisconnectedCount}" />
                 </StackPanel>
             </Border>
-            <Border Margin="0,0,12,0" Padding="16" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="16">
+            <Border
+                Margin="0,0,12,0"
+                Padding="16"
+                Background="#FEF2F2"
+                BorderBrush="#FECACA"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#991B1B" Text="故障设备" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#991B1B" Text="{Binding State.FaultCount}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#991B1B"
+                        Text="{Binding State.FaultCount}" />
                 </StackPanel>
             </Border>
-            <Border Padding="16" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="16">
+            <Border
+                Padding="16"
+                Background="#EFF6FF"
+                BorderBrush="#BFDBFE"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#1D4ED8" Text="停用设备" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding State.DisabledCount}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#1D4ED8"
+                        Text="{Binding State.DisabledCount}" />
                 </StackPanel>
             </Border>
         </UniformGrid>
 
         <Grid Grid.Row="3" Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1.25*" />
+                <ColumnDefinition Width="1.4*" />
                 <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="1.25*" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1.1*" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Style="{StaticResource BoardCardStyle}">
@@ -198,60 +379,148 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel>
-                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="重点设备" />
-                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.AttentionSummary}" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Row="1" Margin="0,16,0,0">
-                        <ListBox Background="Transparent" BorderThickness="0" ItemsSource="{Binding State.AttentionDevices}" Visibility="{Binding State.HasAttentionDevices, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0,0,0,10" />
-                                    <Setter Property="BorderThickness" Value="0" />
-                                    <Setter Property="Background" Value="Transparent" />
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Padding="14" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="14">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding DeviceName}" />
-                                                <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding IpAddress}" />
-                                                <TextBlock Margin="0,8,0,0" Foreground="#475569">
-                                                    <Run Text="温度 " /><Run Text="{Binding Temperature}" />
-                                                    <Run Text=" / 压力 " /><Run Text="{Binding Pressure}" />
-                                                    <Run Text=" / 转速 " /><Run Text="{Binding Speed}" />
-                                                </TextBlock>
-                                            </StackPanel>
-                                            <Border Grid.Column="1" Padding="10,4" BorderThickness="1" CornerRadius="999">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="#FFFBEB" />
-                                                        <Setter Property="BorderBrush" Value="#FDE68A" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
-                                                                <Setter Property="Background" Value="#FEF2F2" />
-                                                                <Setter Property="BorderBrush" Value="#FECACA" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+                        <StackPanel Grid.Column="0">
+                            <TextBlock
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Foreground="{StaticResource TextBrush}"
+                                Text="待处理设备" />
+                            <TextBlock
+                                Margin="0,6,0,0"
+                                Foreground="{StaticResource MutedBrush}"
+                                Text="{Binding State.AttentionSummary}" />
+                        </StackPanel>
+
+                        <Border
+                            Grid.Column="1"
+                            Padding="12,6"
+                            Background="#EFF6FF"
+                            BorderBrush="#BFDBFE"
+                            BorderThickness="1"
+                            CornerRadius="999">
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="#1D4ED8"
+                                Text="{Binding State.AttentionDeviceCount, StringFormat='待处理 {0} 台'}" />
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,18,-6,0">
+                        <ScrollViewer
+                            Padding="0,0,6,0"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto"
+                            Visibility="{Binding State.HasAttentionDevices, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding State.SpotlightDevices}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource FocusCardStyle}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="6" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Border Width="6" CornerRadius="3">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="#FDE68A" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
+                                                                        <Setter Property="Background" Value="#FCA5A5" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+
+                                                    <StackPanel Grid.Column="1" Margin="14,0,18,0">
+                                                        <TextBlock
+                                                            FontSize="18"
+                                                            FontWeight="Bold"
+                                                            Foreground="{StaticResource TextBrush}"
+                                                            Text="{Binding DeviceName}" />
+                                                        <TextBlock
+                                                            Margin="0,6,0,0"
+                                                            Foreground="{StaticResource MutedBrush}"
+                                                            Text="{Binding LocationSummary}" />
+                                                        <TextBlock
+                                                            Margin="0,6,0,0"
+                                                            Foreground="{StaticResource MutedBrush}"
+                                                            Text="{Binding DeviceAddress, StringFormat='通信地址：{0}'}" />
+                                                        <WrapPanel Margin="0,12,0,0">
+                                                            <Border Style="{StaticResource InfoChipStyle}">
+                                                                <TextBlock Foreground="#475569" Text="{Binding CurrentOrderSummary}" />
+                                                            </Border>
+                                                            <Border Style="{StaticResource InfoChipStyle}">
+                                                                <TextBlock Foreground="#475569" Text="{Binding HeartbeatSummary}" />
+                                                            </Border>
+                                                        </WrapPanel>
+                                                        <TextBlock
+                                                            Margin="0,6,0,0"
+                                                            Foreground="{StaticResource MutedBrush}"
+                                                            Text="{Binding StateAgeSummary}" />
+                                                    </StackPanel>
+
+                                                    <Border Grid.Column="2" Style="{StaticResource StatusBadgeBorderStyle}">
+                                                        <TextBlock Style="{StaticResource StatusBadgeTextStyle}" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+                                                    </Border>
+                                                </Grid>
                                             </Border>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
 
-                        <Border Padding="22" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="16">
+                                <Border
+                                    Padding="16"
+                                    Background="#F8FBFF"
+                                    BorderBrush="#D7E3F4"
+                                    BorderThickness="1"
+                                    CornerRadius="16"
+                                    Visibility="{Binding State.HasSpotlightOverflow, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock
+                                                FontSize="15"
+                                                FontWeight="SemiBold"
+                                                Foreground="{StaticResource TextBrush}"
+                                                Text="{Binding State.SpotlightOverflowSummary}" />
+                                            <TextBlock
+                                                Margin="0,6,0,0"
+                                                Foreground="{StaticResource MutedBrush}"
+                                                Text="其余异常设备建议在设备管理页统一筛选处理。" />
+                                        </StackPanel>
+                                        <Button
+                                            Grid.Column="1"
+                                            Margin="16,0,0,0"
+                                            Command="{Binding DataContext.ShowManagementCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}"
+                                            Style="{StaticResource ToolbarButtonStyle}">
+                                            <TextBlock Text="前往管理" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <Border
+                            Padding="24"
+                            Background="{StaticResource CardSoftBgBrush}"
+                            BorderBrush="#E2EAF6"
+                            BorderThickness="1"
+                            CornerRadius="16">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Visible" />
@@ -263,11 +532,30 @@
                                 </Style>
                             </Border.Style>
                             <StackPanel VerticalAlignment="Center">
-                                <Border Width="52" Height="52" Background="#DBEAFE" CornerRadius="26">
-                                    <materialDesign:PackIcon Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="ShieldCheckOutline" />
+                                <Border
+                                    Width="54"
+                                    Height="54"
+                                    Background="#DBEAFE"
+                                    CornerRadius="27">
+                                    <materialDesign:PackIcon
+                                        Width="24"
+                                        Height="24"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="#2563EB"
+                                        Kind="ShieldCheckOutline" />
                                 </Border>
-                                <TextBlock Margin="0,16,0,0" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="当前无重点设备" />
-                                <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="发生断连或故障的设备会优先聚合到这里，便于快速定位。" TextWrapping="Wrap" />
+                                <TextBlock
+                                    Margin="0,16,0,0"
+                                    FontSize="18"
+                                    FontWeight="SemiBold"
+                                    Foreground="{StaticResource TextBrush}"
+                                    Text="当前没有待处理异常设备" />
+                                <TextBlock
+                                    Margin="0,8,0,0"
+                                    Foreground="{StaticResource MutedBrush}"
+                                    Text="断连和故障设备会优先进入这里，便于值班人员先处理最影响生产的设备。"
+                                    TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -281,63 +569,117 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel>
-                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="最近动态" />
-                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.RecentDeviceSummary}" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Row="1" Margin="0,16,0,0">
-                        <ListView Background="Transparent" BorderThickness="0" ItemsSource="{Binding State.RecentDevices}" Visibility="{Binding State.HasRecentDevices, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0,0,0,10" />
-                                    <Setter Property="BorderThickness" Value="0" />
-                                    <Setter Property="Background" Value="Transparent" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Padding="14" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="14">
-                                        <Grid>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Foreground="{StaticResource TextBrush}"
+                                Text="最近状态更新" />
+                            <TextBlock
+                                Margin="0,6,0,0"
+                                Foreground="{StaticResource MutedBrush}"
+                                Text="{Binding State.RecentDeviceSummary}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button
+                                Margin="0,0,8,0"
+                                Command="{Binding DataContext.ShowManagementCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}"
+                                Style="{StaticResource ToolbarButtonStyle}">
+                                <TextBlock Text="管理" />
+                            </Button>
+                            <Button Command="{Binding DataContext.ShowAlarmCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}" Style="{StaticResource ToolbarButtonStyle}">
+                                <TextBlock Text="告警" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,18,-6,0">
+                        <ScrollViewer
+                            Padding="0,0,6,0"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto"
+                            Visibility="{Binding State.HasRecentDevices, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ItemsControl ItemsSource="{Binding State.RecentDevices}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,14">
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="26" />
                                                 <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding DeviceName}" />
-                                                <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding LastUpdateTime, StringFormat='最近更新：{0:yyyy-MM-dd HH:mm:ss}'}" />
-                                            </StackPanel>
-                                            <Border Grid.Column="1" Padding="10,4" BorderThickness="1" CornerRadius="999">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="#ECFDF5" />
-                                                        <Setter Property="BorderBrush" Value="#A7F3D0" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disconnected}">
-                                                                <Setter Property="Background" Value="#FFFBEB" />
-                                                                <Setter Property="BorderBrush" Value="#FDE68A" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Fault}">
-                                                                <Setter Property="Background" Value="#FEF2F2" />
-                                                                <Setter Property="BorderBrush" Value="#FECACA" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding DeviceState}" Value="{x:Static state:DeviceState.Disabled}">
-                                                                <Setter Property="Background" Value="#F3F4F6" />
-                                                                <Setter Property="BorderBrush" Value="#D1D5DB" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+
+                                            <Grid Grid.Column="0" HorizontalAlignment="Center">
+                                                <Border
+                                                    Width="2"
+                                                    Margin="0,14,0,0"
+                                                    Background="#D7E3F4" />
+                                                <Border
+                                                    Width="10"
+                                                    Height="10"
+                                                    Margin="0,8,0,0"
+                                                    Background="#2563EB"
+                                                    CornerRadius="5" />
+                                            </Grid>
+
+                                            <Border
+                                                Grid.Column="1"
+                                                Padding="16"
+                                                Background="{StaticResource CardSoftBgBrush}"
+                                                BorderBrush="#E2EAF6"
+                                                BorderThickness="1"
+                                                CornerRadius="16">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                                        <TextBlock
+                                                            FontSize="17"
+                                                            FontWeight="Bold"
+                                                            Foreground="{StaticResource TextBrush}"
+                                                            Text="{Binding DeviceName}" />
+                                                        <TextBlock
+                                                            Margin="0,6,0,0"
+                                                            Foreground="{StaticResource MutedBrush}"
+                                                            Text="{Binding LocationSummary}" />
+                                                        <WrapPanel Margin="0,8,0,0">
+                                                            <Border Style="{StaticResource InfoChipStyle}">
+                                                                <TextBlock Foreground="#475569" Text="{Binding StateAgeSummary}" />
+                                                            </Border>
+                                                            <Border Style="{StaticResource InfoChipStyle}">
+                                                                <TextBlock Foreground="#475569" Text="{Binding HeartbeatSummary}" />
+                                                            </Border>
+                                                        </WrapPanel>
+                                                        <TextBlock
+                                                            Margin="0,2,0,0"
+                                                            Foreground="#475569"
+                                                            Text="{Binding CurrentOrderSummary}" />
+                                                    </StackPanel>
+                                                    <Border Grid.Column="1" Style="{StaticResource StatusBadgeBorderStyle}">
+                                                        <TextBlock Style="{StaticResource StatusBadgeTextStyle}" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+                                                    </Border>
+                                                </Grid>
                                             </Border>
                                         </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
 
-                        <Border Padding="22" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="16">
+                        <Border
+                            Padding="24"
+                            Background="{StaticResource CardSoftBgBrush}"
+                            BorderBrush="#E2EAF6"
+                            BorderThickness="1"
+                            CornerRadius="16">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Visible" />
@@ -349,46 +691,36 @@
                                 </Style>
                             </Border.Style>
                             <StackPanel VerticalAlignment="Center">
-                                <Border Width="52" Height="52" Background="#DBEAFE" CornerRadius="26">
-                                    <materialDesign:PackIcon Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="Pulse" />
+                                <Border
+                                    Width="54"
+                                    Height="54"
+                                    Background="#DBEAFE"
+                                    CornerRadius="27">
+                                    <materialDesign:PackIcon
+                                        Width="24"
+                                        Height="24"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="#2563EB"
+                                        Kind="Pulse" />
                                 </Border>
-                                <TextBlock Margin="0,16,0,0" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="等待实时数据" />
-                                <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="设备开始推送状态后，这里会按最新更新时间展示动态。" TextWrapping="Wrap" />
+                                <TextBlock
+                                    Margin="0,16,0,0"
+                                    FontSize="18"
+                                    FontWeight="SemiBold"
+                                    Foreground="{StaticResource TextBrush}"
+                                    Text="等待状态刷新" />
+                                <TextBlock
+                                    Margin="0,8,0,0"
+                                    Foreground="{StaticResource MutedBrush}"
+                                    Text="设备开始产生通信记录或状态变化后，这里会按最近更新时间展示最新动态。"
+                                    TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
                     </Grid>
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Column="4">
-                <Border Margin="0,0,0,16" Padding="16" Background="{StaticResource CardSoftBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
-                    <StackPanel>
-                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="快捷入口" />
-                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="常用设备操作集中在这里，减少切页成本。" />
-                        <Button Margin="0,16,0,0" Command="{Binding DataContext.ShowManagementCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}" Style="{StaticResource ToolbarButtonStyle}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="CogOutline" />
-                                <TextBlock VerticalAlignment="Center" Text="打开设备管理" />
-                            </StackPanel>
-                        </Button>
-                        <Button Margin="0,10,0,0" Command="{Binding DataContext.ShowAlarmCommand, RelativeSource={RelativeSource AncestorType={x:Type controls:DeviceShellView}}}" Style="{StaticResource ToolbarButtonStyle}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="BellOutline" />
-                                <TextBlock VerticalAlignment="Center" Text="打开设备告警" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Border>
-
-                <Border Padding="16" Background="{StaticResource CardSoftBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
-                    <StackPanel>
-                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="处理建议" />
-                        <TextBlock Margin="0,14,0,0" Foreground="{StaticResource TextBrush}" Text="1. 优先处理故障和断连设备，避免异常扩大。" TextWrapping="Wrap" />
-                        <TextBlock Margin="0,10,0,0" Foreground="{StaticResource TextBrush}" Text="2. 管理页用于统一做筛选、启停、编辑和分页浏览。" TextWrapping="Wrap" />
-                        <TextBlock Margin="0,10,0,0" Foreground="{StaticResource TextBrush}" Text="3. 告警页适合批量确认和按级别追踪未处理告警。" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

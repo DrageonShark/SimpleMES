@@ -27,9 +27,9 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 
         public string SeverityText => Severity switch
         {
-            DeviceAlarmSeverity.Critical => "\u4e25\u91cd",
-            DeviceAlarmSeverity.Warning => "\u544a\u8b66",
-            _ => "\u63d0\u9192"
+            DeviceAlarmSeverity.Critical => "严重",
+            DeviceAlarmSeverity.Warning => "告警",
+            _ => "提醒"
         };
     }
 }

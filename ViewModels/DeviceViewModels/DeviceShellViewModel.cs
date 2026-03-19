@@ -37,15 +37,15 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             {
                 case DeviceModulePage.Board:
                     CurrentChild = _boardViewModel;
-                    PageTitle = "\u8bbe\u5907\u770b\u677f";
+                    PageTitle = "设备看板";
                     break;
                 case DeviceModulePage.Management:
                     CurrentChild = _managementViewModel;
-                    PageTitle = "\u8bbe\u5907\u7ba1\u7406";
+                    PageTitle = "设备管理";
                     break;
                 case DeviceModulePage.Alarm:
                     CurrentChild = _alarmViewModel;
-                    PageTitle = "\u8bbe\u5907\u544a\u8b66";
+                    PageTitle = "设备告警";
                     break;
             }
         }

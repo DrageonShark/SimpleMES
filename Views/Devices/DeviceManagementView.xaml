@@ -72,6 +72,15 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="InfoChipStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,8,8" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#D7E3F4" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="999" />
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="24" Background="{StaticResource PageBgBrush}">
@@ -90,20 +99,43 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="设备管理" />
-                <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.DeviceOverviewSummary}" />
+                <TextBlock
+                    FontSize="26"
+                    FontWeight="Bold"
+                    Foreground="{StaticResource TextBrush}"
+                    Text="设备管理" />
+                <TextBlock
+                    Margin="0,6,0,0"
+                    Foreground="{StaticResource MutedBrush}"
+                    Text="{Binding State.DeviceOverviewSummary}" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Margin="0,0,10,0" Command="{Binding ResetFiltersCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                <Button
+                    Margin="0,0,10,0"
+                    Command="{Binding ResetFiltersCommand}"
+                    Style="{StaticResource OutlinedButtonStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="FilterOffOutline" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="0,0,8,0"
+                            Foreground="#2563EB"
+                            Kind="FilterOffOutline" />
                         <TextBlock VerticalAlignment="Center" Text="重置筛选" />
                     </StackPanel>
                 </Button>
-                <Button Margin="0,0,10,0" Command="{Binding RefreshViewCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                <Button
+                    Margin="0,0,10,0"
+                    Command="{Binding RefreshViewCommand}"
+                    Style="{StaticResource OutlinedButtonStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="Refresh" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="0,0,8,0"
+                            Foreground="#2563EB"
+                            Kind="Refresh" />
                         <TextBlock VerticalAlignment="Center" Text="刷新视图" />
                     </StackPanel>
                 </Button>
@@ -112,41 +144,99 @@
                     Style="{StaticResource PrimaryButtonStyle}"
                     Visibility="{Binding Actions.CanAddDevicePermission, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="White" Kind="PlusCircleOutline" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="0,0,8,0"
+                            Foreground="White"
+                            Kind="PlusCircleOutline" />
                         <TextBlock VerticalAlignment="Center" Text="新增设备" />
                     </StackPanel>
                 </Button>
             </StackPanel>
         </Grid>
 
-        <UniformGrid Grid.Row="1" Margin="0,18,0,0" Columns="4">
-            <Border Margin="0,0,12,0" Padding="16" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="16">
+        <UniformGrid
+            Grid.Row="1"
+            Margin="0,18,0,0"
+            Columns="4">
+            <Border
+                Margin="0,0,12,0"
+                Padding="16"
+                Background="#ECFDF5"
+                BorderBrush="#A7F3D0"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#065F46" Text="运行中" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#065F46" Text="{Binding State.RunningCount}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#065F46"
+                        Text="{Binding State.RunningCount}" />
                 </StackPanel>
             </Border>
-            <Border Margin="0,0,12,0" Padding="16" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="16">
+            <Border
+                Margin="0,0,12,0"
+                Padding="16"
+                Background="#FFFBEB"
+                BorderBrush="#FDE68A"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#92400E" Text="断连中" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#92400E" Text="{Binding State.DisconnectedCount}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#92400E"
+                        Text="{Binding State.DisconnectedCount}" />
                 </StackPanel>
             </Border>
-            <Border Margin="0,0,12,0" Padding="16" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="16">
+            <Border
+                Margin="0,0,12,0"
+                Padding="16"
+                Background="#FEF2F2"
+                BorderBrush="#FECACA"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#991B1B" Text="故障设备" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#991B1B" Text="{Binding State.FaultCount}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#991B1B"
+                        Text="{Binding State.FaultCount}" />
                 </StackPanel>
             </Border>
-            <Border Padding="16" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="16">
+            <Border
+                Padding="16"
+                Background="#EFF6FF"
+                BorderBrush="#BFDBFE"
+                BorderThickness="1"
+                CornerRadius="16">
                 <StackPanel>
                     <TextBlock Foreground="#1D4ED8" Text="筛选结果" />
-                    <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding State.FilteredDeviceDto.Count}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="#1D4ED8"
+                        Text="{Binding State.FilteredDeviceDto.Count}" />
                 </StackPanel>
             </Border>
         </UniformGrid>
 
-        <Border Grid.Row="2" Margin="0,18,0,0" Padding="18" Background="{StaticResource CardBgBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+        <Border
+            Grid.Row="2"
+            Margin="0,18,0,0"
+            Padding="18"
+            Background="{StaticResource CardBgBrush}"
+            BorderBrush="{StaticResource BorderBrushSoft}"
+            BorderThickness="1"
+            CornerRadius="18">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -165,8 +255,19 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Foreground="{StaticResource MutedBrush}" Text="搜索设备" />
                         <DockPanel Margin="0,6,0,0">
-                            <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
-                                <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="Magnify" />
+                            <Border
+                                Width="36"
+                                Height="36"
+                                Margin="0,0,8,0"
+                                Background="#DBEAFE"
+                                CornerRadius="10">
+                                <materialDesign:PackIcon
+                                    Width="18"
+                                    Height="18"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="#2563EB"
+                                    Kind="Magnify" />
                             </Border>
                             <TextBox Height="36" Text="{Binding State.SearchKeyword, UpdateSourceTrigger=PropertyChanged}" />
                         </DockPanel>
@@ -175,16 +276,34 @@
                     <StackPanel Grid.Column="2">
                         <TextBlock Foreground="{StaticResource MutedBrush}" Text="状态筛选" />
                         <DockPanel Margin="0,6,0,0">
-                            <Border Width="36" Height="36" Margin="0,0,8,0" Background="#DBEAFE" CornerRadius="10">
-                                <materialDesign:PackIcon Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="TuneVariant" />
+                            <Border
+                                Width="36"
+                                Height="36"
+                                Margin="0,0,8,0"
+                                Background="#DBEAFE"
+                                CornerRadius="10">
+                                <materialDesign:PackIcon
+                                    Width="18"
+                                    Height="18"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="#2563EB"
+                                    Kind="TuneVariant" />
                             </Border>
-                            <ComboBox Height="36" ItemsSource="{Binding State.StateFilterOptions}" SelectedItem="{Binding State.StateFilter, Mode=TwoWay}" />
+                            <ComboBox
+                                Height="36"
+                                ItemsSource="{Binding State.StateFilterOptions}"
+                                SelectedItem="{Binding State.StateFilter, Mode=TwoWay}" />
                         </DockPanel>
                     </StackPanel>
 
                     <StackPanel Grid.Column="4">
                         <TextBlock Foreground="{StaticResource MutedBrush}" Text="每页显示" />
-                        <ComboBox Height="36" Margin="0,6,0,0" ItemsSource="{Binding PageSizeOptions}" SelectedItem="{Binding PageSize, Mode=TwoWay}" />
+                        <ComboBox
+                            Height="36"
+                            Margin="0,6,0,0"
+                            ItemsSource="{Binding PageSizeOptions}"
+                            SelectedItem="{Binding PageSize, Mode=TwoWay}" />
                     </StackPanel>
                 </Grid>
 
@@ -194,13 +313,31 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="{Binding VisibleRangeSummary}" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{StaticResource MutedBrush}"
+                        Text="{Binding VisibleRangeSummary}" />
 
                     <WrapPanel Grid.Column="1">
-                        <Button Margin="0,0,8,0" Command="{Binding FilterAllCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="全部" />
-                        <Button Margin="0,0,8,0" Command="{Binding FilterRunningCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="运行中" />
-                        <Button Margin="0,0,8,0" Command="{Binding FilterDisconnectedCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="断连" />
-                        <Button Command="{Binding FilterFaultCommand}" Style="{StaticResource OutlinedButtonStyle}" Content="故障" />
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding FilterAllCommand}"
+                            Content="全部"
+                            Style="{StaticResource OutlinedButtonStyle}" />
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding FilterRunningCommand}"
+                            Content="运行中"
+                            Style="{StaticResource OutlinedButtonStyle}" />
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding FilterDisconnectedCommand}"
+                            Content="断连"
+                            Style="{StaticResource OutlinedButtonStyle}" />
+                        <Button
+                            Command="{Binding FilterFaultCommand}"
+                            Content="故障"
+                            Style="{StaticResource OutlinedButtonStyle}" />
                     </WrapPanel>
                 </Grid>
             </Grid>
@@ -233,12 +370,26 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding DeviceName}" />
-                                            <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding IpAddress}" />
-                                            <TextBlock Margin="0,2,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding SerialPort}" />
+                                            <TextBlock
+                                                FontSize="16"
+                                                FontWeight="SemiBold"
+                                                Foreground="{StaticResource TextBrush}"
+                                                Text="{Binding DeviceName}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                Foreground="{StaticResource MutedBrush}"
+                                                Text="{Binding LocationSummary}" />
+                                            <TextBlock
+                                                Margin="0,2,0,0"
+                                                Foreground="{StaticResource MutedBrush}"
+                                                Text="{Binding DeviceAddress, StringFormat='通信地址：{0}'}" />
                                         </StackPanel>
 
-                                        <Border Grid.Column="1" Padding="10,4" BorderThickness="1" CornerRadius="999">
+                                        <Border
+                                            Grid.Column="1"
+                                            Padding="10,4"
+                                            BorderThickness="1"
+                                            CornerRadius="999">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#ECFDF5" />
@@ -259,36 +410,25 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                FontSize="12"
+                                                FontWeight="SemiBold"
+                                                Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
                                         </Border>
                                     </Grid>
 
-                                    <Grid Grid.Row="1" Margin="0,14,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <Border Grid.Column="0" Margin="0,0,6,0" Padding="10" Background="#EFF6FF" CornerRadius="12">
-                                            <StackPanel>
-                                                <TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Text="温度 (℃)" />
-                                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding Temperature}" />
-                                            </StackPanel>
+                                    <WrapPanel Grid.Row="1" Margin="0,14,0,0">
+                                        <Border Style="{StaticResource InfoChipStyle}">
+                                            <TextBlock Foreground="#475569" Text="{Binding CurrentOrderSummary}" />
                                         </Border>
-                                        <Border Grid.Column="1" Margin="0,0,6,0" Padding="10" Background="#FFFBEB" CornerRadius="12">
-                                            <StackPanel>
-                                                <TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Text="压力 (Bar)" />
-                                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="#B45309" Text="{Binding Pressure}" />
-                                            </StackPanel>
+                                        <Border Style="{StaticResource InfoChipStyle}">
+                                            <TextBlock Foreground="#475569" Text="{Binding HeartbeatSummary}" />
                                         </Border>
-                                        <Border Grid.Column="2" Padding="10" Background="#FEF2F2" CornerRadius="12">
-                                            <StackPanel>
-                                                <TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Text="转速 (Rpm)" />
-                                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="#991B1B" Text="{Binding Speed}" />
-                                            </StackPanel>
+                                        <Border Style="{StaticResource InfoChipStyle}">
+                                            <TextBlock Foreground="#475569" Text="{Binding StateAgeSummary}" />
                                         </Border>
-                                    </Grid>
+                                    </WrapPanel>
 
                                     <Grid Grid.Row="2" Margin="0,14,0,0">
                                         <Grid.ColumnDefinitions>
@@ -304,7 +444,12 @@
                                             Style="{StaticResource OutlinedButtonStyle}"
                                             Visibility="{Binding DataContext.Actions.CanEditDevicePermission, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <StackPanel Orientation="Horizontal">
-                                                <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="PencilOutline" />
+                                                <materialDesign:PackIcon
+                                                    Width="16"
+                                                    Height="16"
+                                                    Margin="0,0,8,0"
+                                                    Foreground="#2563EB"
+                                                    Kind="PencilOutline" />
                                                 <TextBlock VerticalAlignment="Center" Text="编辑设备" />
                                             </StackPanel>
                                         </Button>
@@ -344,7 +489,12 @@
                                         </Button>
                                     </Grid>
 
-                                    <TextBlock Grid.Row="3" Margin="0,12,0,0" HorizontalAlignment="Right" Foreground="{StaticResource MutedBrush}" Text="{Binding LastUpdateTime, StringFormat='最后更新：{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                    <TextBlock
+                                        Grid.Row="3"
+                                        Margin="0,12,0,0"
+                                        HorizontalAlignment="Right"
+                                        Foreground="{StaticResource MutedBrush}"
+                                        Text="{Binding DeviceType, StringFormat='设备类型：{0}'}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -352,7 +502,12 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <Border Padding="28" Background="{StaticResource CardSoftBgBrush}" BorderBrush="#E2EAF6" BorderThickness="1" CornerRadius="18">
+            <Border
+                Padding="28"
+                Background="{StaticResource CardSoftBgBrush}"
+                BorderBrush="#E2EAF6"
+                BorderThickness="1"
+                CornerRadius="18">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Visibility" Value="Visible" />
@@ -364,11 +519,31 @@
                     </Style>
                 </Border.Style>
                 <StackPanel VerticalAlignment="Center">
-                    <Border Width="56" Height="56" HorizontalAlignment="Left" Background="#DBEAFE" CornerRadius="28">
-                        <materialDesign:PackIcon Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#2563EB" Kind="Chip" />
+                    <Border
+                        Width="56"
+                        Height="56"
+                        HorizontalAlignment="Left"
+                        Background="#DBEAFE"
+                        CornerRadius="28">
+                        <materialDesign:PackIcon
+                            Width="28"
+                            Height="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Foreground="#2563EB"
+                            Kind="Chip" />
                     </Border>
-                    <TextBlock Margin="0,18,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding State.ManagementEmptyTitle}" />
-                    <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.ManagementEmptyDescription}" TextWrapping="Wrap" />
+                    <TextBlock
+                        Margin="0,18,0,0"
+                        FontSize="20"
+                        FontWeight="SemiBold"
+                        Foreground="{StaticResource TextBrush}"
+                        Text="{Binding State.ManagementEmptyTitle}" />
+                    <TextBlock
+                        Margin="0,8,0,0"
+                        Foreground="{StaticResource MutedBrush}"
+                        Text="{Binding State.ManagementEmptyDescription}"
+                        TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
         </Grid>
@@ -379,19 +554,35 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="{Binding PagingSummary}" />
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{StaticResource MutedBrush}"
+                Text="{Binding PagingSummary}" />
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Margin="0,0,10,0" Command="{Binding PreviousPageCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                <Button
+                    Margin="0,0,10,0"
+                    Command="{Binding PreviousPageCommand}"
+                    Style="{StaticResource OutlinedButtonStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="0,0,8,0" Foreground="#2563EB" Kind="ChevronLeft" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="0,0,8,0"
+                            Foreground="#2563EB"
+                            Kind="ChevronLeft" />
                         <TextBlock VerticalAlignment="Center" Text="上一页" />
                     </StackPanel>
                 </Button>
                 <Button Command="{Binding NextPageCommand}" Style="{StaticResource OutlinedButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center" Text="下一页" />
-                        <materialDesign:PackIcon Width="16" Height="16" Margin="8,0,0,0" Foreground="#2563EB" Kind="ChevronRight" />
+                        <materialDesign:PackIcon
+                            Width="16"
+                            Height="16"
+                            Margin="8,0,0,0"
+                            Foreground="#2563EB"
+                            Kind="ChevronRight" />
                     </StackPanel>
                 </Button>
             </StackPanel>

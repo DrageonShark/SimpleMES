@@ -7,7 +7,7 @@ namespace SimpleMES.Services.State
     {
         public string Name => "Running";
 
-        public async Task<IDeviceState> HandleAsync(DeviceModel device, DevicePollResult result, IDataRepository repository,
+        public async Task<IDeviceState> HandleAsync(MonitoredDeviceModel device, DevicePollResult result, IDataRepository repository,
             CancellationToken token = default)
         {
             if (!result.IsSuccess)
@@ -23,14 +23,14 @@ namespace SimpleMES.Services.State
 
                 var next = new FaultState(result.Exception?.Message);
                 await repository.UpdateDeviceStateAsync(device.DeviceId, next.Name, result.OccurredAt);
-                device.DeviceState = next.Name;
-                device.LastUpdateTime = result.OccurredAt;
+                device.Runtime.DeviceState = next.Name;
+                device.Runtime.LastUpdateTime = result.OccurredAt;
                 return next;
             }
 
 
-            device.DeviceState = Name;
-            device.LastUpdateTime = result.OccurredAt;
+            device.Runtime.DeviceState = Name;
+            device.Runtime.LastUpdateTime = result.OccurredAt;
             await repository.UpdateDeviceStateAsync(device.DeviceId, Name, result.OccurredAt);
             return this;
         }

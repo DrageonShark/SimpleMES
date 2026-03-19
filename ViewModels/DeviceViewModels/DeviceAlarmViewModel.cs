@@ -9,7 +9,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 {
     public partial class DeviceAlarmViewModel : DialogViewModelBase, IDisposable
     {
-        private const string AllSeverityFilter = "\u5168\u90e8";
+        private const string AllSeverityFilter = "全部";
         private readonly IDeviceWorkspaceActions _actions;
 
         [ObservableProperty]
@@ -22,14 +22,14 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         {
             State = state;
             _actions = actions;
-            PageTitle = "\u8bbe\u5907\u544a\u8b66";
+            PageTitle = "设备告警";
 
             SeverityFilterOptions = new[]
             {
                 AllSeverityFilter,
-                "\u4e25\u91cd",
-                "\u544a\u8b66",
-                "\u63d0\u9192"
+                "严重",
+                "告警",
+                "提醒"
             };
 
             State.PendingAlarms.CollectionChanged += OnPendingAlarmsChanged;
@@ -50,20 +50,20 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 
         public string FilteredAlarmSummary =>
             HasActiveFilters
-                ? $"\u7b5b\u9009\u540e {VisibleAlarms.Count} \u6761\u672a\u786e\u8ba4\u544a\u8b66"
+                ? $"筛选后 {VisibleAlarms.Count} 条未确认告警"
                 : State.AlarmSummary;
 
         public string EmptyStateTitle =>
             State.HasPendingAlarms
-                ? "\u5f53\u524d\u7b5b\u9009\u4e0b\u6682\u65e0\u544a\u8b66"
-                : "\u5f53\u524d\u6ca1\u6709\u672a\u786e\u8ba4\u544a\u8b66";
+                ? "当前筛选下暂无告警"
+                : "当前没有未确认告警";
 
         public string EmptyStateDescription =>
             State.HasPendingAlarms
-                ? "\u8c03\u6574\u5173\u952e\u5b57\u6216\u7ea7\u522b\u7b5b\u9009\u540e\u518d\u8bd5\u3002"
-                : "\u8bbe\u5907\u544a\u8b66\u4f1a\u96c6\u4e2d\u663e\u793a\u5728\u8fd9\u91cc\uff0c\u4fbf\u4e8e\u7edf\u4e00\u786e\u8ba4\u3001\u8ddf\u8fdb\u548c\u540e\u7eed\u6269\u5c55\u5386\u53f2\u544a\u8b66\u3002";
+                ? "调整关键字或级别筛选后再试。"
+                : "设备告警会集中显示在这里，便于统一确认、跟进和后续扩展历史告警。";
 
-        public string HistoryEntryText => "\u5386\u53f2\u544a\u8b66\u5165\u53e3\u5f85\u540e\u7eed\u63a5\u5165";
+        public string HistoryEntryText => "历史告警入口待后续接入";
 
         partial void OnSearchKeywordChanged(string value)
         {
@@ -169,9 +169,9 @@ namespace SimpleMES.ViewModels.DeviceViewModels
 
             return SeverityFilter switch
             {
-                "\u4e25\u91cd" => ResolveSeverity(alarm) == DeviceAlarmSeverity.Critical,
-                "\u544a\u8b66" => ResolveSeverity(alarm) == DeviceAlarmSeverity.Warning,
-                "\u63d0\u9192" => ResolveSeverity(alarm) == DeviceAlarmSeverity.Notice,
+                "严重" => ResolveSeverity(alarm) == DeviceAlarmSeverity.Critical,
+                "告警" => ResolveSeverity(alarm) == DeviceAlarmSeverity.Warning,
+                "提醒" => ResolveSeverity(alarm) == DeviceAlarmSeverity.Notice,
                 _ => true
             };
         }
@@ -180,12 +180,12 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         {
             var message = alarm.AlarmMessage ?? string.Empty;
 
-            if (ContainsAny(message, "\u7d27\u6025", "\u6025\u505c", "\u6545\u969c", "\u505c\u673a", "\u5371\u9669", "\u4e25\u91cd"))
+            if (ContainsAny(message, "紧急", "急停", "故障", "停机", "危险", "严重"))
             {
                 return DeviceAlarmSeverity.Critical;
             }
 
-            if (ContainsAny(message, "\u62a5\u8b66", "\u544a\u8b66", "\u5f02\u5e38", "\u8d85\u9650", "\u65ad\u8fde", "\u5931\u8d25"))
+            if (ContainsAny(message, "报警", "告警", "异常", "超限", "断连", "失败"))
             {
                 return DeviceAlarmSeverity.Warning;
             }

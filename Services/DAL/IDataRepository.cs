@@ -36,7 +36,7 @@ namespace SimpleMES.Services.DAL
         /// <summary>
         /// 获取所有设备
         /// </summary>
-        Task<IEnumerable<DeviceModel>> GetAllDevicesAsync();
+        Task<IEnumerable<MonitoredDeviceModel>> GetAllDevicesAsync();
         /// <summary>
         /// 更新设备状态
         /// </summary>
