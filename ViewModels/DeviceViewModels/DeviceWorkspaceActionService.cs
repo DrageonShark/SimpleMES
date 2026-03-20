@@ -280,6 +280,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 });
 
                 device.DeviceState = toEnable ? Services.State.DeviceState.Disconnected : Services.State.DeviceState.Disabled;
+                device.IsEnabled = toEnable;
                 device.LastUpdateTime = updateTime;
                 if (!toEnable)
                 {
@@ -288,16 +289,41 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     device.Speed = 0;
                 }
 
-                var changed = new DeviceModel
+                var masterDevice = (await _repository.GetAllDevicesAsync())
+                    .FirstOrDefault(item => item.DeviceId == device.DeviceId)?
+                    .Device;
+
+                var changed = masterDevice ?? new DeviceModel
                 {
                     DeviceId = device.DeviceId,
                     DeviceName = device.DeviceName,
+                    DeviceCode = device.DeviceCode,
+                    DeviceType = device.DeviceType,
                     IpAddress = device.IpAddress,
                     Port = device.Port,
                     SerialPort = device.SerialPort,
                     SlaveId = device.SlaveId,
-                    IsEnabled = toEnable
+                    WorkshopName = device.WorkshopName,
+                    LineName = device.LineName,
+                    StationName = device.StationName,
+                    IsEnabled = toEnable,
+                    Criticality = device.Criticality,
+                    SortOrder = device.SortOrder,
+                    Remark = device.Remark
                 };
+
+                device.DeviceCode = changed.DeviceCode;
+                device.DeviceType = changed.DeviceType;
+                device.IpAddress = changed.IpAddress;
+                device.Port = changed.Port;
+                device.SerialPort = changed.SerialPort;
+                device.SlaveId = changed.SlaveId;
+                device.WorkshopName = changed.WorkshopName;
+                device.LineName = changed.LineName;
+                device.StationName = changed.StationName;
+                device.Criticality = changed.Criticality;
+                device.SortOrder = changed.SortOrder;
+                device.Remark = changed.Remark;
 
                 _configNotifier.NotifyConfigChanged(changed, toEnable ? ConfigChangeType.Enabled : ConfigChangeType.Disabled);
                 _workspaceState.RefreshDeviceFilter();

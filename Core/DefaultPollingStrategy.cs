@@ -27,13 +27,15 @@ namespace SimpleMES.Core
                     DeviceId = device.DeviceId,
                     DeviceName = device.DeviceName,
                     IpAddress = device.IpAddress,
+                    Port = device.Port,
                     SerialPort = device.SerialPort,
+                    SlaveId = device.SlaveId,
                     Temperature = temp,
                     Pressure = press,
                     Speed = speed,
-                        DeviceState = Enum.Parse<DeviceState>(device.Runtime.DeviceState, true),
-                        LastUpdateTime = occurredAt
-                    };
+                    DeviceState = Enum.Parse<DeviceState>(device.Runtime.DeviceState, true),
+                    LastUpdateTime = occurredAt
+                };
                 PersistCallback persist = async (IDataRepository repository, CancellationToken ct) =>
                 {
                     await repository.InsertProductionRecordAsync(new ProductionRecordModel

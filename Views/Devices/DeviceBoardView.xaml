@@ -61,7 +61,8 @@
         </Style>
 
         <Style x:Key="StatusBadgeBorderStyle" TargetType="Border">
-            <Setter Property="MinWidth" Value="86" />
+            <Setter Property="MinWidth" Value="50" />
+            <Setter Property="Height" Value="50" />
             <Setter Property="Padding" Value="12,8" />
             <Setter Property="Background" Value="#ECFDF5" />
             <Setter Property="BorderBrush" Value="#A7F3D0" />
@@ -308,33 +309,99 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="状态统计" />
-                    <TextBlock Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" Text="{Binding State.DeviceOverviewSummary}" />
+                    <TextBlock
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Foreground="{StaticResource TextBrush}"
+                        Text="状态统计" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Foreground="{StaticResource MutedBrush}"
+                        Text="{Binding State.DeviceOverviewSummary}" />
                 </StackPanel>
 
-                <WrapPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Border Margin="0,0,10,6" Padding="12,8" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="999">
+                <WrapPanel
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center">
+                    <Border
+                        Margin="0,0,10,6"
+                        Padding="12,8"
+                        Background="#ECFDF5"
+                        BorderBrush="#A7F3D0"
+                        BorderThickness="1"
+                        CornerRadius="999">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#065F46" Text="运行中" />
-                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#065F46" Text="{Binding State.RunningCount}" />
+                            <TextBlock
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                Foreground="#065F46"
+                                Text="运行中" />
+                            <TextBlock
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Foreground="#065F46"
+                                Text="{Binding State.RunningCount}" />
                         </StackPanel>
                     </Border>
-                    <Border Margin="0,0,10,6" Padding="12,8" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="999">
+                    <Border
+                        Margin="0,0,10,6"
+                        Padding="12,8"
+                        Background="#FFFBEB"
+                        BorderBrush="#FDE68A"
+                        BorderThickness="1"
+                        CornerRadius="999">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#92400E" Text="断连中" />
-                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#92400E" Text="{Binding State.DisconnectedCount}" />
+                            <TextBlock
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                Foreground="#92400E"
+                                Text="断连中" />
+                            <TextBlock
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Foreground="#92400E"
+                                Text="{Binding State.DisconnectedCount}" />
                         </StackPanel>
                     </Border>
-                    <Border Margin="0,0,10,6" Padding="12,8" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="999">
+                    <Border
+                        Margin="0,0,10,6"
+                        Padding="12,8"
+                        Background="#FEF2F2"
+                        BorderBrush="#FECACA"
+                        BorderThickness="1"
+                        CornerRadius="999">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#991B1B" Text="故障设备" />
-                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#991B1B" Text="{Binding State.FaultCount}" />
+                            <TextBlock
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                Foreground="#991B1B"
+                                Text="故障设备" />
+                            <TextBlock
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Foreground="#991B1B"
+                                Text="{Binding State.FaultCount}" />
                         </StackPanel>
                     </Border>
-                    <Border Margin="0,0,0,6" Padding="12,8" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="999">
+                    <Border
+                        Margin="0,0,0,6"
+                        Padding="12,8"
+                        Background="#EFF6FF"
+                        BorderBrush="#BFDBFE"
+                        BorderThickness="1"
+                        CornerRadius="999">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#1D4ED8" Text="停用设备" />
-                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#1D4ED8" Text="{Binding State.DisabledCount}" />
+                            <TextBlock
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                Foreground="#1D4ED8"
+                                Text="停用设备" />
+                            <TextBlock
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Foreground="#1D4ED8"
+                                Text="{Binding State.DisabledCount}" />
                         </StackPanel>
                     </Border>
                 </WrapPanel>
@@ -381,6 +448,7 @@
                             BorderThickness="1"
                             CornerRadius="999">
                             <TextBlock
+                                VerticalAlignment="Center"
                                 FontSize="12"
                                 FontWeight="SemiBold"
                                 Foreground="#1D4ED8"
@@ -448,7 +516,10 @@
                                                     </StackPanel>
 
                                                     <Border Grid.Column="2" Style="{StaticResource StatusBadgeBorderStyle}">
-                                                        <TextBlock Style="{StaticResource StatusBadgeTextStyle}" Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
+                                                        <TextBlock
+                                                            VerticalAlignment="Center"
+                                                            Style="{StaticResource StatusBadgeTextStyle}"
+                                                            Text="{Binding DeviceState, Converter={StaticResource DeviceStateConverter}}" />
                                                     </Border>
                                                 </Grid>
                                             </Border>
@@ -644,7 +715,13 @@
                                                             Foreground="#475569"
                                                             Text="{Binding ResolutionSummary}" />
                                                     </StackPanel>
-                                                    <Border Grid.Column="1" Padding="12,8" BorderThickness="1" CornerRadius="999">
+                                                    <Border
+                                                        Grid.Column="1"
+                                                        Width="50"
+                                                        Height="50"
+                                                        Padding="12,8"
+                                                        BorderThickness="1"
+                                                        CornerRadius="999">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
                                                                 <Setter Property="Background" Value="#EFF6FF" />
@@ -661,7 +738,12 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding EventLevelText}">
+                                                        <TextBlock
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            FontSize="12"
+                                                            FontWeight="SemiBold"
+                                                            Text="{Binding EventLevelText}">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Foreground" Value="#1D4ED8" />

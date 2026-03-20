@@ -33,6 +33,10 @@ namespace SimpleMES.Services.State
         /// <summary>
         /// 设备停用
         /// </summary>
-        Disabled
+        Disabled,
+        /// <summary>
+        /// 启用
+        /// </summary>
+        Enabled
     }
 }

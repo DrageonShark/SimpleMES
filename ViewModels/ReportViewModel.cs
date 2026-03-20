@@ -15,7 +15,7 @@ using System.Windows.Threading;
 
 namespace SimpleMES.ViewModels
 {
-    public partial class ReportViewModel : DialogViewModelBase , IDisposable
+    public partial class ReportViewModel : DialogViewModelBase, IDisposable
     {
         private readonly IDataRepository _dbService;
         private readonly ProductionRecordModel _record;
