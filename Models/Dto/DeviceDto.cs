@@ -31,6 +31,8 @@ namespace SimpleMES.Models.Dto
 
         [ObservableProperty] private bool _isEnabled;
         [ObservableProperty] private byte _criticality;
+        [ObservableProperty] private int _sortOrder;
+        [ObservableProperty] private string? _remark;
         [ObservableProperty] private decimal? _temperature;
         [ObservableProperty] private decimal? _pressure;
         [ObservableProperty] private int _speed;

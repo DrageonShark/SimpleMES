@@ -164,6 +164,8 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     existing.StationName = device.StationName;
                     existing.IsEnabled = device.IsEnabled;
                     existing.Criticality = device.Criticality;
+                    existing.SortOrder = device.SortOrder;
+                    existing.Remark = device.Remark;
                     existing.Temperature = device.Temperature;
                     existing.Pressure = device.Pressure;
                     existing.Speed = device.Speed;

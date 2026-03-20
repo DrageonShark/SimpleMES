@@ -7,8 +7,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:deviceViewModels="clr-namespace:SimpleMES.ViewModels.DeviceViewModels"
     xmlns:local="clr-namespace:SimpleMES"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:orderViewModels="clr-namespace:SimpleMES.ViewModels.OrderViewModels"
+    xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
     xmlns:views="clr-namespace:SimpleMES.Views"
     xmlns:vm="clr-namespace:SimpleMES.ViewModels"
     Title="简单MES系统"
@@ -16,19 +18,20 @@
     Height="800"
     MinWidth="1180"
     MinHeight="720"
-    Background="#F5F9FF"
+    Background="#EFF4FB"
     ResizeMode="CanResize"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     mc:Ignorable="d">
-    <WindowChrome.WindowChrome>
-        <WindowChrome
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome
             CaptionHeight="0"
             CornerRadius="0"
             GlassFrameThickness="0"
             ResizeBorderThickness="6"
             UseAeroCaptionButtons="False" />
-    </WindowChrome.WindowChrome>
+    </shell:WindowChrome.WindowChrome>
+
     <Window.Resources>
         <DataTemplate DataType="{x:Type deviceViewModels:DeviceShellViewModel}">
             <controls:DeviceShellView />
@@ -43,60 +46,16 @@
             <controls:OrderShellView />
         </DataTemplate>
 
-        <!--  侧边栏宽度值辅助改变转换器  -->
         <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
-
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
-        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="34" />
-            <Setter Property="Height" Value="34" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Foreground" Value="#1565C0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border
-                            x:Name="Bd"
-                            Background="{TemplateBinding Background}"
-                            CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#E3F2FD" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#D0E8FB" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <!--  侧边栏按钮与顶部按钮的公共交互动效样式：统一蓝白风格、Ripple 波纹和 Elevation 阴影  -->
+        <Style x:Key="InteractiveSurfaceBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
         </Style>
 
-        <Style
-            x:Key="TitleBarCloseButtonStyle"
-            BasedOn="{StaticResource TitleBarButtonStyle}"
-            TargetType="Button">
-            <Setter Property="Foreground" Value="#D32F2F" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FFEBEE" />
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#FFCDD2" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
+        <!--  侧边栏一级菜单样式：左侧高亮条、悬浮抬升、选中保持高亮  -->
         <Style x:Key="SidebarSectionToggleStyle" TargetType="ToggleButton">
             <Setter Property="Height" Value="52" />
             <Setter Property="Margin" Value="0,8,0,0" />
@@ -114,9 +73,10 @@
                     <ControlTemplate TargetType="ToggleButton">
                         <Border
                             x:Name="Bd"
+                            materialDesign:ElevationAssist.Elevation="Dp1"
                             Background="{TemplateBinding Background}"
                             CornerRadius="10">
-                            <Grid>
+                            <Grid ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="4" />
                                     <ColumnDefinition Width="*" />
@@ -130,31 +90,43 @@
                                     Background="#00FFFFFF"
                                     CornerRadius="2" />
 
-                                <ContentPresenter
+                                <materialDesign:Ripple
                                     Grid.Column="1"
-                                    Margin="{TemplateBinding Padding}"
-                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                    Margin="0"
+                                    Padding="{TemplateBinding Padding}"
+                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    materialDesign:RippleAssist.Feedback="#D8EBFF">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                </materialDesign:Ripple>
                             </Grid>
                         </Border>
 
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1E5AA5" />
+                                <Setter TargetName="Bd" Property="Background" Value="#1A5AAA" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp3" />
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2267BC" />
+                                <Setter TargetName="Bd" Property="Background" Value="#2168BE" />
                                 <Setter TargetName="Indicator" Property="Background" Value="#BFE1FF" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#184E90" />
+                                <Setter TargetName="Bd" Property="Background" Value="#164C8F" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
                             </Trigger>
+                            <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
+        <!--  侧边栏普通导航样式：二级按钮 hover 更柔和，保持内容垂直居中  -->
         <Style x:Key="SidebarNavButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="44" />
             <Setter Property="Margin" Value="0,6,0,0" />
@@ -171,147 +143,337 @@
                     <ControlTemplate TargetType="Button">
                         <Border
                             x:Name="Bd"
+                            materialDesign:ElevationAssist.Elevation="Dp0"
                             Background="{TemplateBinding Background}"
                             CornerRadius="8">
-                            <Grid>
+                            <Grid ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="4" />
+                                    <ColumnDefinition Width="3" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
                                 <Border
-                                    x:Name="Indicator"
+                                    x:Name="HoverIndicator"
                                     Grid.Column="0"
-                                    Width="4"
                                     Margin="0,8,0,8"
                                     Background="#00FFFFFF"
                                     CornerRadius="2" />
 
-                                <ContentPresenter
+                                <materialDesign:Ripple
                                     Grid.Column="1"
-                                    Margin="{TemplateBinding Padding}"
-                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                    Padding="{TemplateBinding Padding}"
+                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    materialDesign:RippleAssist.Feedback="#CFE4FF">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                </materialDesign:Ripple>
                             </Grid>
                         </Border>
 
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1A4E8F" />
+                                <Setter TargetName="Bd" Property="Background" Value="#184B8A" />
+                                <Setter TargetName="HoverIndicator" Property="Background" Value="#7DB5F7" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#163F73" />
+                                <Setter TargetName="Bd" Property="Background" Value="#133C6D" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
                             </Trigger>
-                            <Trigger Property="IsDefaulted" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2267BC" />
-                                <Setter TargetName="Indicator" Property="Background" Value="#BFE1FF" />
-                            </Trigger>
+                            <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        <!--  导航栏按钮  -->
+        <!--  侧边栏二级菜单样式：缩进更深，hover 更轻柔，适合子菜单层级  -->
         <Style
             x:Key="SidebarSubNavButtonStyle"
             BasedOn="{StaticResource SidebarNavButtonStyle}"
             TargetType="Button">
             <Setter Property="Height" Value="40" />
             <Setter Property="Margin" Value="0,4,0,0" />
-            <Setter Property="Padding" Value="34,0,14,0" />
+            <Setter Property="Padding" Value="32,0,14,0" />
             <Setter Property="FontSize" Value="14" />
         </Style>
 
+        <!--  侧边栏图标文本样式：统一图标和文本垂直居中  -->
         <Style x:Key="SidebarIconTextStyle" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Foreground" Value="White" />
         </Style>
 
-
-        <!--  侧边栏按钮  -->
-        <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="30" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="Foreground" Value="#1F2D3D" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#D0D7E2" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Cursor" Value="Hand" />
+        <!--  侧边栏折叠态样式：折叠后只保留图标，文本和箭头自动隐藏  -->
+        <Style x:Key="SidebarPrimaryContentPanelStyle" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
+
+        <Style
+            x:Key="SidebarPrimaryLabelTextStyle"
+            BasedOn="{StaticResource SidebarIconTextStyle}"
+            TargetType="TextBlock">
+            <Setter Property="Margin" Value="12,0,0,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style
+            x:Key="SidebarArrowTextStyle"
+            BasedOn="{StaticResource SidebarIconTextStyle}"
+            TargetType="TextBlock">
+            <Setter Property="Margin" Value="12,0,0,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SidebarBrandTitleTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Text" Value="Simple MES" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="FontSize" Value="18" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Text" Value="SM" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SidebarBrandSubtitleTextStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,6,0,0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#DCEEFF" />
+            <Setter Property="Text" Value="设备管理中心" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SidebarFooterTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#CFE4FA" />
+            <Setter Property="Text" Value="版本：1.0.0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--  顶部菜单切换按钮样式：圆角、波纹和阴影，保持 Material Design 交互感  -->
+        <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Foreground" Value="#1565C0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#D3E1F0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            materialDesign:ElevationAssist.Elevation="Dp1"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10">
+                            <materialDesign:Ripple
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                materialDesign:RippleAssist.Feedback="#90CAF9">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </materialDesign:Ripple>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F3F8FF" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp3" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E4F0FD" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="SessionTextBlockStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="15" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="#1F2D3D" />
+            <Setter Property="Foreground" Value="#1D3557" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Width" Value="30" />
         </Style>
-        <!--  设置菜单按钮  -->
+
+        <!--  顶部设置按钮样式：与窗口按钮保持一致的 ripple + elevation  -->
         <Style x:Key="SettingsToggleButtonStyle" TargetType="ToggleButton">
             <Setter Property="Foreground" Value="#1F2D3D" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="Padding" Value="8,4" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
                         <Border
                             x:Name="Bd"
+                            materialDesign:ElevationAssist.Elevation="Dp0"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            CornerRadius="8">
+                            <materialDesign:Ripple
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                materialDesign:RippleAssist.Feedback="#9CC7F2">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </materialDesign:Ripple>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#EEF3F8" />
+                                <Setter TargetName="Bd" Property="Background" Value="#EEF5FD" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#E4EDF7" />
+                                <Setter TargetName="Bd" Property="Background" Value="#E5F0FB" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        <!--  设置菜单子按钮  -->
+
+        <!--  顶部设置菜单项样式：延续顶部栏的柔和 hover 风格  -->
         <Style x:Key="SettingsMenuItemButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="38" />
+            <Setter Property="Height" Value="40" />
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border
+                            x:Name="Bd"
+                            materialDesign:ElevationAssist.Elevation="Dp0"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8">
+                            <materialDesign:Ripple
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                materialDesign:RippleAssist.Feedback="#C3DBF5">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </materialDesign:Ripple>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#F3F7FB" />
+                                <Setter TargetName="Bd" Property="Background" Value="#F3F8FD" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#EAF1F8" />
+                                <Setter TargetName="Bd" Property="Background" Value="#EAF2FA" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!--  顶部窗口控制按钮样式：最小化、最大化、关闭统一使用波纹和阴影反馈  -->
+        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Foreground" Value="#1565C0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            materialDesign:ElevationAssist.Elevation="Dp0"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8">
+                            <materialDesign:Ripple
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                materialDesign:RippleAssist.Feedback="#90CAF9">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </materialDesign:Ripple>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E8F2FE" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#D8E9FC" />
+                                <Setter TargetName="Bd" Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style
+            x:Key="TitleBarCloseButtonStyle"
+            BasedOn="{StaticResource TitleBarButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Foreground" Value="#D32F2F" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FDECEC" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#F9DADA" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
-    <Grid Background="#F0F2F5">
+
+    <Grid Background="#EFF4FB">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding IsMenuCollapsed, Converter={StaticResource BoolToGridLengthConverter}, ConverterParameter=200}" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <!--  侧边栏  -->
+        <!--  侧边栏区域：蓝白 + Material Design 风格导航，一级菜单高亮、二级菜单 hover 柔和  -->
         <Border
             Grid.Column="0"
+            Margin="0,0,6,0"
             Background="#123A67"
-            CornerRadius="0,14,14,0">
+            CornerRadius="0,18,18,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -319,188 +481,231 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!--  顶部品牌区  -->
                 <Border
                     Grid.Row="0"
                     Padding="18,20,18,16"
                     Background="#1565C0"
-                    CornerRadius="0,14,0,0">
+                    CornerRadius="0,18,0,0">
                     <StackPanel>
-                        <TextBlock
-                            FontSize="26"
-                            FontWeight="Bold"
-                            Foreground="White"
-                            Text="Simple MES" />
-                        <TextBlock
-                            Margin="0,6,0,0"
-                            FontSize="12"
-                            Foreground="#DCEEFF"
-                            Text="设备管理中心" />
+                        <TextBlock Style="{StaticResource SidebarBrandTitleTextStyle}" />
+                        <TextBlock Style="{StaticResource SidebarBrandSubtitleTextStyle}" />
                     </StackPanel>
                 </Border>
 
-                <!--  菜单区  -->
                 <ScrollViewer
                     Grid.Row="1"
                     Background="#123A67"
                     HorizontalScrollBarVisibility="Disabled"
                     VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="12,12,12,14">
-
                         <ToggleButton
                             x:Name="DeviceWindowButton"
                             IsChecked="{Binding IsDeviceWindowMenuOpen, Mode=TwoWay}"
-                            Style="{StaticResource SidebarSectionToggleStyle}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="22" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="18" />
-                                </Grid.ColumnDefinitions>
-
+                            Style="{StaticResource SidebarSectionToggleStyle}"
+                            ToolTip="设备中心">
+                            <StackPanel Style="{StaticResource SidebarPrimaryContentPanelStyle}">
                                 <TextBlock
-                                    Grid.Column="0"
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="14"
                                     Style="{StaticResource SidebarIconTextStyle}"
                                     Text="&#xE7F4;" />
 
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Margin="12,0,0,0"
-                                    Style="{StaticResource SidebarIconTextStyle}"
-                                    Text="设备中心" />
+                                <TextBlock Style="{StaticResource SidebarPrimaryLabelTextStyle}" Text="设备中心" />
 
                                 <TextBlock
-                                    Grid.Column="2"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="10"
-                                    Foreground="White"
+                                    Style="{StaticResource SidebarArrowTextStyle}"
                                     Text="&#xE70D;" />
-                            </Grid>
+                            </StackPanel>
                         </ToggleButton>
 
-                        <Border
-                            Margin="0,6,0,2"
-                            Padding="0,0,0,4"
-                            Visibility="{Binding IsDeviceWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border Margin="0,6,0,2" Padding="0,0,0,4">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsMenuCollapsed}" Value="False" />
+                                                <Condition Binding="{Binding IsDeviceWindowMenuOpen}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <StackPanel>
-                                <Button
-                                    Command="{Binding ShowDeviceBoardCommand}"
-                                    Content="设备看板"
-                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
-                                <Button
-                                    Command="{Binding ShowDeviceManagementCommand}"
-                                    Content="设备管理"
-                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
-                                <Button
-                                    Command="{Binding ShowDeviceAlarmCommand}"
-                                    Content="设备告警"
-                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                                <Button Command="{Binding ShowDeviceBoardCommand}" Content="设备看板">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SidebarSubNavButtonStyle}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDeviceBoardActive}" Value="True">
+                                                    <Setter Property="Background" Value="#2A72C9" />
+                                                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Command="{Binding ShowDeviceManagementCommand}" Content="设备管理">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SidebarSubNavButtonStyle}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDeviceManagementActive}" Value="True">
+                                                    <Setter Property="Background" Value="#2A72C9" />
+                                                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Command="{Binding ShowDeviceAlarmCommand}" Content="设备告警">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SidebarSubNavButtonStyle}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDeviceAlarmActive}" Value="True">
+                                                    <Setter Property="Background" Value="#2A72C9" />
+                                                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                             </StackPanel>
                         </Border>
 
                         <ToggleButton
                             x:Name="OrderWindowButton"
                             IsChecked="{Binding IsOrderWindowMenuOpen, Mode=TwoWay}"
-                            Style="{StaticResource SidebarSectionToggleStyle}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="22" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="18" />
-                                </Grid.ColumnDefinitions>
-
+                            Style="{StaticResource SidebarSectionToggleStyle}"
+                            ToolTip="生产订单">
+                            <StackPanel Style="{StaticResource SidebarPrimaryContentPanelStyle}">
                                 <TextBlock
-                                    Grid.Column="0"
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="14"
                                     Style="{StaticResource SidebarIconTextStyle}"
                                     Text="&#xE8A5;" />
 
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Margin="12,0,0,0"
-                                    Style="{StaticResource SidebarIconTextStyle}"
-                                    Text="生产订单" />
+                                <TextBlock Style="{StaticResource SidebarPrimaryLabelTextStyle}" Text="生产订单" />
 
                                 <TextBlock
-                                    Grid.Column="2"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="10"
-                                    Foreground="White"
+                                    Style="{StaticResource SidebarArrowTextStyle}"
                                     Text="&#xE70D;" />
-                            </Grid>
+                            </StackPanel>
                         </ToggleButton>
 
-                        <Border
-                            Margin="0,6,0,2"
-                            Padding="0,0,0,4"
-                            Visibility="{Binding IsOrderWindowMenuOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border Margin="0,6,0,2" Padding="0,0,0,4">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsMenuCollapsed}" Value="False" />
+                                                <Condition Binding="{Binding IsOrderWindowMenuOpen}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <StackPanel>
-                                <Button
-                                    Command="{Binding ShowOrderBoardCommand}"
-                                    Content="订单看板"
-                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
-                                <Button
-                                    Command="{Binding ShowManagementCommand}"
-                                    Content="订单维护"
-                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
-                                <Button
-                                    Command="{Binding ShowOrderDispatchCommand}"
-                                    Content="订单调度"
-                                    Style="{StaticResource SidebarSubNavButtonStyle}" />
+                                <Button Command="{Binding ShowOrderBoardCommand}" Content="订单看板">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SidebarSubNavButtonStyle}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsOrderBoardActive}" Value="True">
+                                                    <Setter Property="Background" Value="#2A72C9" />
+                                                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Command="{Binding ShowManagementCommand}" Content="订单维护">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SidebarSubNavButtonStyle}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsOrderManagementActive}" Value="True">
+                                                    <Setter Property="Background" Value="#2A72C9" />
+                                                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Command="{Binding ShowOrderDispatchCommand}" Content="订单调度">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SidebarSubNavButtonStyle}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsOrderDispatchActive}" Value="True">
+                                                    <Setter Property="Background" Value="#2A72C9" />
+                                                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                             </StackPanel>
                         </Border>
 
-                        <Button Command="{Binding ShowReportCommand}" Style="{StaticResource SidebarNavButtonStyle}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="22" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-
+                        <Button Command="{Binding ShowReportCommand}" ToolTip="数据报表">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource SidebarNavButtonStyle}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsReportActive}" Value="True">
+                                            <Setter Property="Background" Value="#2168BE" />
+                                            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp3" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Style="{StaticResource SidebarPrimaryContentPanelStyle}">
                                 <TextBlock
-                                    Grid.Column="0"
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="14"
                                     Style="{StaticResource SidebarIconTextStyle}"
                                     Text="&#xE9D2;" />
 
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Margin="12,0,0,0"
-                                    Style="{StaticResource SidebarIconTextStyle}"
-                                    Text="数据报表" />
-                            </Grid>
+                                <TextBlock Style="{StaticResource SidebarPrimaryLabelTextStyle}" Text="数据报表" />
+                            </StackPanel>
                         </Button>
                     </StackPanel>
                 </ScrollViewer>
+
+                <Border
+                    Grid.Row="2"
+                    Padding="16,10"
+                    Background="#0F3056"
+                    CornerRadius="0,0,18,0">
+                    <TextBlock Style="{StaticResource SidebarFooterTextStyle}" />
+                </Border>
             </Grid>
         </Border>
-
-        <!--  右侧主区  -->
+        <!--  顶部区域样式：右侧用户信息、设置菜单和窗口控制按钮统一使用 Material 风格交互  -->
         <Border
             Grid.Column="1"
-            Margin="5"
+            Margin="0,6,6,6"
             Background="White"
-            CornerRadius="12">
+            BorderBrush="#DDE8F5"
+            BorderThickness="1"
+            CornerRadius="16">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="56" />
+                    <RowDefinition Height="64" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
+
                 <Border
                     Grid.Row="0"
                     Background="#F7FAFD"
-                    BorderBrush="#E8EEF5"
+                    BorderBrush="#E6EEF7"
                     BorderThickness="0,0,0,1"
-                    CornerRadius="12 12 0 0">
-                    <Grid Margin="12,0,10,0">
+                    CornerRadius="16,16,0,0">
+                    <Grid Margin="14,0,12,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -520,114 +725,122 @@
                             <TextBlock
                                 Margin="12,0,0,0"
                                 VerticalAlignment="Center"
-                                FontSize="18"
+                                FontSize="20"
                                 FontWeight="SemiBold"
-                                Foreground="#1F2D3D"
+                                Foreground="#1D3557"
                                 Text="{Binding PageTitle}" />
                         </StackPanel>
 
-                        <!--  中间空白拖动区  -->
                         <Border
                             Grid.Column="1"
                             Background="Transparent"
                             MouseLeftButtonDown="DragArea_OnMouseLeftButtonDown" />
 
-                        <Grid Grid.Column="2" VerticalAlignment="Center">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                        <Border
+                            Grid.Column="2"
+                            Margin="0,0,12,0"
+                            Padding="14,8"
+                            VerticalAlignment="Center"
+                            materialDesign:ElevationAssist.Elevation="Dp1"
+                            Background="White"
+                            BorderBrush="#DCE8F5"
+                            BorderThickness="1"
+                            CornerRadius="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <TextBlock
-                                Grid.Column="0"
-                                Width="Auto"
-                                Margin="0"
-                                Style="{StaticResource SessionTextBlockStyle}"
-                                Text="{Binding CurrentUserName}" />
-                            <TextBlock
-                                Grid.Column="1"
-                                Width="Auto"
-                                Margin="0,0,10,0"
-                                Style="{StaticResource SessionTextBlockStyle}"
-                                Text="{Binding CurrentRoleGreeting}" />
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Margin="0"
+                                    Style="{StaticResource SessionTextBlockStyle}"
+                                    Text="{Binding CurrentUserName}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="6,0,10,0"
+                                    Style="{StaticResource SessionTextBlockStyle}"
+                                    Text="{Binding CurrentRoleGreeting}" />
 
-                            <Border
-                                Grid.Column="2"
-                                Width="1"
-                                Height="20"
-                                Margin="0,0,10,0"
-                                Background="#C9CED6" />
-
-                            <ToggleButton
-                                x:Name="SettingsButton"
-                                Grid.Column="3"
-                                IsChecked="{Binding IsSettingsMenuOpen, Mode=TwoWay}"
-                                Style="{StaticResource SettingsToggleButtonStyle}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        FontFamily="Segoe MDL2 Assets"
-                                        FontSize="14"
-                                        Text="&#xE713;" />
-                                    <TextBlock
-                                        Margin="4,0,0,0"
-                                        FontSize="15"
-                                        Text="设置" />
-                                    <TextBlock
-                                        Margin="4,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontFamily="Segoe MDL2 Assets"
-                                        FontSize="10"
-                                        Text="&#xE70D;" />
-                                </StackPanel>
-                            </ToggleButton>
-
-                            <Popup
-                                AllowsTransparency="True"
-                                IsOpen="{Binding IsSettingsMenuOpen, Mode=TwoWay}"
-                                Placement="Bottom"
-                                PlacementTarget="{Binding ElementName=SettingsButton}"
-                                StaysOpen="False"
-                                VerticalOffset="6">
                                 <Border
-                                    Width="140"
-                                    Background="White"
-                                    BorderBrush="#D4DCE6"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    SnapsToDevicePixels="True">
-                                    <StackPanel>
-                                        <Button
-                                            Command="{Binding OpenSoftwareVersionCommand}"
-                                            Content="软件版本"
-                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
-                                        <Separator Margin="8,2" />
-                                        <Button
-                                            Command="{Binding OpenLogRecordCommand}"
-                                            Content="日志记录"
-                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
-                                        <Separator Margin="8,2" />
-                                        <Button
-                                            Command="{Binding OpenSystemConfigCommand}"
-                                            Content="系统配置"
-                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
-                                        <Separator Margin="8,2" />
-                                        <Button
-                                            Command="{Binding SignOutCurrentUserCommand}"
-                                            Content="退出当前账号"
-                                            Foreground="#C42B1C"
-                                            Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                    Grid.Column="2"
+                                    Width="1"
+                                    Height="20"
+                                    Margin="0,0,10,0"
+                                    Background="#D2DDEA" />
+
+                                <ToggleButton
+                                    x:Name="SettingsButton"
+                                    Grid.Column="3"
+                                    IsChecked="{Binding IsSettingsMenuOpen, Mode=TwoWay}"
+                                    Style="{StaticResource SettingsToggleButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            FontSize="14"
+                                            Text="&#xE713;" />
+                                        <TextBlock
+                                            Margin="4,0,0,0"
+                                            FontSize="14"
+                                            Text="设置" />
+                                        <TextBlock
+                                            Margin="4,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            FontSize="10"
+                                            Text="&#xE70D;" />
                                     </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                        <!--  右上角自定义窗口按钮  -->
+                                </ToggleButton>
+
+                                <Popup
+                                    AllowsTransparency="True"
+                                    IsOpen="{Binding IsSettingsMenuOpen, Mode=TwoWay}"
+                                    Placement="Bottom"
+                                    PlacementTarget="{Binding ElementName=SettingsButton}"
+                                    StaysOpen="False"
+                                    VerticalOffset="8">
+                                    <Border
+                                        Width="150"
+                                        Padding="6"
+                                        materialDesign:ElevationAssist.Elevation="Dp3"
+                                        Background="White"
+                                        BorderBrush="#D6E1ED"
+                                        BorderThickness="1"
+                                        CornerRadius="12"
+                                        SnapsToDevicePixels="True">
+                                        <StackPanel>
+                                            <Button
+                                                Command="{Binding OpenSoftwareVersionCommand}"
+                                                Content="软件版本"
+                                                Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                            <Button
+                                                Command="{Binding OpenLogRecordCommand}"
+                                                Content="日志记录"
+                                                Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                            <Button
+                                                Command="{Binding OpenSystemConfigCommand}"
+                                                Content="系统配置"
+                                                Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                            <Button
+                                                Command="{Binding SignOutCurrentUserCommand}"
+                                                Content="退出当前账号"
+                                                Foreground="#C42B1C"
+                                                Style="{StaticResource SettingsMenuItemButtonStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </Border>
+
                         <Border
                             Grid.Column="3"
-                            Margin="20,0,0,0"
+                            Padding="4"
                             VerticalAlignment="Center"
+                            materialDesign:ElevationAssist.Elevation="Dp1"
                             Background="#F4F9FF"
                             BorderBrush="#DCE8F5"
                             BorderThickness="1"
@@ -670,9 +883,9 @@
                                     Style="{StaticResource TitleBarCloseButtonStyle}" />
                             </StackPanel>
                         </Border>
-
                     </Grid>
                 </Border>
+
                 <ContentControl Grid.Row="1" Content="{Binding CurrentView}" />
             </Grid>
         </Border>

@@ -48,7 +48,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
         public async Task AddDeviceAsync()
         {
             Log.Information("添加新设备");
-            var draft = new DeviceModel { SlaveId = 1, IsEnabled = true };
+            var draft = new DeviceModel { SlaveId = 1, IsEnabled = true, Criticality = 2 };
             DeviceModel? savedDevice = null;
             var newId = 0;
 
@@ -69,21 +69,32 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     savedDevice = new DeviceModel
                     {
                         DeviceName = device.DeviceName.Trim(),
-                        IpAddress = device.IpAddress?.Trim() ?? string.Empty,
+                        DeviceCode = NormalizeOptional(device.DeviceCode),
+                        DeviceType = NormalizeOptional(device.DeviceType),
+                        WorkshopName = NormalizeOptional(device.WorkshopName),
+                        LineName = NormalizeOptional(device.LineName),
+                        StationName = NormalizeOptional(device.StationName),
+                        IpAddress = NormalizeAddress(device.IpAddress),
                         Port = device.Port,
-                        SerialPort = device.SerialPort?.Trim() ?? string.Empty,
+                        SerialPort = NormalizeAddress(device.SerialPort),
                         SlaveId = device.SlaveId is null or 0 ? (byte)1 : device.SlaveId,
-                        IsEnabled = true
+                        IsEnabled = device.IsEnabled,
+                        Criticality = NormalizeCriticality(device.Criticality),
+                        SortOrder = device.SortOrder,
+                        Remark = NormalizeOptional(device.Remark)
                     };
 
                     newId = await _repository.InsertDeviceAsync(savedDevice);
+                    var snapshotState = savedDevice.IsEnabled
+                        ? nameof(Services.State.DeviceState.Disconnected)
+                        : nameof(Services.State.DeviceState.Disabled);
                     await _repository.InsertDeviceEventAsync(new DeviceEventModel
                     {
                         DeviceId = newId,
                         EventType = "DeviceAdded",
                         EventLevel = "Info",
-                        EventMessage = "设备已接入系统，等待建立通信",
-                        SnapshotState = nameof(Services.State.DeviceState.Disconnected),
+                        EventMessage = savedDevice.IsEnabled ? "设备已接入系统，等待建立通信" : "设备已接入系统，当前为停用状态",
+                        SnapshotState = snapshotState,
                         OccurredAt = DateTime.Now,
                         IsResolved = true,
                         ResolvedAt = DateTime.Now
@@ -127,10 +138,18 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             {
                 DeviceId = device.DeviceId,
                 DeviceName = device.DeviceName,
+                DeviceCode = device.DeviceCode,
+                DeviceType = device.DeviceType,
                 IpAddress = device.IpAddress,
                 Port = device.Port,
                 SerialPort = device.SerialPort,
-                SlaveId = device.SlaveId
+                SlaveId = device.SlaveId,
+                WorkshopName = device.WorkshopName,
+                LineName = device.LineName,
+                StationName = device.StationName,
+                Criticality = device.Criticality,
+                SortOrder = device.SortOrder,
+                Remark = device.Remark
             };
 
             async Task<bool> SaveAsync(DeviceDto dto)
@@ -151,11 +170,19 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     {
                         DeviceId = dto.DeviceId,
                         DeviceName = dto.DeviceName.Trim(),
-                        IpAddress = dto.IpAddress?.Trim() ?? string.Empty,
+                        DeviceCode = NormalizeOptional(dto.DeviceCode),
+                        DeviceType = NormalizeOptional(dto.DeviceType),
+                        WorkshopName = NormalizeOptional(dto.WorkshopName),
+                        LineName = NormalizeOptional(dto.LineName),
+                        StationName = NormalizeOptional(dto.StationName),
+                        IpAddress = NormalizeAddress(dto.IpAddress),
                         Port = dto.Port,
-                        SerialPort = dto.SerialPort?.Trim() ?? string.Empty,
+                        SerialPort = NormalizeAddress(dto.SerialPort),
                         SlaveId = dto.SlaveId is null or 0 ? (byte)1 : dto.SlaveId,
-                        IsEnabled = device.DeviceState != Services.State.DeviceState.Disabled
+                        IsEnabled = device.DeviceState != Services.State.DeviceState.Disabled,
+                        Criticality = NormalizeCriticality(dto.Criticality),
+                        SortOrder = dto.SortOrder,
+                        Remark = NormalizeOptional(dto.Remark)
                     };
 
                     await _repository.UpdateDeviceAsync(newDevice);
@@ -172,10 +199,18 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                     });
 
                     device.DeviceName = dto.DeviceName;
-                    device.IpAddress = dto.IpAddress ?? string.Empty;
+                    device.DeviceCode = newDevice.DeviceCode;
+                    device.DeviceType = newDevice.DeviceType;
+                    device.WorkshopName = newDevice.WorkshopName;
+                    device.LineName = newDevice.LineName;
+                    device.StationName = newDevice.StationName;
+                    device.IpAddress = newDevice.IpAddress;
                     device.Port = dto.Port;
-                    device.SerialPort = dto.SerialPort ?? string.Empty;
+                    device.SerialPort = newDevice.SerialPort;
                     device.SlaveId = dto.SlaveId;
+                    device.Criticality = newDevice.Criticality;
+                    device.SortOrder = newDevice.SortOrder;
+                    device.Remark = newDevice.Remark;
                     _workspaceState.NotifyDeviceMetadataChanged();
                     _configNotifier.NotifyConfigChanged(newDevice, ConfigChangeType.Updated);
                     return true;
@@ -194,10 +229,18 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 {
                     DeviceId = dto.DeviceId,
                     DeviceName = dto.DeviceName,
-                    IpAddress = dto.IpAddress,
+                    DeviceCode = dto.DeviceCode,
+                    DeviceType = dto.DeviceType,
+                    WorkshopName = dto.WorkshopName,
+                    LineName = dto.LineName,
+                    StationName = dto.StationName,
+                    IpAddress = NormalizeAddress(dto.IpAddress),
                     Port = dto.Port,
-                    SerialPort = dto.SerialPort,
-                    SlaveId = dto.SlaveId
+                    SerialPort = NormalizeAddress(dto.SerialPort),
+                    SlaveId = dto.SlaveId,
+                    Criticality = NormalizeCriticality(dto.Criticality),
+                    SortOrder = dto.SortOrder,
+                    Remark = NormalizeOptional(dto.Remark)
                 };
                 return await TestConnectionAsync(model);
             }
@@ -462,6 +505,26 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             }
 
             return resolutionNote.Trim();
+        }
+
+        private static string? NormalizeOptional(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return value.Trim();
+        }
+
+        private static string NormalizeAddress(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+        }
+
+        private static byte NormalizeCriticality(byte criticality)
+        {
+            return criticality is >= 1 and <= 3 ? criticality : (byte)2;
         }
 
         private void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)

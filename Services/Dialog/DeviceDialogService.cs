@@ -2,6 +2,7 @@
 using SimpleMES.Models.Dto;
 using SimpleMES.ViewModels;
 using SimpleMES.Views;
+using SimpleMES.Views.Devices;
 using System.Windows;
 
 namespace SimpleMES.Services.Dialog

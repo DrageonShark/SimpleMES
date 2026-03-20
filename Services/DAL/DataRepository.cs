@@ -193,16 +193,18 @@ namespace SimpleMES.Services.DAL
         {
             const string sql = @"UPDATE T_DeviceMaster
                          SET DeviceName   = @DeviceName,
-                             DeviceCode   = COALESCE(NULLIF(@DeviceCode, ''), DeviceCode),
-                             DeviceType   = COALESCE(NULLIF(@DeviceType, ''), DeviceType),
-                             WorkshopName = COALESCE(NULLIF(@WorkshopName, ''), WorkshopName),
-                             LineName     = COALESCE(NULLIF(@LineName, ''), LineName),
-                             StationName  = COALESCE(NULLIF(@StationName, ''), StationName),
+                             DeviceCode   = @DeviceCode,
+                             DeviceType   = @DeviceType,
+                             WorkshopName = @WorkshopName,
+                             LineName     = @LineName,
+                             StationName  = @StationName,
                              IpAddress    = @IpAddress,
-                             Port         = ISNULL(@Port, Port),
+                             Port         = @Port,
                              SerialPort   = @SerialPort,
-                             SlaveId      = ISNULL(@SlaveId, SlaveId),
-                             Remark       = COALESCE(NULLIF(@Remark, ''), Remark),
+                             SlaveId      = @SlaveId,
+                             Criticality  = CASE WHEN @Criticality = 0 THEN 2 ELSE @Criticality END,
+                             SortOrder    = @SortOrder,
+                             Remark       = @Remark,
                              UpdatedAt    = SYSDATETIME()
                           WHERE DeviceId   = @DeviceId;";
             return await _db.ExecuteAsync(sql, device);
@@ -263,7 +265,7 @@ namespace SimpleMES.Services.DAL
                                      @Port,
                                      @SerialPort,
                                      @SlaveId,
-                                     1,
+                                     @IsEnabled,
                                      CASE WHEN @Criticality = 0 THEN 2 ELSE @Criticality END,
                                      @SortOrder,
                                      @Remark
@@ -283,7 +285,7 @@ namespace SimpleMES.Services.DAL
                                  VALUES
                                  (
                                      @NewDeviceId,
-                                     'Disconnected',
+                                     CASE WHEN @IsEnabled = 1 THEN 'Disconnected' ELSE 'Disabled' END,
                                      NULL,
                                      GETDATE(),
                                      NULL,

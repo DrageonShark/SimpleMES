@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace SimpleMES.Views
+namespace SimpleMES.Views.Devices
 {
     /// <summary>
     /// DeviceAddWindow.xaml 的交互逻辑

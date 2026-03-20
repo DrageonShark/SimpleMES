@@ -1,0 +1,347 @@
+<Window
+    x:Class="SimpleMES.Views.Devices.DeviceEditWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="编辑设备"
+    Width="860"
+    Height="760"
+    Background="#EEF5FF"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+        <Style x:Key="SectionCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="Background" Value="#F8FBFF" />
+            <Setter Property="BorderBrush" Value="#D7E6FF" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+        </Style>
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,4" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#0F172A" />
+        </Style>
+        <Style x:Key="SectionDescStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#64748B" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#1E3A8A" />
+        </Style>
+        <Style x:Key="InputStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#C7D8F5" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style
+            x:Key="TextAreaStyle"
+            BasedOn="{StaticResource InputStyle}"
+            TargetType="TextBox">
+            <Setter Property="Height" Value="96" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+        </Style>
+        <Style x:Key="SelectStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#C7D8F5" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style
+            x:Key="GhostButtonStyle"
+            BasedOn="{StaticResource MaterialDesignPaperButton}"
+            TargetType="Button">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="MinWidth" Value="92" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#334155" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+            <Setter Property="materialDesign:RippleAssist.Feedback" Value="#9CA3AF" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style
+            x:Key="BaseSolidButtonStyle"
+            BasedOn="{StaticResource MaterialDesignPaperButton}"
+            TargetType="Button">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="MinWidth" Value="96" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+            <Setter Property="materialDesign:RippleAssist.Feedback" Value="#DBEAFE" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+                    <Setter Property="Opacity" Value="0.9" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style
+            x:Key="PrimaryButtonStyle"
+            BasedOn="{StaticResource BaseSolidButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Background" Value="#2563EB" />
+        </Style>
+        <Style
+            x:Key="SuccessButtonStyle"
+            BasedOn="{StaticResource BaseSolidButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Background" Value="#0F766E" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Border
+            Padding="24"
+            materialDesign:ElevationAssist.Elevation="Dp2"
+            Background="White"
+            BorderBrush="#D9E7FF"
+            BorderThickness="1"
+            CornerRadius="24">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="18" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="190" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="#0F172A"
+                            Text="编辑设备主数据" />
+                        <TextBlock
+                            Margin="0,6,0,0"
+                            FontSize="13"
+                            Foreground="#64748B"
+                            Text="只修改 T_DeviceMaster 配置项，设备运行态和事件处理仍由实时链路与事件中心维护。" />
+                    </StackPanel>
+                    <Border
+                        Grid.Column="1"
+                        Padding="16,12"
+                        Background="#EFF6FF"
+                        BorderBrush="#BFDBFE"
+                        BorderThickness="1"
+                        CornerRadius="16">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="#1D4ED8"
+                                Text="编辑建议" />
+                            <TextBlock
+                                Margin="0,6,0,0"
+                                FontSize="12"
+                                Foreground="#475569"
+                                Text="保存前可先测试连接；主数据修改会同步刷新设备管理页和事件展示信息。"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Style="{StaticResource SectionCardStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="主数据" />
+                                <TextBlock Style="{StaticResource SectionDescStyle}" Text="维护设备名称、编号与类型，作为看板和事件的统一主索引。" />
+                                <TextBlock Style="{StaticResource LabelStyle}" Text="设备名称" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding DeviceName, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="设备编号" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding DeviceCode, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="设备类型" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding DeviceType, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border
+                            Grid.Row="0"
+                            Grid.Column="2"
+                            Style="{StaticResource SectionCardStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="区域信息" />
+                                <TextBlock Style="{StaticResource SectionDescStyle}" Text="变更后会直接反映在设备管理页和事件详情的位置字段里。" />
+                                <TextBlock Style="{StaticResource LabelStyle}" Text="车间" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding WorkshopName, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="产线" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding LineName, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="工位" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding StationName, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Style="{StaticResource SectionCardStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="通信参数" />
+                                <TextBlock Style="{StaticResource SectionDescStyle}" Text="支持 TCP 或串口接入；保存后通信服务会按新配置重新连接。" />
+                                <TextBlock Style="{StaticResource LabelStyle}" Text="IP 地址" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="端口" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}" />
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="串口号" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding SerialPort, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="从站号" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding SlaveId, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableNumberConverter}}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            Style="{StaticResource SectionCardStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="运维属性" />
+                                <TextBlock Style="{StaticResource SectionDescStyle}" Text="用于看板关注排序和设备管理列表的展示优先级。" />
+                                <TextBlock Style="{StaticResource LabelStyle}" Text="关键程度" />
+                                <ComboBox SelectedIndex="{Binding CriticalityIndex, Mode=TwoWay}" Style="{StaticResource SelectStyle}">
+                                    <ComboBoxItem Content="低优先级" />
+                                    <ComboBoxItem Content="中优先级" />
+                                    <ComboBoxItem Content="高优先级" />
+                                </ComboBox>
+                                <TextBlock
+                                    Margin="0,14,0,6"
+                                    Style="{StaticResource LabelStyle}"
+                                    Text="排序优先级" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding SortOrderText, UpdateSourceTrigger=PropertyChanged}" />
+                                <Border
+                                    Margin="0,18,0,0"
+                                    Padding="14"
+                                    Background="#F0F9FF"
+                                    BorderBrush="#BAE6FD"
+                                    BorderThickness="1"
+                                    CornerRadius="14">
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="#0369A1"
+                                            Text="说明" />
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="12"
+                                            Foreground="#475569"
+                                            Text="自动恢复不会替代人工确认，故障闭环仍以事件中心中的确认动作为准。"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <Border
+                            Grid.Row="2"
+                            Grid.ColumnSpan="3"
+                            Style="{StaticResource SectionCardStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="备注信息" />
+                                <TextBlock Style="{StaticResource SectionDescStyle}" Text="记录接入说明、工艺约束或维护注意事项，便于班组排查。" />
+                                <TextBox Style="{StaticResource TextAreaStyle}" Text="{Binding Remark, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+
+                <StackPanel
+                    Grid.Row="4"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button
+                        Margin="0,0,10,0"
+                        Command="{Binding TestConnectionCommand}"
+                        Content="测试连接"
+                        Style="{StaticResource SuccessButtonStyle}" />
+                    <Button
+                        Margin="0,0,10,0"
+                        Command="{Binding SaveCommand}"
+                        Content="保存变更"
+                        IsDefault="True"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+                    <Button
+                        Content="取消"
+                        IsCancel="True"
+                        Style="{StaticResource GhostButtonStyle}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
