@@ -136,7 +136,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             var latestList = latestDevices.ToList();
             if (ListDeviceDto.Count == 0)
             {
-                foreach (var device in latestList.OrderBy(d => d.DeviceId))
+                foreach (var device in OrderDevicesForManagement(latestList))
                 {
                     ListDeviceDto.Add(device);
                 }
@@ -215,7 +215,7 @@ namespace SimpleMES.ViewModels.DeviceViewModels
                 _ => query
             };
 
-            SyncCollection(FilteredDeviceDto, query.OrderBy(device => device.DeviceId));
+            SyncCollection(FilteredDeviceDto, OrderDevicesForManagement(query));
 
             RunningCount = ListDeviceDto.Count(device => device.DeviceState == DeviceState.Running);
             DisconnectedCount = ListDeviceDto.Count(device => device.DeviceState == DeviceState.Disconnected);
@@ -306,6 +306,14 @@ namespace SimpleMES.ViewModels.DeviceViewModels
             {
                 target.Add(item);
             }
+        }
+
+        private static IEnumerable<DeviceDto> OrderDevicesForManagement(IEnumerable<DeviceDto> devices)
+        {
+            return devices
+                .OrderBy(device => device.SortOrder)
+                .ThenByDescending(device => device.Criticality)
+                .ThenBy(device => device.DeviceId);
         }
     }
 }
